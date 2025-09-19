@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Gravi-Tec Chat Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body{
+      margin:0;
+      font-family:'Source Sans Pro', sans-serif;
+      background:#f5f7fb;
+      color:#333;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+    }
+    .chat-container{
+	  width: 400px;
+	  min-width: clamp(350px, 90%, 400px);
+	  max-width: 95%;
+	  background:#fff;
+	  border-radius:12px;
+	  box-shadow:0 4px 20px rgba(0,0,0,0.1);
+	  display:flex;
+	  flex-direction:column;
+	  overflow:hidden;
+	  height: 500px;
+	  min-height: clamp(350px, 90%, 400px);
+	  max-height: 95%;
+	}
+    .chat-header{
+      background:#214497;
+      color:#fff;
+      padding:12px 16px;
+      font-weight:700;
+    }
+    .chat-messages{
+      flex:1;
+      padding:16px;
+      overflow-y:auto;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      background:#f9fbff;
+    }
+    .message{
+      max-width:80%;
+      padding:10px 14px;
+      border-radius:12px;
+      line-height:1.4;
+      font-size:15px;
+      word-break: break-word;
+    }
+    .bot{
+      background:#e7ecf8;
+      align-self:flex-start;
+    }
+    .user{
+      background:#214497;
+      color:#fff;
+      align-self:flex-end;
+    }
+    .chat-input{
+      display:flex;
+      border-top:1px solid #ddd;
+    }
+    .chat-input input{
+      flex:1;
+      border:none;
+      padding:12px;
+      font-size:15px;
+      outline:none;
+    }
+    .chat-input button{
+      background:#214497;
+      border:none;
+      color:#fff;
+      font-weight:600;
+      padding:0 16px;
+      cursor:pointer;
+    }
+    /* Typing spinner */
+    .typing {
+      display:flex;
+      align-items:center;
+      gap:4px;
+      padding:10px 14px;
+      border-radius:12px;
+      background:#e7ecf8;
+      align-self:flex-start;
+      max-width:50%;
+    }
+    .dot {
+      width:8px;
+      height:8px;
+      background:#214497;
+      border-radius:50%;
+      animation: bounce 1s infinite;
+    }
+    .dot:nth-child(2){ animation-delay: 0.2s; }
+    .dot:nth-child(3){ animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-container">
+    <div class="chat-header">Gravi-Tec Support Chat</div>
+    <div class="chat-messages" id="chat"></div>
+    <div class="chat-input">
+      <input id="input" type="text" placeholder="Nachricht eingeben..."/>
+      <button onclick="sendMessage()">Senden</button>
+    </div>
+  </div>
+
+  <script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    let messages = []; // conversation history
+    let typingIndicator = null;
+
+    function addMessage(role, content){
+      messages.push({ role, content });
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + (role==='user'?'user':'bot');
+      msgDiv.textContent = content;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function showTyping(){
+      typingIndicator = document.createElement('div');
+      typingIndicator.className = 'typing';
+      typingIndicator.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+      chat.appendChild(typingIndicator);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function removeTyping(){
+      if(typingIndicator){
+        chat.removeChild(typingIndicator);
+        typingIndicator = null;
+      }
+    }
+
+    async function sendMessage(){
+      const text = input.value.trim();
+      if(!text) return;
+
+      addMessage('user', text);
+      input.value = '';
+
+      showTyping(); // show spinner
+
+      try {
+        const res = await fetch('http://localhost:8000/api/v1/chat', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ messages })
+        });
+        const data = await res.json();
+        removeTyping();
+
+        if(data.message && data.message.role==='assistant'){
+          addMessage('assistant', data.message.content);
+        } else {
+          addMessage('assistant', 'Fehler: Ungültige Antwort vom Server.');
+        }
+      } catch(e){
+        removeTyping();
+        addMessage('assistant', 'Fehler beim Senden der Nachricht.');
+      }
+    }
+
+    input.addEventListener('keypress', e => {
+      if(e.key === 'Enter') sendMessage();
+    });
+  </script>
+</body>
+</html>
