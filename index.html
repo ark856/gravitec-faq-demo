@@ -158,7 +158,8 @@
       showTyping(); // show spinner
 
       try {
-        const res = await fetch('http://localhost:8000/api/v1/chat', {
+        //const res = await fetch('http://localhost:8000/api/v1/chat', {
+	  	const res = await fetch('https://gravitec-faq-demo-backend.onrender.com/api/v1/chat', {
           method:'POST',
           headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ messages })
@@ -182,4 +183,5 @@
     });
   </script>
 </body>
+
 </html>
