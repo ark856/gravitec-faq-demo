@@ -129,7 +129,8 @@
       messages.push({ role, content });
       const msgDiv = document.createElement('div');
 
-	  formattedContent = formattedContent.replace(/(\n|\r)/g, '<br>');
+	  let formattedContent = content.replace(/\\n/g, '\n'); 
+  	  formattedContent = formattedContent.replace(/(\n|\r)/g, '<br>');
 	  console.log("Formatted content: ", formattedContent);
 
 		
@@ -192,6 +193,7 @@
 </body>
 
 </html>
+
 
 
 
