@@ -129,22 +129,13 @@
       messages.push({ role, content });
       const msgDiv = document.createElement('div');
 
-      // 1. Unescape the literal string "\n" into an actual newline character \n
-	  let formattedContent = content.replace(/\\n/g, '\n'); 
-  
-	  // 2. Convert the standard newline "\n" and carriage returns "\r" to <br> tags
-	  // This covers all common newline characters.
 	  formattedContent = formattedContent.replace(/(\n|\r)/g, '<br>');
-	  
-	  // 3. Use innerHTML to render the <br> tags
-	  msgDiv.innerHTML = formattedContent;
-
-		console.log("Formatted content: ", formattedContent);
+	  console.log("Formatted content: ", formattedContent);
 
 		
 		
       msgDiv.className = 'message ' + (role==='user'?'user':'bot');
-      msgDiv.textContent = content;
+      msgDiv.textContent = formattedContent;
       chat.appendChild(msgDiv);
       chat.scrollTop = chat.scrollHeight;
     }
@@ -201,6 +192,7 @@
 </body>
 
 </html>
+
 
 
 
