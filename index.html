@@ -129,14 +129,14 @@
       const msgDiv = document.createElement('div');
 
       // 1. Unescape the literal string "\n" into an actual newline character \n
-	  //    This is often necessary when content comes from a JSON response.
-      let unescapedContent = content.replace(/\\n/g, '\n'); 
+	  let formattedContent = content.replace(/\\n/g, '\n'); 
   
-      // 2. Now replace the actual newline characters (\n) with the HTML line break tag (<br>).
-      const formattedContent = unescapedContent.replace(/\n/g, '<br>');
-  
-      // 3. Use innerHTML to render the <br> tags as HTML elements.
-      msgDiv.innerHTML = formattedContent;
+	  // 2. Convert the standard newline "\n" and carriage returns "\r" to <br> tags
+	  // This covers all common newline characters.
+	  formattedContent = formattedContent.replace(/(\n|\r)/g, '<br>');
+	  
+	  // 3. Use innerHTML to render the <br> tags
+	  msgDiv.innerHTML = formattedContent;
 
 		
 		
@@ -198,5 +198,6 @@
 </body>
 
 </html>
+
 
 
