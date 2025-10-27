@@ -128,10 +128,17 @@
       messages.push({ role, content });
       const msgDiv = document.createElement('div');
 
-	  // Replace newline characters with <br> tags
-      const formattedContent = content.replace(/\n/g, '<br>');
-      // Use innerHTML instead of textContent to render the <br> tags
+      // 1. Unescape the literal string "\n" into an actual newline character \n
+	  //    This is often necessary when content comes from a JSON response.
+      let unescapedContent = content.replace(/\\n/g, '\n'); 
+  
+      // 2. Now replace the actual newline characters (\n) with the HTML line break tag (<br>).
+      const formattedContent = unescapedContent.replace(/\n/g, '<br>');
+  
+      // 3. Use innerHTML to render the <br> tags as HTML elements.
       msgDiv.innerHTML = formattedContent;
+
+		
 		
       msgDiv.className = 'message ' + (role==='user'?'user':'bot');
       msgDiv.textContent = content;
@@ -191,4 +198,5 @@
 </body>
 
 </html>
+
 
