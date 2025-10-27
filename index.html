@@ -127,6 +127,12 @@
     function addMessage(role, content){
       messages.push({ role, content });
       const msgDiv = document.createElement('div');
+
+	  // Replace newline characters with <br> tags
+      const formattedContent = content.replace(/\n/g, '<br>');
+      // Use innerHTML instead of textContent to render the <br> tags
+      msgDiv.innerHTML = formattedContent;
+		
       msgDiv.className = 'message ' + (role==='user'?'user':'bot');
       msgDiv.textContent = content;
       chat.appendChild(msgDiv);
@@ -185,3 +191,4 @@
 </body>
 
 </html>
+
