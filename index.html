@@ -6,198 +6,292 @@
   <title>Gravi-Tec Chat Demo</title>
   <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body{
-      margin:0;
-      font-family:'Source Sans Pro', sans-serif;
-      background:#f5f7fb;
-      color:#333;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      height:100vh;
+    body {
+      margin: 0;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: #0f1316;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    .chat-container{
-	  width: 400px;
-	  min-width: clamp(350px, 90%, 400px);
-	  max-width: 95%;
-	  background:#fff;
-	  border-radius:12px;
-	  box-shadow:0 4px 20px rgba(0,0,0,0.1);
-	  display:flex;
-	  flex-direction:column;
-	  overflow:hidden;
-	  height: 500px;
-	  min-height: clamp(350px, 90%, 400px);
-	  max-height: 95%;
-	}
-    .chat-header{
-      background:#214497;
-      color:#fff;
-      padding:12px 16px;
-      font-weight:700;
+
+    /* Darkened overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
     }
-    .chat-messages{
-      flex:1;
-      padding:16px;
-      overflow-y:auto;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      background:#f9fbff;
+
+    /* Chat modal */
+    .chat-container {
+      width: 600px;
+      background: #1b1f24;
+      border: 3px solid #000;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      color: #ddd;
     }
-    .message{
-      max-width:80%;
-      padding:10px 14px;
-      border-radius:12px;
-      line-height:1.4;
-      font-size:15px;
+
+    .chat-header {
+      background: linear-gradient(180deg, #3b75c3, #2858a8);
+      color: white;
+      font-weight: 700;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: #121518;
+    }
+
+    .message {
+      max-width: 80%;
+      line-height: 1.4;
+      font-size: 15px;
       word-break: break-word;
+      padding: 10px 14px;
+      border-radius: 8px;
+      transform: skewX(-16deg);
     }
-    .bot{
-      background:#e7ecf8;
-      align-self:flex-start;
+
+    .message span {
+      display: block;
+      transform: skewX(16deg);
     }
-    .user{
-      background:#214497;
-      color:#fff;
-      align-self:flex-end;
+
+    .bot {
+      background: #232933;
+      align-self: flex-start;
+      color: #f0f0f0;
     }
-    .chat-input{
-      display:flex;
-      border-top:1px solid #ddd;
+
+    .user {
+      background: #2858a8;
+      color: #fff;
+      align-self: flex-end;
     }
-    .chat-input input{
-      flex:1;
-      border:none;
-      padding:12px;
-      font-size:15px;
-      outline:none;
+
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #333;
+      background: #1b1f24;
+      padding: 12px;
+      gap: 10px;
     }
-    .chat-input button{
-      background:#214497;
-      border:none;
-      color:#fff;
-      font-weight:600;
-      padding:0 16px;
-      cursor:pointer;
+
+    .chat-input input {
+      flex: 1;
+      border: none;
+      padding: 12px;
+      font-size: 15px;
+      border-radius: 6px;
+      outline: none;
+      background: #0f1316;
+      color: #fff;
     }
-    /* Typing spinner */
+
+    /* Imported button style */
+    .btn-schild {
+      position: relative;
+      display: inline-block;
+      transform: skewX(-16deg);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #3b75c3, #2858a8);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
+      overflow: hidden;
+      min-width: 140px;
+	  padding-right: 20px;
+    }
+    .btn-schild > a {
+      display: block;
+      padding: 14px 54px 14px 28px;
+      transform: skewX(16deg);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .btn-schild .chip {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 46px;
+      transform: skewX(-16deg);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #fff, #f4f7fc);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-schild .chip span {
+      display: inline-block;
+      transform: skewX(16deg);
+      font-size: 18px;
+      color: #2858a8;
+      font-weight: 900;
+    }
+
+    /* Button hover */
+    .btn-schild:hover {
+      background: linear-gradient(180deg, #3b75c3, #3b75c3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
+    }
+
+    /* Typing animation */
     .typing {
-      display:flex;
-      align-items:center;
-      gap:4px;
-      padding:10px 14px;
-      border-radius:12px;
-      background:#e7ecf8;
-      align-self:flex-start;
-      max-width:50%;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #232933;
+      align-self: flex-start;
+      transform: skewX(-16deg);
+    }
+    .typing span {
+      transform: skewX(16deg);
+      display: flex;
+      gap: 4px;
     }
     .dot {
-      width:8px;
-      height:8px;
-      background:#214497;
-      border-radius:50%;
+      width: 8px;
+      height: 8px;
+      background: #3b75c3;
+      border-radius: 50%;
       animation: bounce 1s infinite;
     }
-    .dot:nth-child(2){ animation-delay: 0.2s; }
-    .dot:nth-child(3){ animation-delay: 0.4s; }
-
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
     }
+
+    /* Open button */
+    .open-chat-btn {
+      background: linear-gradient(180deg, #3b75c3, #2858a8);
+      color: white;
+      padding: 14px 30px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 16px;
+      border-radius: 4px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 <body>
-  <div class="chat-container">
-    <div class="chat-header">Gravi-Tec Support Chat</div>
-    <div class="chat-messages" id="chat"></div>
-    <div class="chat-input">
-      <input id="input" type="text" placeholder="Nachricht eingeben..."/>
-      <button onclick="sendMessage()">Senden</button>
+  <button class="open-chat-btn" onclick="openChat()">Chat öffnen</button>
+
+  <div class="modal-overlay" id="chatModal">
+    <div class="chat-container">
+      <div class="chat-header">Gravi-Tec Support Chat</div>
+      <div class="chat-messages" id="chat"></div>
+      <div class="chat-input">
+        <input id="input" type="text" placeholder="Nachricht eingeben..."/>
+        <div class="btn-schild" onclick="sendMessage()">
+          <a href="#">Senden</a>
+          <div class="chip"><span>✎</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
+    const chatModal = document.getElementById('chatModal');
     const chat = document.getElementById('chat');
     const input = document.getElementById('input');
-    let messages = []; // conversation history
+    let messages = [];
     let typingIndicator = null;
+    let greeted = false;
 
-    function addMessage(role, content){
-		console.log("Content: ", content);
+    function openChat() {
+      chatModal.style.display = 'flex';
+      if (!greeted) {
+        addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
+        greeted = true;
+      }
+    }
+
+    function addMessage(role, content) {
       messages.push({ role, content });
       const msgDiv = document.createElement('div');
-
-	  let formattedContent = content.replace(/\\n/g, '\n'); 
-  	  formattedContent = formattedContent.replace(/(\n|\r)/g, '<br>');
-	  console.log("Formatted content: ", formattedContent);
-
-		
-		
-      msgDiv.className = 'message ' + (role==='user'?'user':'bot');
-      msgDiv.textContent = formattedContent;
+      msgDiv.className = 'message ' + (role === 'user' ? 'user' : 'bot');
+      const inner = document.createElement('span');
+      inner.textContent = content;
+      msgDiv.appendChild(inner);
       chat.appendChild(msgDiv);
       chat.scrollTop = chat.scrollHeight;
     }
 
-    function showTyping(){
+    function showTyping() {
       typingIndicator = document.createElement('div');
       typingIndicator.className = 'typing';
-      typingIndicator.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+      const inner = document.createElement('span');
+      inner.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+      typingIndicator.appendChild(inner);
       chat.appendChild(typingIndicator);
       chat.scrollTop = chat.scrollHeight;
     }
 
-    function removeTyping(){
-      if(typingIndicator){
+    function removeTyping() {
+      if (typingIndicator) {
         chat.removeChild(typingIndicator);
         typingIndicator = null;
       }
     }
 
-    async function sendMessage(){
-      const text = input.value.trim();
-      if(!text) return;
-
-      addMessage('user', text);
-      input.value = '';
-
-      showTyping(); // show spinner
-
-      try {
-        //const res = await fetch('http://localhost:8000/api/v1/chat', {
-	  	const res = await fetch('https://gravitec-faq-demo-backend.onrender.com/api/v1/chat', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ messages })
-        });
-        const data = await res.json();
-        removeTyping();
-
-        if(data.message && data.message.role==='assistant'){
-          addMessage('assistant', data.message.content);
-        } else {
-          addMessage('assistant', 'Fehler: Ungültige Antwort vom Server.');
-        }
-      } catch(e){
-        removeTyping();
-        addMessage('assistant', 'Fehler beim Senden der Nachricht.');
-      }
-    }
-
-    input.addEventListener('keypress', e => {
-      if(e.key === 'Enter') sendMessage();
-    });
+    async function sendMessage(){ 
+		const text = input.value.trim(); 
+		if (!text) 
+			return; 
+		addMessage('user', text); 
+		input.value = ''; 
+		showTyping(); // show spinner 
+		try { 
+			//const res = await fetch('http://localhost:8000/api/v1/chat', { 
+			const res = await fetch('https://gravitec-faq-demo-backend.onrender.com/api/v1/chat', {
+			method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages }) });
+			
+			const data = await res.json(); 
+			removeTyping(); 
+			if (data.message && data.message.role==='assistant'){ 
+				addMessage('assistant', data.message.content); 
+			} else { 
+				addMessage('assistant', 'Fehler: Ungültige Antwort vom Server.'); 
+			} 
+		} catch(e){ 
+			removeTyping(); 
+			addMessage('assistant', 'Fehler beim Senden der Nachricht.'); 
+		} 
+	} 
+	
+	input.addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
+	
   </script>
 </body>
-
 </html>
-
-
-
-
-
-
-
-
