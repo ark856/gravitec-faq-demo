@@ -263,7 +263,7 @@
         .replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
 
       // ACHTUNG: Verwenden Sie innerHTML, um die <br> und &nbsp; Tags zu rendern
-      let noMarkdownContent = marked.parse(formattedContent);
+      let noMarkdownContent = marked.parseInline(formattedContent);
 	  inner.innerHTML = noMarkdownContent;
 
       msgDiv.appendChild(inner);
@@ -318,5 +318,6 @@
   </script>
 </body>
 </html>
+
 
 
