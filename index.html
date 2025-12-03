@@ -30,15 +30,15 @@
 
     /* Chat modal */
     .chat-container {
-      width: 600px;
-      background: #1b1f24;
-      border: 3px solid #000;
-      display: flex;
-      flex-direction: column;
-      height: 600px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-      color: #ddd;
-    }
+		width: 600px;
+		background: #1b1f24;
+		border: 3px solid #000;
+		display: flex;
+		flex-direction: column;
+		height: 600px; /* Bleibt bei 600px */
+		box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+		color: #ddd;
+	}
 
     .chat-header {
       background: linear-gradient(180deg, #3b75c3, #2858a8);
@@ -50,30 +50,41 @@
       letter-spacing: 0.5px;
     }
 
-    .chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      background: #121518;
-    }
+    /* Chat messages container (Gesamtverlauf) */
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Bleibt bei auto */
+    /* ... restliche Styles ... */
+}
 
-    .message {
-      max-width: 80%;
-      line-height: 1.4;
-      font-size: 15px;
-      word-break: break-word;
-      padding: 10px 14px;
-      border-radius: 8px;
-      transform: skewX(-16deg);
-    }
+/* Einzelne Nachricht */
+.message {
+    display: inline-block;
+    max-width: 95%;
+    /* NEU: Maximale Höhe definieren, um den Container nicht zu überdehnen */
+    max-height: 400px; 
+    /* NEU: Scrollen, falls die Nachricht die max-height überschreitet */
+    overflow-y: auto; 
+    
+    background: #232933;
+    color: #f0f0f0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    /*transform: skewX(-3deg);*/
+    /* overflow: hidden; (wird durch overflow-y ersetzt) */
+    word-wrap: break-word;
+    line-height: 1.4;
+}
 
-    .message span {
-      display: block;
-      transform: skewX(16deg);
-    }
+/* Der innere <span> */
+.message span {
+    display: inline-block;
+    /*transform: skewX(3deg);*/
+    white-space: pre-wrap;
+    /* Wichtig: Um das Scrollen zu ermöglichen, muss der Inhalt, der scrollen soll, die Höhe des Containers überschreiten. 
+       Keine Änderungen hier notwendig, da der Inhalt sich der message-Box anpasst. */
+}
 
     .bot {
       background: #232933;
@@ -110,7 +121,7 @@
     .btn-schild {
       position: relative;
       display: inline-block;
-      transform: skewX(-16deg);
+      transform: skewX(-2deg);
       border-radius: 10px;
       background: linear-gradient(180deg, #3b75c3, #2858a8);
       border: 1px solid rgba(255,255,255,0.12);
@@ -122,7 +133,7 @@
     .btn-schild > a {
       display: block;
       padding: 14px 54px 14px 28px;
-      transform: skewX(16deg);
+      transform: skewX(12deg);
       color: white;
       text-decoration: none;
       font-weight: 700;
@@ -137,7 +148,7 @@
       top: 6px;
       bottom: 6px;
       width: 46px;
-      transform: skewX(-16deg);
+      transform: skewX(-12deg);
       border-radius: 8px;
       background: linear-gradient(180deg, #fff, #f4f7fc);
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -148,7 +159,7 @@
     }
     .btn-schild .chip span {
       display: inline-block;
-      transform: skewX(16deg);
+      transform: skewX(12deg);
       font-size: 18px;
       color: #2858a8;
       font-weight: 900;
@@ -169,10 +180,10 @@
       border-radius: 12px;
       background: #232933;
       align-self: flex-start;
-      transform: skewX(-16deg);
+      transform: skewX(-12deg);
     }
     .typing span {
-      transform: skewX(16deg);
+      transform: skewX(12deg);
       display: flex;
       gap: 4px;
     }
@@ -242,7 +253,17 @@
       const msgDiv = document.createElement('div');
       msgDiv.className = 'message ' + (role === 'user' ? 'user' : 'bot');
       const inner = document.createElement('span');
-      inner.textContent = content;
+
+      // NEU: Behandeln von escaped Newline-Zeichen, Tabs und escaped Leerzeichen
+      let formattedContent = content
+        .replace(/\\n/g, '<br>') // Ersetzt explizite '\n' und '\\n' durch <br>
+        .replace(/\n/g, '<br>') // Ersetzt normale \n (falls sie aus der API kommen)
+        .replace(/\\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;') // Ersetzt \t durch 4 non-breaking spaces
+        .replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
+
+      // ACHTUNG: Verwenden Sie innerHTML, um die <br> und &nbsp; Tags zu rendern
+      inner.innerHTML = formattedContent;
+
       msgDiv.appendChild(inner);
       chat.appendChild(msgDiv);
       chat.scrollTop = chat.scrollHeight;
