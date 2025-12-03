@@ -232,6 +232,7 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
   <script>
     const chatModal = document.getElementById('chatModal');
     const chat = document.getElementById('chat');
@@ -262,7 +263,8 @@
         .replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
 
       // ACHTUNG: Verwenden Sie innerHTML, um die <br> und &nbsp; Tags zu rendern
-      inner.innerHTML = formattedContent;
+      let noMarkdownContent = marked.parse(formattedContent);
+	  inner.innerHTML = noMarkdownContent;
 
       msgDiv.appendChild(inner);
       chat.appendChild(msgDiv);
@@ -316,4 +318,5 @@
   </script>
 </body>
 </html>
+
 
