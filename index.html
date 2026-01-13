@@ -52,43 +52,43 @@
 
     /* Chat messages container (Gesamtverlauf) */
 	.chat-messages {
-	    flex: 1;
-	    padding: 20px;
-	    overflow-y: auto; /* Bleibt bei auto */
-	    /* ... restliche Styles ... */
-	}
-	
-	/* Einzelne Nachricht */
-	.message {
-	    display: inline-block;
-	    max-width: 95%;
-	    /* NEU: Maximale Höhe definieren, um den Container nicht zu überdehnen */
-	    /*max-height: 400px; */
-	    /* NEU: Scrollen, falls die Nachricht die max-height überschreitet */
-	    /* overflow-y: auto; */
-	    
-	    background: #232933;
-	    color: #f0f0f0;
-	    padding: 10px 14px;
-		margin: 3px;
-	    border-radius: 8px;
-	    /*transform: skewX(-3deg);*/
-	    /* overflow: hidden; (wird durch overflow-y ersetzt) */
-	    word-wrap: break-word;
-	    line-height: 1.4;
-	}
-	
-	/* Der innere <span> */
-	.message span {
-	    display: inline-block;
-		margin 0;
-	    /*transform: skewX(3deg);*/
-	    /*white-space: pre-wrap;*/
-	    /* Wichtig: Um das Scrollen zu ermöglichen, muss der Inhalt, der scrollen soll, die Höhe des Containers überschreiten. 
-	       Keine Änderungen hier notwendig, da der Inhalt sich der message-Box anpasst. */
+		flex: 1;
+		padding: 20px;
+		overflow-y: auto; /* Bleibt bei auto */
+		/* ... restliche Styles ... */
 	}
 
-    .message p {
+	/* Einzelne Nachricht */
+	.message {
+		display: inline-block;
+		max-width: 95%;
+		/* NEU: Maximale Höhe definieren, um den Container nicht zu überdehnen */
+		/*max-height: 400px; */
+		/* NEU: Scrollen, falls die Nachricht die max-height überschreitet */
+		/*overflow-y: auto; */
+		
+		background: #232933;
+		color: #f0f0f0;
+		padding: 10px 14px;
+		margin 3px;
+		border-radius: 8px;
+		/*transform: skewX(-3deg);*/
+		/* overflow: hidden; (wird durch overflow-y ersetzt) */
+		word-wrap: break-word;
+		line-height: 1.4;
+	}
+
+	/* Der innere <span> */
+	.message span {
+		display: inline-block;
+		/*transform: skewX(3deg);*/
+		margin: 0;
+		/*white-space: pre-wrap;*/
+		/* Wichtig: Um das Scrollen zu ermöglichen, muss der Inhalt, der scrollen soll, die Höhe des Containers überschreiten. 
+		   Keine Änderungen hier notwendig, da der Inhalt sich der message-Box anpasst. */
+	}
+	
+	.message p {
 		margin: 0;
 		padding: 0;
 	}
@@ -128,7 +128,7 @@
     .btn-schild {
       position: relative;
       display: inline-block;
-      transform: skewX(-12deg);
+      transform: skewX(-2deg);
       border-radius: 10px;
       background: linear-gradient(180deg, #3b75c3, #2858a8);
       border: 1px solid rgba(255,255,255,0.12);
@@ -140,7 +140,7 @@
     .btn-schild > a {
       display: block;
       padding: 14px 54px 14px 28px;
-      transform: skewX(12deg);
+      transform: skewX(2deg);
       color: white;
       text-decoration: none;
       font-weight: 700;
@@ -155,7 +155,7 @@
       top: 6px;
       bottom: 6px;
       width: 46px;
-      transform: skewX(-12deg);
+      transform: skewX(-2deg);
       border-radius: 8px;
       background: linear-gradient(180deg, #fff, #f4f7fc);
       box-shadow: 0 4px 12px rgba(0,0,0,0.3);
@@ -240,13 +240,17 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
   <script>
     const chatModal = document.getElementById('chatModal');
     const chat = document.getElementById('chat');
     const input = document.getElementById('input');
+	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
     let messages = [];
     let typingIndicator = null;
     let greeted = false;
+	
+	console.log("Session ID: ", sessionID);
 
     function openChat() {
       chatModal.style.display = 'flex';
@@ -257,20 +261,22 @@
     }
 
     function addMessage(role, content) {
-      messages.push({ role, content });
+      messages.push({ role: role, content: content, timestamp: Date.now() });
       const msgDiv = document.createElement('div');
       msgDiv.className = 'message ' + (role === 'user' ? 'user' : 'bot');
       const inner = document.createElement('span');
-
-      // NEU: Behandeln von escaped Newline-Zeichen, Tabs und escaped Leerzeichen
-      let formattedContent = content
+	  
+	  const md = window.markdownit();
+	  
+	  
+	  let formattedContent = content
         .replace(/\\n/g, '\n') // Ersetzt explizite '\n' und '\\n' durch <br>
         //.replace(/\n/g, '<br>') // Ersetzt normale \n (falls sie aus der API kommen)
-        .replace(/\\t/g, '&nbsp;&nbsp;&nbsp;&nbsp;') // Ersetzt \t durch 4 non-breaking spaces
+        .replace(/\\t/g, '&nbsp;&nbsp;') // Ersetzt \t durch 4 non-breaking spaces
         .replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
 
-      // ACHTUNG: Verwenden Sie innerHTML, um die <br> und &nbsp; Tags zu rendern
-      let noMarkdownContent = marked.parse(formattedContent);
+	  let noMarkdownContent = marked.parse(formattedContent);
+	  
 	  inner.innerHTML = noMarkdownContent;
 
       msgDiv.appendChild(inner);
@@ -282,7 +288,7 @@
       typingIndicator = document.createElement('div');
       typingIndicator.className = 'typing';
       const inner = document.createElement('span');
-      inner.innerHTML = `<div class="dot"></div><div class="dot"></div><div class="dot"></div>`;
+      inner.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
       typingIndicator.appendChild(inner);
       chat.appendChild(typingIndicator);
       chat.scrollTop = chat.scrollHeight;
@@ -303,30 +309,53 @@
 		input.value = ''; 
 		showTyping(); // show spinner 
 		try { 
-			//const res = await fetch('http://localhost:8000/api/v1/chat', { 
-			const res = await fetch('https://gravitec-faq-demo-backend.onrender.com/api/v1/chat', {
-			method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ messages }) });
+			requestBody = {
+				"session_id": sessionID,
+				"messages": messages
+			};
+			//backendURL = 'http://localhost:8000/api/v1/chat';
+			backendURL = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat'
+			console.log("Request body: ", requestBody);
+			
+			const res = await fetch(backendURL, { 
+				method:'POST', 
+				headers:  {
+					'Content-Type':'application/json'
+				}, 
+				body: JSON.stringify(requestBody)
+			});
 			
 			const data = await res.json(); 
 			removeTyping(); 
 			if (data.message && data.message.role==='assistant'){ 
 				addMessage('assistant', data.message.content); 
 			} else { 
+			    console.error("Unexpected data received: ", data);
 				addMessage('assistant', 'Fehler: Ungültige Antwort vom Server.'); 
 			} 
 		} catch(e){ 
 			removeTyping(); 
 			addMessage('assistant', 'Fehler beim Senden der Nachricht.'); 
 		} 
-	} 
+	}
+
+	function formatDateNow() {
+	  const d = new Date(Date.now());
+
+	  const pad = n => String(n).padStart(2, '0');
+
+	  return (
+		d.getFullYear() + '_' + 
+		pad(d.getMonth() + 1) + '_' +
+		pad(d.getDate()) + '_' + 
+		pad(d.getHours()) + '_' +
+		pad(d.getMinutes()) + '_' +
+		pad(d.getSeconds())
+	  );
+	}
 	
 	input.addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
 	
   </script>
 </body>
 </html>
-
-
-
-
-
