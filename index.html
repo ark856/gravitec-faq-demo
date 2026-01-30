@@ -59,38 +59,51 @@
 	}
 
 	/* Einzelne Nachricht */
+	.message-row {
+	  width: 100%;
+	  display: flex;
+	  margin-bottom: 4px; /* optional spacing between messages */
+	}
+
+	/* align row by role */
+	.message-row.user {
+	  justify-content: flex-end;  /* user messages on right */
+	}
+
+	.message-row.bot {
+	  justify-content: flex-start; /* assistant messages on left */
+	}
+
+	/* bubble styles */
 	.message {
-		display: inline-block;
-		max-width: 95%;
-		/* NEU: Maximale Höhe definieren, um den Container nicht zu überdehnen */
-		/*max-height: 400px; */
-		/* NEU: Scrollen, falls die Nachricht die max-height überschreitet */
-		/*overflow-y: auto; */
-		
-		background: #232933;
-		color: #f0f0f0;
-		padding: 10px 14px;
-		margin 3px;
-		border-radius: 8px;
-		/*transform: skewX(-3deg);*/
-		/* overflow: hidden; (wird durch overflow-y ersetzt) */
-		word-wrap: break-word;
-		line-height: 1.4;
+	  max-width: 80%;   /* bubble grows up to 80% of container */
+	  width: auto; /* only as wide as content */
+	  background: #232933;
+	  color: #f0f0f0;
+	  padding: 10px 14px;
+	  border-radius: 8px;
+	  word-wrap: break-word;
+	  line-height: 1.4;
 	}
 
 	/* Der innere <span> */
 	.message span {
-		display: inline-block;
-		/*transform: skewX(3deg);*/
+		display: block;
+		overflow-wrap: anywhere;
+		word-break: break-word;
 		margin: 0;
-		/*white-space: pre-wrap;*/
-		/* Wichtig: Um das Scrollen zu ermöglichen, muss der Inhalt, der scrollen soll, die Höhe des Containers überschreiten. 
-		   Keine Änderungen hier notwendig, da der Inhalt sich der message-Box anpasst. */
 	}
 	
 	.message p {
 		margin: 0;
 		padding: 0;
+	}
+	
+	.message pre,
+	.message code {
+	  white-space: pre-wrap;
+	  word-break: break-word;
+	  overflow-wrap: anywhere;
 	}
 
     .bot {
@@ -106,23 +119,36 @@
     }
 
     .chat-input {
-      display: flex;
-      border-top: 1px solid #333;
-      background: #1b1f24;
-      padding: 12px;
-      gap: 10px;
-    }
+	  display: flex;
+	  gap: 10px;
+	  padding: 6px 12px; 
+	  background: #1b1f24;
+	  border-top: 1px solid #333;
+	  align-items: flex-end; /* button stays at bottom */
+	}
 
-    .chat-input input {
-      flex: 1;
-      border: none;
-      padding: 12px;
-      font-size: 15px;
-      border-radius: 6px;
-      outline: none;
-      background: #0f1316;
-      color: #fff;
-    }
+	.textarea-wrapper {
+	  flex: 1; /* take remaining space */
+	  display: flex;
+	  flex-direction: column;
+	}
+
+	.chat-input textarea.chat-input-field {
+	  width: 100%;
+	  resize: none;
+	  border: none;
+	  border-radius: 6px;
+	  outline: none;
+	  background: #0f1316;
+	  color: #fff;
+	  font-family: inherit;
+	  font-size: 15px;
+	  line-height: 1.4;
+	  padding: 6px 12px;
+	  max-height: calc(1.4em * 5 + 12px); /* 5 lines max */
+	  overflow-y: auto;
+	  box-sizing: border-box;
+	}
 
     /* Imported button style */
     .btn-schild {
@@ -227,30 +253,42 @@
 
   <div class="modal-overlay" id="chatModal">
     <div class="chat-container">
-      <div class="chat-header">Gravi-Tec Support Chat</div>
-      <div class="chat-messages" id="chat"></div>
-      <div class="chat-input">
-        <input id="input" type="text" placeholder="Nachricht eingeben..."/>
-        <div class="btn-schild" onclick="sendMessage()">
-          <a href="#">Senden</a>
-          <div class="chip"><span>✎</span></div>
-        </div>
-      </div>
+        <div class="chat-header">Gravi-Tec Support Chat</div>
+        <div class="chat-messages" id="chat"></div>
+        <div class="chat-input">
+		  <div class="textarea-wrapper">
+			<textarea
+			  id="chatbot-input"
+			  class="chat-input-field"
+			  placeholder="Nachricht eingeben..."
+			  rows="1"
+			></textarea>
+		  </div>
+		  <div class="btn-schild" id="sendBtn" onclick="sendMessageStream()">
+			<a href="#">Senden</a>
+			<div class="chip"><span>✎</span></div>
+		  </div>
+		</div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
   <script>
+	const STORAGE_KEY = "chat_session_ids";
+	const MAX_MESSAGES_IN_STORAGE = 5;
     const chatModal = document.getElementById('chatModal');
     const chat = document.getElementById('chat');
-    const input = document.getElementById('input');
+    const input = document.getElementById('chatbot-input');
 	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
     let messages = [];
+	let isWaitingResponse = false;
     let typingIndicator = null;
     let greeted = false;
 	
+	
 	console.log("Session ID: ", sessionID);
+	saveSessionId(sessionID);
 
     function openChat() {
       chatModal.style.display = 'flex';
@@ -261,28 +299,30 @@
     }
 
     function addMessage(role, content) {
-      messages.push({ role: role, content: content, timestamp: Date.now() });
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'message ' + (role === 'user' ? 'user' : 'bot');
-      const inner = document.createElement('span');
-	  
-	  const md = window.markdownit();
-	  
-	  
-	  let formattedContent = content
-        .replace(/\\n/g, '\n') // Ersetzt explizite '\n' und '\\n' durch <br>
-        //.replace(/\n/g, '<br>') // Ersetzt normale \n (falls sie aus der API kommen)
-        .replace(/\\t/g, '&nbsp;&nbsp;') // Ersetzt \t durch 4 non-breaking spaces
-        .replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
+	  messages.push({ role: role, content: content, timestamp: Date.now() });
 
+	  const row = document.createElement('div');
+	  row.className = 'message-row';
+	  const msgDiv = document.createElement('div');
+	  msgDiv.className = 'message ' + (role === 'user' ? 'user' : 'bot'); // keep role on bubble too
+	  const inner = document.createElement('span');
+
+
+	  const md = window.markdownit();
+	  let formattedContent = content
+		.replace(/\\n/g, '\n') // Ersetzt explizite '\n' und '\\n' durch <br>
+		//.replace(/\n/g, '<br>') // Ersetzt normale \n (falls sie aus der API kommen)
+		.replace(/\\t/g, '&nbsp;&nbsp;') // Ersetzt \t durch 4 non-breaking spaces
+		.replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
 	  let noMarkdownContent = marked.parse(formattedContent);
 	  
+	  
 	  inner.innerHTML = noMarkdownContent;
-
       msgDiv.appendChild(inner);
-      chat.appendChild(msgDiv);
+	  row.appendChild(msgDiv);
+	  chat.appendChild(row);
       chat.scrollTop = chat.scrollHeight;
-    }
+	}
 
     function showTyping() {
       typingIndicator = document.createElement('div');
@@ -302,19 +342,29 @@
     }
 
     async function sendMessage(){ 
-		const text = input.value.trim(); 
-		if (!text) 
-			return; 
-		addMessage('user', text); 
-		input.value = ''; 
-		showTyping(); // show spinner 
+		if (isWaitingResponse) return; // skip if already waiting
+
+		const inputEl = document.querySelector('.chat-input-field');
+		const text = inputEl.value.trim();
+		if (!text) return;
+
+		// lock the button
+		isWaitingResponse = true;
+		const sendBtn = document.getElementById('sendBtn');
+		sendBtn.style.pointerEvents = 'none';  // visually prevents clicking
+		sendBtn.style.opacity = '0.6';         // optional visual feedback
+
+		addMessage('user', text);
+		inputEl.value = '';
+		showTyping();
+		
 		try { 
 			requestBody = {
 				"session_id": sessionID,
 				"messages": messages
 			};
-			//backendURL = 'http://localhost:8000/api/v1/chat';
-			backendURL = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat'
+			const backendURL = 'http://localhost:8000/api/v1/chat';
+			//const backendURL = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat'
 			console.log("Request body: ", requestBody);
 			
 			const res = await fetch(backendURL, { 
@@ -325,8 +375,12 @@
 				body: JSON.stringify(requestBody)
 			});
 			
-			const data = await res.json(); 
+			const data = await res.json();
+			console.log("data", data);
+			//addMessage('assistant', 'Kommt auf Material und Ausführung an. Bitte kurz:\n\n1) Material: Metall (Alu/Edelstahl), Kunststoff, Holz, Acryl, Stein, Folie?\n2) Größe (mm) + Stückzahl\n3) Veredelung: Lasergravur, Fräsen oder Druck?\n4) Fertigung: Wir stellen her (eigene Fertigung) oder Sie liefern Rohling (Fremdware)?\n\nOptional: Befestigung – Klebepad, Bohrungen, Abstandhalter.\n\nBeispiel-Angabe: „Aluminium, 100×50 mm, 10 Stk, Lasergravur, eigene Fertigung, 2 Bohrungen“.');
+			//let data = {message: "Hello there!"};
 			removeTyping(); 
+			
 			if (data.message && data.message.role==='assistant'){ 
 				addMessage('assistant', data.message.content); 
 			} else { 
@@ -336,7 +390,14 @@
 		} catch(e){ 
 			removeTyping(); 
 			addMessage('assistant', 'Fehler beim Senden der Nachricht.'); 
-		} 
+			console.error(e);
+		} finally {
+			// unlock button
+			isWaitingResponse = false;
+			sendBtn.style.pointerEvents = 'auto';
+			sendBtn.style.opacity = '1';
+		}
+		
 	}
 
 	function formatDateNow() {
@@ -354,7 +415,194 @@
 	  );
 	}
 	
-	input.addEventListener('keypress', e => { if(e.key === 'Enter') sendMessage(); });
+	
+
+	function saveSessionId(newSessionId) {
+	  let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+	  // remove duplicates
+	  sessions = sessions.filter(id => id !== newSessionId);
+
+	  // add newest to the front
+	  sessions.unshift(newSessionId);
+
+	  // keep only latest 5
+	  sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
+
+	  // save
+	  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+	}
+	
+	
+	
+	
+	////////////// Streaming code
+	
+	function addStreamingBotMessage() {
+	  const row = document.createElement('div');
+	  row.className = 'message-row';
+
+	  const msgDiv = document.createElement('div');
+	  msgDiv.className = 'message bot';
+
+	  const inner = document.createElement('span');
+	  inner.innerHTML = ''; // start empty
+
+	  msgDiv.appendChild(inner);
+	  row.appendChild(msgDiv);
+	  chat.appendChild(row);
+
+	  chat.scrollTop = chat.scrollHeight;
+
+	  return inner; // IMPORTANT: return span for streaming
+	}
+	
+	function appendToBotMessage(innerEl, textChunk) {
+	  // Preserve markdown rendering incrementally
+	  const md = window.markdownit();
+	  
+	  if (!innerEl) {
+		innerEl = addStreamingBotMessage();
+	  }
+
+	  innerEl._raw = (innerEl._raw || '') + textChunk;
+	  innerEl.innerHTML = marked.parse(innerEl._raw);
+
+	  chat.scrollTop = chat.scrollHeight;
+	}
+	
+	async function sendMessageStream() {
+	  if (isWaitingResponse) return;  
+	  
+	  let hasStartedStreaming = false;
+	  let botInnerEl = null;
+	  const inputEl = document.querySelector('.chat-input-field');
+	  const text = inputEl.value.trim();
+	  if (!text) return;
+
+	  isWaitingResponse = true;
+	  const sendBtn = document.getElementById('sendBtn');
+	  sendBtn.style.pointerEvents = 'none';
+	  sendBtn.style.opacity = '0.6';
+
+	  addMessage('user', text);
+	  inputEl.value = '';
+	  showTyping();
+
+	  try {
+		const requestBody = {
+		  session_id: sessionID,
+		  messages: messages
+		};
+		
+		//const backendURLstream = 'http://localhost:8000/api/v1/chat/stream'
+		const backendURLstream  = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream'
+
+		const res = await fetch(backendURLstream, {
+		  method: 'POST',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify(requestBody)
+		});
+
+		if (!res.body) {
+		  throw new Error('Streaming not supported by browser');
+		}
+
+		const reader = res.body.getReader();
+		const decoder = new TextDecoder();
+
+		let buffer = '';
+
+		while (true) {
+		  const { value, done } = await reader.read();
+		  if (done) break;
+
+		  buffer += decoder.decode(value, { stream: true });
+
+		  // Split SSE-style messages
+		  const parts = buffer.split('\n\n');
+		  buffer = parts.pop();
+
+		  for (const part of parts) {
+			if (!part.startsWith('data:')) continue;
+
+			const json = JSON.parse(part.replace('data:', '').trim());
+
+			if (json.type === 'token') {
+			  // First token → remove typing + create bubble
+			  if (!hasStartedStreaming) {
+				removeTyping();
+				botInnerEl = addStreamingBotMessage();
+				hasStartedStreaming = true;
+			  }
+
+			  appendToBotMessage(botInnerEl, json.text);
+			}
+
+			if (json.type === 'final') {
+			  // Optional: persist final message
+			  messages.push({
+				role: 'assistant',
+				content: botInnerEl._raw,
+				timestamp: Date.now()
+			  });
+			}
+
+			if (json.error) {
+			  appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
+			}
+		  }
+		}
+
+	  } catch (e) {
+		console.error(e);
+		if (!botInnerEl) {
+			botInnerEl = addStreamingBotMessage();
+		}
+		appendToBotMessage(
+			botInnerEl,
+			'\n\n❌ Verbindung zum Server fehlgeschlagen.'
+		);
+	  } finally {
+		isWaitingResponse = false;
+		removeTyping();
+		sendBtn.style.pointerEvents = 'auto';
+		sendBtn.style.opacity = '1';
+	  }
+	}
+	
+	
+	///////////////// end of streaming part
+
+
+
+	
+	
+	input.addEventListener("keydown", (e) => {
+	  // Only act if input is focused
+	  if (document.activeElement !== input) {
+		return;
+	  }
+	  if (isWaitingResponse) {
+		return;
+	  }
+
+	  if (e.key === "Enter" && !e.shiftKey) {
+		// Enter → send message
+		e.preventDefault(); // stop newline
+		sendMessageStream();
+	  }
+	  
+	  // Shift + Enter → allow newline (do nothing)
+	});
+	
+	// Auto-resize chat textarea
+	input.addEventListener('input', () => {
+	  input.style.height = 'auto'; // reset height so scrollHeight recalculates
+	  const lineHeight = parseInt(getComputedStyle(input).lineHeight); // get line height in px
+	  const maxHeight = lineHeight * 5 + 24; // 5 lines max + padding (24px from your CSS)
+	  input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
+	});
 	
   </script>
 </body>
