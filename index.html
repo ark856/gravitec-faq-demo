@@ -274,6 +274,7 @@ saveSessionId(sessionID);
 addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
 greeted = true;
 resetTextareaHeight();
+document.querySelector('.gt-chat-container').scrollIntoView({ behavior: 'auto', block: 'start' });
 
 function addMessage(role, content) {
   messages.push({ role, content, timestamp: Date.now() });
@@ -297,7 +298,6 @@ function addMessage(role, content) {
   msgDiv.appendChild(inner);
   row.appendChild(msgDiv);
   chat.appendChild(row);
-  chat.scrollTop = chat.scrollHeight;
 }
 
 function showTyping() {
@@ -307,7 +307,6 @@ function showTyping() {
   inner.innerHTML = '<div class="gt-chat-dot"></div><div class="gt-chat-dot"></div><div class="gt-chat-dot"></div>';
   typingIndicator.appendChild(inner);
   chat.appendChild(typingIndicator);
-  chat.scrollTop = chat.scrollHeight;
 }
 
 function removeTyping() {
@@ -330,7 +329,6 @@ function addStreamingBotMessage() {
   msgDiv.appendChild(inner);
   row.appendChild(msgDiv);
   chat.appendChild(row);
-  chat.scrollTop = chat.scrollHeight;
 
   return inner;
 }
@@ -339,7 +337,6 @@ function appendToBotMessage(innerEl, textChunk) {
   if (!innerEl) return;
   innerEl._raw = (innerEl._raw || '') + textChunk;
   innerEl.innerHTML = marked.parse(innerEl._raw);
-  chat.scrollTop = chat.scrollHeight;
 }
 
 async function sendMessageStream() {
@@ -476,5 +473,6 @@ function saveSessionId(newSessionId) {
   </script>
 </body>
 </html>
+
 
 
