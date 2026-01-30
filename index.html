@@ -11,36 +11,24 @@
       font-family: 'Source Sans Pro', sans-serif;
       background: #0f1316;
       color: #eee;
+      height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
     }
 
-    /* Darkened overlay */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
+    .gt-chat-container {
+      width: 600px;
+      background: #1b1f24;
+      border: 3px solid #000;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      color: #ddd;
     }
 
-    /* Chat modal */
-    .chat-container {
-		width: 600px;
-		background: #1b1f24;
-		border: 3px solid #000;
-		display: flex;
-		flex-direction: column;
-		height: 600px; /* Bleibt bei 600px */
-		box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-		color: #ddd;
-	}
-
-    .chat-header {
+    .gt-chat-header {
       background: linear-gradient(180deg, #3b75c3, #2858a8);
       color: white;
       font-weight: 700;
@@ -50,108 +38,100 @@
       letter-spacing: 0.5px;
     }
 
-    /* Chat messages container (Gesamtverlauf) */
-	.chat-messages {
-		flex: 1;
-		padding: 20px;
-		overflow-y: auto; /* Bleibt bei auto */
-		/* ... restliche Styles ... */
-	}
+    .gt-chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
 
-	/* Einzelne Nachricht */
-	.message-row {
-	  width: 100%;
-	  display: flex;
-	  margin-bottom: 4px; /* optional spacing between messages */
-	}
+    .gt-chat-message-row {
+      width: 100%;
+      display: flex;
+      margin-bottom: 4px;
+    }
 
-	/* align row by role */
-	.message-row.user {
-	  justify-content: flex-end;  /* user messages on right */
-	}
+    .gt-chat-message-row.user {
+      justify-content: flex-end;
+    }
 
-	.message-row.bot {
-	  justify-content: flex-start; /* assistant messages on left */
-	}
+    .gt-chat-message-row.assistant {
+      justify-content: flex-start;
+    }
 
-	/* bubble styles */
-	.message {
-	  max-width: 80%;   /* bubble grows up to 80% of container */
-	  width: auto; /* only as wide as content */
-	  background: #232933;
-	  color: #f0f0f0;
-	  padding: 10px 14px;
-	  border-radius: 8px;
-	  word-wrap: break-word;
-	  line-height: 1.4;
-	}
-
-	/* Der innere <span> */
-	.message span {
-		display: block;
-		overflow-wrap: anywhere;
-		word-break: break-word;
-		margin: 0;
-	}
-	
-	.message p {
-		margin: 0;
-		padding: 0;
-	}
-	
-	.message pre,
-	.message code {
-	  white-space: pre-wrap;
-	  word-break: break-word;
-	  overflow-wrap: anywhere;
-	}
-
-    .bot {
+    .gt-chat-message {
+      max-width: 80%;
+      width: auto;
       background: #232933;
-      align-self: flex-start;
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+
+    .gt-chat-message span {
+      display: block;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      margin: 0;
+    }
+
+    .gt-chat-message p {
+      margin: 0;
+      padding: 0;
+    }
+
+    .gt-chat-message pre,
+    .gt-chat-message code {
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .gt-chat-message.user {
+      background: #2858a8;
+      color: #fff;
+    }
+
+    .gt-chat-message.assistant {
+      background: #232933;
       color: #f0f0f0;
     }
 
-    .user {
-      background: #2858a8;
-      color: #fff;
-      align-self: flex-end;
+    .gt-chat-input {
+      display: flex;
+      gap: 10px;
+      padding: 6px 12px;
+      background: #1b1f24;
+      border-top: 1px solid #333;
+      align-items: flex-end;
     }
 
-    .chat-input {
-	  display: flex;
-	  gap: 10px;
-	  padding: 6px 12px; 
-	  background: #1b1f24;
-	  border-top: 1px solid #333;
-	  align-items: flex-end; /* button stays at bottom */
-	}
+    .gt-chat-textarea-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
 
-	.textarea-wrapper {
-	  flex: 1; /* take remaining space */
-	  display: flex;
-	  flex-direction: column;
-	}
+    .gt-chat-input-field {
+      width: 100%;
+      resize: none;
+      border: none;
+      border-radius: 6px;
+      outline: none;
+      background: #0f1316;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.4;
+      padding: 6px 12px;
+      max-height: calc(1.4em * 5 + 12px);
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
 
-	.chat-input textarea.chat-input-field {
-	  width: 100%;
-	  resize: none;
-	  border: none;
-	  border-radius: 6px;
-	  outline: none;
-	  background: #0f1316;
-	  color: #fff;
-	  font-family: inherit;
-	  font-size: 15px;
-	  line-height: 1.4;
-	  padding: 6px 12px;
-	  max-height: calc(1.4em * 5 + 12px); /* 5 lines max */
-	  overflow-y: auto;
-	  box-sizing: border-box;
-	}
-
-    /* Imported button style */
-    .btn-schild {
+    /* Button style */
+    .gt-chat-btn-schild {
       position: relative;
       display: inline-block;
       transform: skewX(-2deg);
@@ -161,9 +141,10 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
       overflow: hidden;
       min-width: 140px;
-	  padding-right: 20px;
+      padding-right: 20px;
     }
-    .btn-schild > a {
+
+    .gt-chat-btn-schild > a {
       display: block;
       padding: 14px 54px 14px 28px;
       transform: skewX(2deg);
@@ -175,7 +156,8 @@
       z-index: 1;
       text-align: center;
     }
-    .btn-schild .chip {
+
+    .gt-chat-btn-schild .chip {
       position: absolute;
       right: 6px;
       top: 6px;
@@ -190,7 +172,8 @@
       align-items: center;
       justify-content: center;
     }
-    .btn-schild .chip span {
+
+    .gt-chat-btn-schild .chip span {
       display: inline-block;
       transform: skewX(12deg);
       font-size: 18px;
@@ -198,14 +181,13 @@
       font-weight: 900;
     }
 
-    /* Button hover */
-    .btn-schild:hover {
+    .gt-chat-btn-schild:hover {
       background: linear-gradient(180deg, #3b75c3, #3b75c3);
       box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
     }
 
-    /* Typing animation */
-    .typing {
+    /* Typing indicator */
+    .gt-chat-typing {
       display: flex;
       align-items: center;
       gap: 4px;
@@ -215,395 +197,264 @@
       align-self: flex-start;
       transform: skewX(-12deg);
     }
-    .typing span {
+
+    .gt-chat-typing span {
       transform: skewX(12deg);
       display: flex;
       gap: 4px;
     }
-    .dot {
+
+    .gt-chat-dot {
       width: 8px;
       height: 8px;
       background: #3b75c3;
       border-radius: 50%;
       animation: bounce 1s infinite;
     }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
+    .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
+
     @keyframes bounce {
       0%, 80%, 100% { transform: scale(0); }
       40% { transform: scale(1); }
     }
-
-    /* Open button */
-    .open-chat-btn {
-      background: linear-gradient(180deg, #3b75c3, #2858a8);
-      color: white;
-      padding: 14px 30px;
-      border: none;
-      cursor: pointer;
-      font-weight: 700;
-      font-size: 16px;
-      border-radius: 4px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    }
   </style>
 </head>
 <body>
-  <button class="open-chat-btn" onclick="openChat()">Chat öffnen</button>
 
-  <div class="modal-overlay" id="chatModal">
-    <div class="chat-container">
-        <div class="chat-header">Gravi-Tec Support Chat</div>
-        <div class="chat-messages" id="chat"></div>
-        <div class="chat-input">
-		  <div class="textarea-wrapper">
-			<textarea
-			  id="chatbot-input"
-			  class="chat-input-field"
-			  placeholder="Nachricht eingeben..."
-			  rows="1"
-			></textarea>
-		  </div>
-		  <div class="btn-schild" id="sendBtn" onclick="sendMessageStream()">
-			<a href="#">Senden</a>
-			<div class="chip"><span>✎</span></div>
-		  </div>
-		</div>
+  <div class="gt-chat-container">
+    <div class="gt-chat-header">Gravi-Tec Support Chat</div>
+    <div class="gt-chat-messages" id="chat"></div>
+    <div class="gt-chat-input">
+      <div class="gt-chat-textarea-wrapper">
+        <textarea
+          id="chatbot-input"
+          class="gt-chat-input-field"
+          placeholder="Nachricht eingeben..."
+          rows="1"
+        ></textarea>
+      </div>
+      <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
+        <a href="#">Senden</a>
+        <div class="chip"><span>✎</span></div>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
   <script>
-	const STORAGE_KEY = "chat_session_ids";
-	const MAX_MESSAGES_IN_STORAGE = 5;
-    const chatModal = document.getElementById('chatModal');
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('chatbot-input');
-	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
-    let messages = [];
-	let isWaitingResponse = false;
-    let typingIndicator = null;
-    let greeted = false;
-	
-	
-	console.log("Session ID: ", sessionID);
-	saveSessionId(sessionID);
+const STORAGE_KEY = "chat_session_ids";
+const MAX_MESSAGES_IN_STORAGE = 5;
 
-    function openChat() {
-      chatModal.style.display = 'flex';
-      if (!greeted) {
-        addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
-        greeted = true;
+const chat = document.getElementById('chat');
+const input = document.getElementById('chatbot-input');
+const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
+
+let messages = [];
+let isWaitingResponse = false;
+let typingIndicator = null;
+let greeted = false;
+
+console.log("Session ID: ", sessionID);
+saveSessionId(sessionID);
+
+// Show greeting immediately since chat is always visible
+addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
+greeted = true;
+
+function addMessage(role, content) {
+  messages.push({ role, content, timestamp: Date.now() });
+
+  const row = document.createElement('div');
+  row.className = 'gt-chat-message-row ' + role;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'gt-chat-message ' + role;
+
+  const inner = document.createElement('span');
+
+  const md = window.markdownit();
+  let formattedContent = content
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '&nbsp;&nbsp;')
+    .replace(/\\ /g, ' ');
+
+  inner.innerHTML = marked.parse(formattedContent);
+
+  msgDiv.appendChild(inner);
+  row.appendChild(msgDiv);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  typingIndicator = document.createElement('div');
+  typingIndicator.className = 'gt-chat-typing';
+  const inner = document.createElement('span');
+  inner.innerHTML = '<div class="gt-chat-dot"></div><div class="gt-chat-dot"></div><div class="gt-chat-dot"></div>';
+  typingIndicator.appendChild(inner);
+  chat.appendChild(typingIndicator);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  if (typingIndicator) {
+    chat.removeChild(typingIndicator);
+    typingIndicator = null;
+  }
+}
+
+function addStreamingBotMessage() {
+  const row = document.createElement('div');
+  row.className = 'gt-chat-message-row assistant';
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'gt-chat-message assistant';
+
+  const inner = document.createElement('span');
+  inner.innerHTML = '';
+
+  msgDiv.appendChild(inner);
+  row.appendChild(msgDiv);
+  chat.appendChild(row);
+  chat.scrollTop = chat.scrollHeight;
+
+  return inner;
+}
+
+function appendToBotMessage(innerEl, textChunk) {
+  if (!innerEl) return;
+  innerEl._raw = (innerEl._raw || '') + textChunk;
+  innerEl.innerHTML = marked.parse(innerEl._raw);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function sendMessageStream() {
+  if (isWaitingResponse) return;
+
+  let hasStartedStreaming = false;
+  let botInnerEl = null;
+
+  const inputEl = document.querySelector('.gt-chat-input-field');
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  isWaitingResponse = true;
+  const sendBtn = document.getElementById('sendBtn');
+  sendBtn.style.pointerEvents = 'none';
+  sendBtn.style.opacity = '0.6';
+
+  addMessage('user', text);
+  inputEl.value = '';
+  showTyping();
+
+  try {
+    const requestBody = {
+      session_id: sessionID,
+      messages: messages
+    };
+
+    const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
+    // const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
+
+    const res = await fetch(backendURLstream, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!res.body) throw new Error('Streaming not supported');
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n\n');
+      buffer = parts.pop();
+
+      for (const part of parts) {
+        if (!part.startsWith('data:')) continue;
+        const json = JSON.parse(part.replace('data:', '').trim());
+
+        if (json.type === 'token') {
+          if (!hasStartedStreaming) {
+            removeTyping();
+            botInnerEl = addStreamingBotMessage();
+            hasStartedStreaming = true;
+          }
+          appendToBotMessage(botInnerEl, json.text);
+        }
+
+        if (json.type === 'final') {
+          messages.push({
+            role: 'assistant',
+            content: botInnerEl._raw,
+            timestamp: Date.now()
+          });
+        }
+
+        if (json.error) {
+          appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
+        }
       }
     }
+  } catch (e) {
+    console.error(e);
+    if (!botInnerEl) botInnerEl = addStreamingBotMessage();
+    appendToBotMessage(botInnerEl, '\n\n❌ Verbindung zum Server fehlgeschlagen.');
+  } finally {
+    isWaitingResponse = false;
+    removeTyping();
+    sendBtn.style.pointerEvents = 'auto';
+    sendBtn.style.opacity = '1';
+  }
+}
 
-    function addMessage(role, content) {
-	  messages.push({ role: role, content: content, timestamp: Date.now() });
+input.addEventListener("keydown", (e) => {
+  if (document.activeElement !== input) return;
+  if (isWaitingResponse) return;
 
-	  const row = document.createElement('div');
-	  row.className = 'message-row';
-	  const msgDiv = document.createElement('div');
-	  msgDiv.className = 'message ' + (role === 'user' ? 'user' : 'bot'); // keep role on bubble too
-	  const inner = document.createElement('span');
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    sendMessageStream();
+  }
+});
 
+// Auto-resize textarea
+input.addEventListener('input', () => {
+  input.style.height = 'auto';
+  const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+  const maxHeight = lineHeight * 5 + 24;
+  input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
+});
 
-	  const md = window.markdownit();
-	  let formattedContent = content
-		.replace(/\\n/g, '\n') // Ersetzt explizite '\n' und '\\n' durch <br>
-		//.replace(/\n/g, '<br>') // Ersetzt normale \n (falls sie aus der API kommen)
-		.replace(/\\t/g, '&nbsp;&nbsp;') // Ersetzt \t durch 4 non-breaking spaces
-		.replace(/\\ /g, ' '); // Ersetzt escaped spaces '\ ' durch normale spaces
-	  let noMarkdownContent = marked.parse(formattedContent);
-	  
-	  
-	  inner.innerHTML = noMarkdownContent;
-      msgDiv.appendChild(inner);
-	  row.appendChild(msgDiv);
-	  chat.appendChild(row);
-      chat.scrollTop = chat.scrollHeight;
-	}
+function formatDateNow() {
+  const d = new Date(Date.now());
+  const pad = n => String(n).padStart(2, '0');
+  return (
+    d.getFullYear() + '_' +
+    pad(d.getMonth() + 1) + '_' +
+    pad(d.getDate()) + '_' +
+    pad(d.getHours()) + '_' +
+    pad(d.getMinutes()) + '_' +
+    pad(d.getSeconds())
+  );
+}
 
-    function showTyping() {
-      typingIndicator = document.createElement('div');
-      typingIndicator.className = 'typing';
-      const inner = document.createElement('span');
-      inner.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-      typingIndicator.appendChild(inner);
-      chat.appendChild(typingIndicator);
-      chat.scrollTop = chat.scrollHeight;
-    }
-
-    function removeTyping() {
-      if (typingIndicator) {
-        chat.removeChild(typingIndicator);
-        typingIndicator = null;
-      }
-    }
-
-    async function sendMessage(){ 
-		if (isWaitingResponse) return; // skip if already waiting
-
-		const inputEl = document.querySelector('.chat-input-field');
-		const text = inputEl.value.trim();
-		if (!text) return;
-
-		// lock the button
-		isWaitingResponse = true;
-		const sendBtn = document.getElementById('sendBtn');
-		sendBtn.style.pointerEvents = 'none';  // visually prevents clicking
-		sendBtn.style.opacity = '0.6';         // optional visual feedback
-
-		addMessage('user', text);
-		inputEl.value = '';
-		showTyping();
-		
-		try { 
-			requestBody = {
-				"session_id": sessionID,
-				"messages": messages
-			};
-			const backendURL = 'http://localhost:8000/api/v1/chat';
-			//const backendURL = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat'
-			console.log("Request body: ", requestBody);
-			
-			const res = await fetch(backendURL, { 
-				method:'POST', 
-				headers:  {
-					'Content-Type':'application/json'
-				}, 
-				body: JSON.stringify(requestBody)
-			});
-			
-			const data = await res.json();
-			console.log("data", data);
-			//addMessage('assistant', 'Kommt auf Material und Ausführung an. Bitte kurz:\n\n1) Material: Metall (Alu/Edelstahl), Kunststoff, Holz, Acryl, Stein, Folie?\n2) Größe (mm) + Stückzahl\n3) Veredelung: Lasergravur, Fräsen oder Druck?\n4) Fertigung: Wir stellen her (eigene Fertigung) oder Sie liefern Rohling (Fremdware)?\n\nOptional: Befestigung – Klebepad, Bohrungen, Abstandhalter.\n\nBeispiel-Angabe: „Aluminium, 100×50 mm, 10 Stk, Lasergravur, eigene Fertigung, 2 Bohrungen“.');
-			//let data = {message: "Hello there!"};
-			removeTyping(); 
-			
-			if (data.message && data.message.role==='assistant'){ 
-				addMessage('assistant', data.message.content); 
-			} else { 
-			    console.error("Unexpected data received: ", data);
-				addMessage('assistant', 'Fehler: Ungültige Antwort vom Server.'); 
-			} 
-		} catch(e){ 
-			removeTyping(); 
-			addMessage('assistant', 'Fehler beim Senden der Nachricht.'); 
-			console.error(e);
-		} finally {
-			// unlock button
-			isWaitingResponse = false;
-			sendBtn.style.pointerEvents = 'auto';
-			sendBtn.style.opacity = '1';
-		}
-		
-	}
-
-	function formatDateNow() {
-	  const d = new Date(Date.now());
-
-	  const pad = n => String(n).padStart(2, '0');
-
-	  return (
-		d.getFullYear() + '_' + 
-		pad(d.getMonth() + 1) + '_' +
-		pad(d.getDate()) + '_' + 
-		pad(d.getHours()) + '_' +
-		pad(d.getMinutes()) + '_' +
-		pad(d.getSeconds())
-	  );
-	}
-	
-	
-
-	function saveSessionId(newSessionId) {
-	  let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
-	  // remove duplicates
-	  sessions = sessions.filter(id => id !== newSessionId);
-
-	  // add newest to the front
-	  sessions.unshift(newSessionId);
-
-	  // keep only latest 5
-	  sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
-
-	  // save
-	  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-	}
-	
-	
-	
-	
-	////////////// Streaming code
-	
-	function addStreamingBotMessage() {
-	  const row = document.createElement('div');
-	  row.className = 'message-row';
-
-	  const msgDiv = document.createElement('div');
-	  msgDiv.className = 'message bot';
-
-	  const inner = document.createElement('span');
-	  inner.innerHTML = ''; // start empty
-
-	  msgDiv.appendChild(inner);
-	  row.appendChild(msgDiv);
-	  chat.appendChild(row);
-
-	  chat.scrollTop = chat.scrollHeight;
-
-	  return inner; // IMPORTANT: return span for streaming
-	}
-	
-	function appendToBotMessage(innerEl, textChunk) {
-	  // Preserve markdown rendering incrementally
-	  const md = window.markdownit();
-	  
-	  if (!innerEl) {
-		innerEl = addStreamingBotMessage();
-	  }
-
-	  innerEl._raw = (innerEl._raw || '') + textChunk;
-	  innerEl.innerHTML = marked.parse(innerEl._raw);
-
-	  chat.scrollTop = chat.scrollHeight;
-	}
-	
-	async function sendMessageStream() {
-	  if (isWaitingResponse) return;  
-	  
-	  let hasStartedStreaming = false;
-	  let botInnerEl = null;
-	  const inputEl = document.querySelector('.chat-input-field');
-	  const text = inputEl.value.trim();
-	  if (!text) return;
-
-	  isWaitingResponse = true;
-	  const sendBtn = document.getElementById('sendBtn');
-	  sendBtn.style.pointerEvents = 'none';
-	  sendBtn.style.opacity = '0.6';
-
-	  addMessage('user', text);
-	  inputEl.value = '';
-	  showTyping();
-
-	  try {
-		const requestBody = {
-		  session_id: sessionID,
-		  messages: messages
-		};
-		
-		//const backendURLstream = 'http://localhost:8000/api/v1/chat/stream'
-		const backendURLstream  = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream'
-
-		const res = await fetch(backendURLstream, {
-		  method: 'POST',
-		  headers: { 'Content-Type': 'application/json' },
-		  body: JSON.stringify(requestBody)
-		});
-
-		if (!res.body) {
-		  throw new Error('Streaming not supported by browser');
-		}
-
-		const reader = res.body.getReader();
-		const decoder = new TextDecoder();
-
-		let buffer = '';
-
-		while (true) {
-		  const { value, done } = await reader.read();
-		  if (done) break;
-
-		  buffer += decoder.decode(value, { stream: true });
-
-		  // Split SSE-style messages
-		  const parts = buffer.split('\n\n');
-		  buffer = parts.pop();
-
-		  for (const part of parts) {
-			if (!part.startsWith('data:')) continue;
-
-			const json = JSON.parse(part.replace('data:', '').trim());
-
-			if (json.type === 'token') {
-			  // First token → remove typing + create bubble
-			  if (!hasStartedStreaming) {
-				removeTyping();
-				botInnerEl = addStreamingBotMessage();
-				hasStartedStreaming = true;
-			  }
-
-			  appendToBotMessage(botInnerEl, json.text);
-			}
-
-			if (json.type === 'final') {
-			  // Optional: persist final message
-			  messages.push({
-				role: 'assistant',
-				content: botInnerEl._raw,
-				timestamp: Date.now()
-			  });
-			}
-
-			if (json.error) {
-			  appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
-			}
-		  }
-		}
-
-	  } catch (e) {
-		console.error(e);
-		if (!botInnerEl) {
-			botInnerEl = addStreamingBotMessage();
-		}
-		appendToBotMessage(
-			botInnerEl,
-			'\n\n❌ Verbindung zum Server fehlgeschlagen.'
-		);
-	  } finally {
-		isWaitingResponse = false;
-		removeTyping();
-		sendBtn.style.pointerEvents = 'auto';
-		sendBtn.style.opacity = '1';
-	  }
-	}
-	
-	
-	///////////////// end of streaming part
-
-
-
-	
-	
-	input.addEventListener("keydown", (e) => {
-	  // Only act if input is focused
-	  if (document.activeElement !== input) {
-		return;
-	  }
-	  if (isWaitingResponse) {
-		return;
-	  }
-
-	  if (e.key === "Enter" && !e.shiftKey) {
-		// Enter → send message
-		e.preventDefault(); // stop newline
-		sendMessageStream();
-	  }
-	  
-	  // Shift + Enter → allow newline (do nothing)
-	});
-	
-	// Auto-resize chat textarea
-	input.addEventListener('input', () => {
-	  input.style.height = 'auto'; // reset height so scrollHeight recalculates
-	  const lineHeight = parseInt(getComputedStyle(input).lineHeight); // get line height in px
-	  const maxHeight = lineHeight * 5 + 24; // 5 lines max + padding (24px from your CSS)
-	  input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
-	});
-	
+function saveSessionId(newSessionId) {
+  let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  sessions = sessions.filter(id => id !== newSessionId);
+  sessions.unshift(newSessionId);
+  sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+}
   </script>
 </body>
 </html>
