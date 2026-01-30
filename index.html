@@ -273,6 +273,7 @@ saveSessionId(sessionID);
 // Show greeting immediately since chat is always visible
 addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
 greeted = true;
+resetTextareaHeight();
 
 function addMessage(role, content) {
   messages.push({ role, content, timestamp: Date.now() });
@@ -358,6 +359,7 @@ async function sendMessageStream() {
 
   addMessage('user', text);
   inputEl.value = '';
+  resetTextareaHeight();
   showTyping();
 
   try {
@@ -445,6 +447,12 @@ input.addEventListener('input', () => {
   input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
 });
 
+function resetTextareaHeight() {
+  input.style.height = 'auto';                    // reset height
+  const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+  input.style.height = lineHeight + 12 + 'px';   // 1 line + padding
+}
+
 function formatDateNow() {
   const d = new Date(Date.now());
   const pad = n => String(n).padStart(2, '0');
@@ -468,4 +476,5 @@ function saveSessionId(newSessionId) {
   </script>
 </body>
 </html>
+
 
