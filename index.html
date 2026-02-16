@@ -1,260 +1,360 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Gravi-Tec Chat Demo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Source Sans Pro', sans-serif;
-      background: #0f1316;
-      color: #eee;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
-    .gt-chat-container {
-      width: 600px;
-	  font-family: 'Source Sans Pro', sans-serif;
-      background: #1b1f24;
-      border: 3px solid #000;
-      display: flex;
-      flex-direction: column;
-      height: 600px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-      color: #ddd;
-    }
+<style>
+  .gt-chat-container {
+    width: 600px;
+    font-family: 'Source Sans Pro', sans-serif;
+    background: #1b1f24;
+    border: 3px solid #000;
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    color: #ddd;
+  }
+  .gt-chat-header {
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    color: white;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .gt-chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  .gt-chat-message-row {
+    width: 100%;
+    display: flex;
+    margin-bottom: 4px;
+  }
+  .gt-chat-message-row.user {
+    justify-content: flex-end;
+  }
+  .gt-chat-message-row.assistant {
+    justify-content: flex-start;
+  }
+  .gt-chat-message {
+    max-width: 80%;
+    width: auto;
+    background: #232933;
+    color: #f0f0f0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    word-wrap: break-word;
+    line-height: 1.4;
+  }
+  .gt-chat-message span {
+    display: block;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    margin: 0;
+  }
+  .gt-chat-message p {
+    margin: 0;
+    padding: 0;
+  }
+  .gt-chat-message pre,
+  .gt-chat-message code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .gt-chat-message.user {
+    background: #2858a8;
+    color: #fff;
+  }
+  .gt-chat-message.assistant {
+    background: #232933;
+    color: #f0f0f0;
+  }
+  .gt-chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 6px 12px;
+    background: #1b1f24;
+    border-top: 1px solid #333;
+    align-items: flex-end;
+  }
+  .gt-chat-textarea-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .gt-chat-input-field {
+    width: 100%;
+    resize: none;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    background: #0f1316;
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+    padding: 6px 12px;
+    max-height: calc(1.4em * 5 + 12px);
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
 
-    .gt-chat-header {
-      background: linear-gradient(180deg, #3b75c3, #2858a8);
-      color: white;
-      font-weight: 700;
-      padding: 14px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+  .gt-chat-input-field,
+  .gt-chat-input-field:hover,
+  .gt-chat-input-field:focus {
+    background-color: #0f1316 !important;  /* dark background */
+    color: #fff !important;               /* text color */
+    border: none !important;              /* remove any hover border */
+    box-shadow: none !important;          /* remove glow if applied by theme */
+  }
 
-    .gt-chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-
-    .gt-chat-message-row {
-      width: 100%;
-      display: flex;
-      margin-bottom: 4px;
-    }
-
-    .gt-chat-message-row.user {
-      justify-content: flex-end;
-    }
-
-    .gt-chat-message-row.assistant {
-      justify-content: flex-start;
-    }
-
-    .gt-chat-message {
-      max-width: 80%;
-      width: auto;
-      background: #232933;
-      color: #f0f0f0;
-      padding: 10px 14px;
-      border-radius: 8px;
-      word-wrap: break-word;
-      line-height: 1.4;
-    }
-
-    .gt-chat-message span {
-      display: block;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      margin: 0;
-    }
-
-    .gt-chat-message p {
-      margin: 0;
-      padding: 0;
-    }
-
-    .gt-chat-message pre,
-    .gt-chat-message code {
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-    }
-
-    .gt-chat-message.user {
-      background: #2858a8;
-      color: #fff;
-    }
-
-    .gt-chat-message.assistant {
-      background: #232933;
-      color: #f0f0f0;
-    }
-
-    .gt-chat-input {
-      display: flex;
-      gap: 10px;
-      padding: 6px 12px;
-      background: #1b1f24;
-      border-top: 1px solid #333;
-      align-items: flex-end;
-    }
-
-    .gt-chat-textarea-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .gt-chat-input-field {
-      width: 100%;
-      resize: none;
-      border: none;
-      border-radius: 6px;
-      outline: none;
-      background: #0f1316;
-      color: #fff;
-      font-family: inherit;
-      font-size: 15px;
-      line-height: 1.4;
-      padding: 6px 12px;
-      max-height: calc(1.4em * 5 + 12px);
-      overflow-y: auto;
-      box-sizing: border-box;
-    }
-
-	.gt-chat-input-field,
-	.gt-chat-input-field:hover,
-	.gt-chat-input-field:focus {
-	  background-color: #0f1316 !important;  /* dark background */
-	  color: #fff !important;               /* text color */
-	  border: none !important;              /* remove any hover border */
-	  box-shadow: none !important;          /* remove glow if applied by theme */
+  /* Button style */
+  .gt-chat-btn-schild {
+    position: relative;
+    display: inline-block;
+    transform: skewX(-2deg);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
+    overflow: hidden;
+    min-width: 140px;
+    padding-right: 20px;
+  }
+  .gt-chat-btn-schild > a {
+    display: block;
+    padding: 14px 54px 14px 28px;
+    transform: skewX(2deg);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .gt-chat-btn-schild .chip {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 46px;
+    transform: skewX(-2deg);
+    border-radius: 8px;
+    background: linear-gradient(180deg, #fff, #f4f7fc);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gt-chat-btn-schild .chip span {
+    display: inline-block;
+    transform: skewX(12deg);
+    font-size: 18px;
+    color: #2858a8;
+    font-weight: 900;
+  }
+  .gt-chat-btn-schild:hover {
+    background: linear-gradient(180deg, #3b75c3, #3b75c3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
+  }
+  /* Typing indicator */
+  .gt-chat-typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #232933;
+    align-self: flex-start;
+    transform: skewX(-12deg);
+  }
+  .gt-chat-typing span {
+    transform: skewX(12deg);
+    display: flex;
+    gap: 4px;
+  }
+  .gt-chat-dot {
+    width: 8px;
+    height: 8px;
+    background: #3b75c3;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+  }
+  .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
+  .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
+  
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+  
+  /* Thinking Indicator */
+	.gt-thinking-row {
+	  width: 100%;
+	  display: flex;
+	  justify-content: flex-start;
+	  margin-bottom: 4px;
 	}
 
-    /* Button style */
-    .gt-chat-btn-schild {
-      position: relative;
-      display: inline-block;
-      transform: skewX(-2deg);
-      border-radius: 10px;
-      background: linear-gradient(180deg, #3b75c3, #2858a8);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
-      overflow: hidden;
-      min-width: 140px;
-      padding-right: 20px;
-    }
+	.gt-thinking-indicator {
+	  max-width: 80%;
+	  background: #232933;
+	  color: #f0f0f0;
+	  padding: 10px 14px;
+	  border-radius: 8px;
+	  border-left: 3px solid #3b75c3;
+	  line-height: 1.4;
+	  font-size: 14px;
+	}
 
-    .gt-chat-btn-schild > a {
-      display: block;
-      padding: 14px 54px 14px 28px;
-      transform: skewX(2deg);
-      color: white;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 16px;
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
+	.gt-thinking-indicator.gt-complete {
+	  opacity: 0.8;
+	}
 
-    .gt-chat-btn-schild .chip {
-      position: absolute;
-      right: 6px;
-      top: 6px;
-      bottom: 6px;
-      width: 46px;
-      transform: skewX(-2deg);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #fff, #f4f7fc);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+	.gt-thinking-indicator.gt-faded {
+	  opacity: 0.6;
+	}
 
-    .gt-chat-btn-schild .chip span {
-      display: inline-block;
-      transform: skewX(12deg);
-      font-size: 18px;
-      color: #2858a8;
-      font-weight: 900;
-    }
+	.gt-thinking-header {
+	  display: flex;
+	  align-items: center;
+	  gap: 6px;
+	  margin-bottom: 6px;
+	  font-weight: 600;
+	  color: #9fc0ff;
+	}
 
-    .gt-chat-btn-schild:hover {
-      background: linear-gradient(180deg, #3b75c3, #3b75c3);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
-    }
+	.gt-thinking-icon {
+	  font-size: 18px;
+	}
 
-    /* Typing indicator */
-    .gt-chat-typing {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      background: #232933;
-      align-self: flex-start;
-      transform: skewX(-12deg);
-    }
+	.gt-thinking-content {
+	  font-size: 13px;
+	  font-style: italic;
+	  opacity: 0.85;
+	  white-space: pre-wrap;
+	}
 
-    .gt-chat-typing span {
-      transform: skewX(12deg);
-      display: flex;
-      gap: 4px;
-    }
+	/* Tool Calls Container */
+	.gt-tool-row {
+	  width: 100%;
+	  display: flex;
+	  justify-content: flex-start;
+	  margin-bottom: 4px;
+	}
 
-    .gt-chat-dot {
-      width: 8px;
-      height: 8px;
-      background: #3b75c3;
-      border-radius: 50%;
-      animation: bounce 1s infinite;
-    }
+	.gt-tool-calls-container {
+	  max-width: 80%;
+	  background: #232933;
+	  color: #f0f0f0;
+	  padding: 10px 14px;
+	  border-radius: 8px;
+	  border-left: 3px solid #4caf50;
+	  font-size: 14px;
+	}
 
-    .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
-    .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
+	.gt-tool-calls-container.gt-complete {
+	  opacity: 0.8;
+	}
 
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-  </style>
-</head>
-<body>
+	.gt-tools-header {
+	  display: flex;
+	  align-items: center;
+	  gap: 6px;
+	  margin-bottom: 8px;
+	  font-weight: 600;
+	  color: #9fffc1;
+	}
 
-  <div class="gt-chat-container">
-    <div class="gt-chat-header">Gravi-Tec Support Chat</div>
-    <div class="gt-chat-messages" id="chat"></div>
-    <div class="gt-chat-input">
-      <div class="gt-chat-textarea-wrapper">
-        <textarea
-          id="chatbot-input"
-          class="gt-chat-input-field"
-          placeholder="Nachricht eingeben..."
-          rows="1"
-        ></textarea>
-      </div>
-      <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
-        <a href="#">Senden</a>
-        <div class="chip"><span>✎</span></div>
-      </div>
+	.gt-tools-icon {
+	  font-size: 18px;
+	}
+
+	.gt-tools-list {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 8px;
+	}
+
+	.gt-tool-call {
+	  background: #1b1f24;
+	  padding: 8px 10px;
+	  border-radius: 6px;
+	  border: 1px solid #2c323c;
+	}
+
+	.gt-tool-name {
+	  display: flex;
+	  align-items: center;
+	  gap: 6px;
+	  font-size: 13px;
+	  margin-bottom: 4px;
+	}
+
+	.gt-tool-status {
+	  font-size: 14px;
+	}
+
+	.gt-tool-args {
+	  background: #0f1316;
+	  padding: 6px 8px;
+	  border-radius: 4px;
+	  font-size: 12px;
+	  margin-top: 4px;
+	  white-space: pre-wrap;
+	  overflow-wrap: anywhere;
+	  color: #cfd8dc;
+	}
+
+	.gt-tool-result {
+	  background: #10251a;
+	  padding: 6px 8px;
+	  border-radius: 4px;
+	  font-size: 12px;
+	  margin-top: 6px;
+	  border-left: 3px solid #4caf50;
+	  white-space: pre-wrap;
+	  overflow-wrap: anywhere;
+	}
+  
+  
+</style>
+
+
+
+<div class="gt-chat-container">
+  <div class="gt-chat-header">
+	  Gravi-Tec Support Chat
+		<div id="session-id-display" style="float:right; font-size:12px; color:#888; margin-top:8px;"></div>
+  </div>
+  <div class="gt-chat-messages" id="chat"></div>
+  <div class="gt-chat-input">
+    <div class="gt-chat-textarea-wrapper">
+      <textarea
+        id="chatbot-input"
+        class="gt-chat-input-field"
+        placeholder="Nachricht eingeben..."
+        rows="1"
+      ></textarea>
+    </div>
+    <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
+      <a href="#">Senden</a>
+      <div class="chip"><span>✎</span></div>
     </div>
   </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
-  <script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
+<script>
+const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
+//const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
 const STORAGE_KEY = "chat_session_ids";
 const MAX_MESSAGES_IN_STORAGE = 5;
 
@@ -273,6 +373,7 @@ saveSessionId(sessionID);
 // Show greeting immediately since chat is always visible
 addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
 greeted = true;
+document.getElementById('session-id-display').textContent = sessionID;
 resetTextareaHeight();
 document.querySelector('.gt-chat-container').scrollIntoView({ behavior: 'auto', block: 'start' });
 
@@ -341,75 +442,153 @@ function appendToBotMessage(innerEl, textChunk) {
 
 async function sendMessageStream() {
   if (isWaitingResponse) return;
-
   let hasStartedStreaming = false;
   let botInnerEl = null;
-
+  let thinkingEl = null;
+  let toolCallsEl = null;
+  
   const inputEl = document.querySelector('.gt-chat-input-field');
   const text = inputEl.value.trim();
   if (!text) return;
-
+  
   isWaitingResponse = true;
   const sendBtn = document.getElementById('sendBtn');
   sendBtn.style.pointerEvents = 'none';
   sendBtn.style.opacity = '0.6';
-
+  
   addMessage('user', text);
   inputEl.value = '';
-  resetTextareaHeight();
   showTyping();
-
+  
   try {
     const requestBody = {
       session_id: sessionID,
       messages: messages
     };
-
-    const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
-    // const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
-
+    
     const res = await fetch(backendURLstream, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(requestBody)
     });
-
+    
     if (!res.body) throw new Error('Streaming not supported');
-
+    
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
     let buffer = '';
-
+    
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
-
+      
       buffer += decoder.decode(value, { stream: true });
       const parts = buffer.split('\n\n');
       buffer = parts.pop();
-
+      
       for (const part of parts) {
         if (!part.startsWith('data:')) continue;
+        
         const json = JSON.parse(part.replace('data:', '').trim());
-
-        if (json.type === 'token') {
-          if (!hasStartedStreaming) {
-            removeTyping();
-            botInnerEl = addStreamingBotMessage();
-            hasStartedStreaming = true;
-          }
-          appendToBotMessage(botInnerEl, json.text);
+        
+        // Handle different event types
+        switch (json.type) {
+          case 'token':
+            // Regular text streaming
+            if (!hasStartedStreaming) {
+              removeTyping();
+              botInnerEl = addStreamingBotMessage();
+              hasStartedStreaming = true;
+            }
+            appendToBotMessage(botInnerEl, json.text);
+            break;
+          
+          case 'thinking':
+            // AI thinking process
+            if (!thinkingEl) {
+              thinkingEl = addThinkingIndicator();
+            }
+            appendToThinking(thinkingEl, json.content);
+            break;
+          
+          case 'tool_call':
+            // Tool is being called
+            if (!toolCallsEl) {
+              toolCallsEl = addToolCallsContainer();
+            }
+            addToolCall(toolCallsEl, {
+              name: json.tool_name,
+              args: json.args,
+              callId: json.tool_call_id
+            });
+            break;
+          
+          case 'tool_result':
+			  console.log("RAW tool_result event:", json);
+			  console.log("tool_call_id value:", json?.tool_call_id);
+			  console.log("result value:", json?.result);
+			  
+			  const callId = json?.tool_call_id;
+			  if (callId && toolCallsEl) {
+				updateToolResult(toolCallsEl, callId, json.result);
+			  } else {
+				console.error("Missing or invalid tool_call_id in tool_result event!", json);
+			  }
+			  break;
+          
+          case 'tool_args_delta':
+            // Streaming tool arguments (optional - for real-time display)
+            if (toolCallsEl) {
+              updateToolArgs(toolCallsEl, json.args);
+            }
+            break;
+          
+          case 'part_start':
+            // Optional: Log when new parts start
+            console.log(`Starting part ${json.index}: ${json.part_type}`);
+            break;
+          
+          case 'final_result_start':
+            // Model started producing final answer
+            if (thinkingEl) {
+              markThinkingComplete(thinkingEl);
+            }
+            if (toolCallsEl) {
+              markToolCallsComplete(toolCallsEl);
+            }
+            break;
+          
+          case 'final':
+            // Complete - save to message history
+            if (botInnerEl) {
+              messages.push({
+                role: 'assistant',
+                content: botInnerEl._raw || json.output,
+                timestamp: Date.now()
+              });
+            }
+            
+            // Optional: Log usage stats
+            if (json.usage) {
+              console.log('Token usage:', json.usage);
+              // Could display this in UI if desired
+            }
+            break;
+          
+          case 'error':
+            // Error occurred
+            if (!botInnerEl) {
+              botInnerEl = addStreamingBotMessage();
+            }
+            appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.detail);
+            break;
         }
-
-        if (json.type === 'final') {
-          messages.push({
-            role: 'assistant',
-            content: botInnerEl._raw,
-            timestamp: Date.now()
-          });
-        }
-
+        
+        // Legacy error handling
         if (json.error) {
+          if (!botInnerEl) {
+            botInnerEl = addStreamingBotMessage();
+          }
           appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
         }
       }
@@ -423,8 +602,221 @@ async function sendMessageStream() {
     removeTyping();
     sendBtn.style.pointerEvents = 'auto';
     sendBtn.style.opacity = '1';
+    
+    // Clean up thinking/tool indicators if they exist
+    /*if (thinkingEl) {
+      removeThinkingIndicator(thinkingEl);
+    }
+    if (toolCallsEl) {
+      removeToolCallsContainer(toolCallsEl);
+    }*/
   }
 }
+
+// ==================== UI Helper Functions ====================
+
+/**
+ * Add a thinking indicator to show AI's reasoning process
+ */
+function addThinkingIndicator() {
+  const chatContainer = document.getElementById('chat');
+
+  const row = document.createElement('div');
+  row.className = 'gt-thinking-row';
+
+  const thinkingDiv = document.createElement('div');
+  thinkingDiv.className = 'gt-thinking-indicator';
+  thinkingDiv.innerHTML = `
+    <div class="gt-thinking-header">
+      <span>💭</span>
+      <span class="gt-thinking-label">Denkt nach...</span>
+    </div>
+    <div class="gt-thinking-content"></div>
+  `;
+
+  row.appendChild(thinkingDiv);
+  chatContainer.appendChild(row);
+  //scrollToBottom();
+
+  return thinkingDiv;
+}
+
+/**
+ * Append text to thinking indicator
+ */
+function appendToThinking(thinkingEl, text) {
+  const contentEl = thinkingEl.querySelector('.gt-thinking-content');
+  if (contentEl) {
+    contentEl.textContent += text;
+    //scrollToBottom();
+  }
+}
+
+/**
+ * Mark thinking as complete
+ */
+function markThinkingComplete(thinkingEl) {
+  if (!thinkingEl) return;
+  thinkingEl.classList.add('gt-complete');
+  const label = thinkingEl.querySelector('.gt-thinking-label');
+  if (label) {
+    label.textContent = 'Denken abgeschlossen';
+  }
+}
+
+/**
+ * Remove thinking indicator (called after final response)
+ */
+function removeThinkingIndicator(thinkingEl) {
+  if (!thinkingEl || !thinkingEl.parentNode) return;
+  
+  // Option 1: Remove after delay
+  /*setTimeout(() => {
+    if (thinkingEl && thinkingEl.parentNode) {
+      thinkingEl.remove();
+    }
+  }, 2000);*/
+  
+  // Option 2: Just fade it out and keep in history
+  thinkingEl.classList.add('gt-faded');
+}
+
+/**
+ * Add container for tool calls
+ */
+function addToolCallsContainer() {
+  const chatContainer = document.getElementById('chat');
+
+  const row = document.createElement('div');
+  row.className = 'gt-tool-row';
+
+  const toolsDiv = document.createElement('div');
+  toolsDiv.className = 'gt-tool-calls-container';
+  toolsDiv.innerHTML = `
+    <div class="gt-tools-header">
+      <span>🔧</span>
+      <span class="gt-tools-label">Verwendet Werkzeuge...</span>
+    </div>
+    <div class="gt-tools-list"></div>
+  `;
+
+  row.appendChild(toolsDiv);
+  chatContainer.appendChild(row);
+  //scrollToBottom();
+
+  return toolsDiv;
+}
+
+/**
+ * Add a tool call to the container
+ */
+function addToolCall(toolCallsEl, toolCall) {
+  const listEl = toolCallsEl.querySelector('.gt-tools-list');
+  if (!listEl) return;
+  
+  const toolDiv = document.createElement('div');
+  toolDiv.className = 'gt-tool-call';
+  toolDiv.dataset.callId = toolCall.callId;
+  
+  // Safely stringify args
+  let argsStr;
+  try {
+    argsStr = JSON.stringify(toolCall.args, null, 2);
+  } catch (e) {
+    argsStr = String(toolCall.args);
+  }
+  
+  // Escape HTML to prevent XSS
+  const escapeHtml = (text) => {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  };
+  
+  toolDiv.innerHTML = `
+    <div class="gt-tool-name">
+      <span class="gt-tool-status">⏳</span>
+      <strong>${escapeHtml(toolCall.name)}</strong>
+    </div>
+    <pre class="gt-tool-args">${escapeHtml(argsStr)}</pre>
+    <div class="gt-tool-result" style="display: none;"></div>
+  `;
+  listEl.appendChild(toolDiv);
+  //scrollToBottom();
+}
+
+/**
+ * Update tool call with result
+ */
+function updateToolResult(toolCallsEl, callId, result) {
+  const matchingTools = toolCallsEl.querySelectorAll(`[data-call-id="${callId}"]`);
+
+  if (matchingTools.length === 0) {
+    console.warn(`No tool found for callId: ${callId}`);
+    return;
+  }
+
+  if (matchingTools.length > 1) {
+    console.warn(`Found ${matchingTools.length} tools with the same callId ${callId} — this should not happen!`);
+  }
+
+  // We take the last one (or first — doesn't matter much if IDs are correct)
+  const toolDiv = matchingTools[matchingTools.length - 1];
+
+  const statusEl = toolDiv.querySelector('.gt-tool-status');
+  const resultEl = toolDiv.querySelector('.gt-tool-result');
+
+  if (statusEl) statusEl.textContent = '✅';
+
+  if (resultEl) {
+    resultEl.style.display = 'block';
+    let resultStr = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+    resultEl.textContent = resultStr;
+    console.log(`Tool result [${callId}]:`, resultStr.substring(0, 200));
+  }
+}
+
+/**
+ * Update tool arguments while streaming (optional)
+ */
+function updateToolArgs(toolCallsEl, argsDelta) {
+  const lastTool = toolCallsEl.querySelector('.gt-tool-call:last-child .gt-tool-args');
+  if (lastTool) {
+    lastTool.textContent += argsDelta;
+    //scrollToBottom();
+  }
+}
+
+/**
+ * Mark all tool calls as complete
+ */
+function markToolCallsComplete(toolCallsEl) {
+  if (!toolCallsEl) return;
+  toolCallsEl.classList.add('gt-complete');
+  const label = toolCallsEl.querySelector('.gt-tools-label');
+  if (label) {
+    label.textContent = 'Werkzeuge verwendet';
+  }
+}
+
+/**
+ * Remove tool calls container
+ */
+function removeToolCallsContainer(toolCallsEl) {
+  if (!toolCallsEl) return;
+  toolCallsEl.classList.add('gt-complete');
+}
+
+/**
+ * Scroll chat to bottom
+ */
+function scrollToBottom() {
+  const chatMessages = document.querySelector('.gt-chat-messages');
+  if (chatMessages) {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+}
+
 
 input.addEventListener("keydown", (e) => {
   if (document.activeElement !== input) return;
@@ -470,9 +862,4 @@ function saveSessionId(newSessionId) {
   sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
 }
-  </script>
-</body>
-</html>
-
-
-
+</script>
