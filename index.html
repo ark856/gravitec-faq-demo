@@ -353,8 +353,8 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
 <script>
-const backendURLstream = 'https://avahai.gravi-tec.de/api/v1/chat/stream';
 //const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
+const backendURLstream = 'https://avahai.gravi-tec.de/api/v1/chat/stream';
 //const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
 const STORAGE_KEY = "chat_session_ids";
 const MAX_MESSAGES_IN_STORAGE = 5;
@@ -462,10 +462,17 @@ async function sendMessageStream() {
   showTyping();
   
   try {
+	
+    const userMessage = {
+	  role: 'user',
+	  content: text,
+	  timestamp: Date.now()
+	};
+	
     const requestBody = {
-      session_id: sessionID,
-      messages: messages
-    };
+	  session_id: sessionID,
+	  message: userMessage
+	};
     
     const res = await fetch(backendURLstream, {
       method: 'POST',
@@ -864,4 +871,3 @@ function saveSessionId(newSessionId) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
 }
 </script>
-
