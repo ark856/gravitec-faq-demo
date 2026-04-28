@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chatbot Admin</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ===== GLOBAL ===== */
+body {
+  font-family: 'Source Sans Pro', sans-serif;
+  background: #1b1f24;
+  color: #ddd;
+  margin: 0;
+}
+
+.admin-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  border: 3px solid #000;
+  box-shadow: 0 0 20px rgba(0,0,0,0.6);
+  background: #1b1f24;
+}
+
+/* ===== HEADER ===== */
+.admin-header {
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  padding: 16px 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* ===== TABS ===== */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #333;
+}
+
+.tabs button {
+  flex: 1;
+  padding: 14px;
+  background: #232933;
+  border: none;
+  color: #aaa;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tabs button.active {
+  background: #2858a8;
+  color: #fff;
+}
+
+/* ===== CONTENT ===== */
+.tab-content {
+  display: none;
+  padding: 20px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ===== FORMS ===== */
+input, textarea, select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  background: #0f1316;
+  border: none;
+  color: #fff;
+  border-radius: 6px;
+}
+
+label {
+  font-weight: 600;
+}
+
+/* ===== BUTTON ===== */
+.btn {
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  border: none;
+  padding: 12px 18px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* ===== TABLE ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  padding: 10px;
+  border-bottom: 1px solid #333;
+  text-align: left;
+}
+
+th {
+  color: #9fc0ff;
+}
+
+.msg-user { color: #9fc0ff; }
+.msg-assistant { color: #9fffc1; }
+
+/* ===== INFO BOX ===== */
+.info-box {
+  background: #232933;
+  padding: 16px;
+  border-left: 3px solid #3b75c3;
+  border-radius: 6px;
+}
+
+.status-loading { color: #9fc0ff; }
+.status-success { color: #9fffc1; }
+.status-empty { color: #ffb84d; }
+.status-error { color: #ff6b6b; }
+
+
+/* SESSION META */
+.session-meta {
+  background: #232933;
+  padding: 16px;
+  border-left: 3px solid #3b75c3;
+  border-radius: 6px;
+  margin-top: 20px;
+}
+
+.session-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.session-meta strong {
+  color: #9fc0ff;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="admin-container">
+  <div class="admin-header">Chatbot Admin</div>
+
+  <div class="tabs">
+    <button class="active" data-tab="general">General</button>
+    <button data-tab="history">Chat History</button>
+    <button data-tab="info">Info</button>
+  </div>
+
+  <!-- GENERAL -->
+  <div id="general" class="tab-content active">
+    <h2>Settings</h2>
+    <form id="settingsForm">
+      <label style="display:flex; justify-content:space-between; align-items:center;">
+		<span>LLM Model</span>
+
+		<button type="button" class="btn" id="fetchModelsBtn">
+			Fetch Models
+		</button>
+	  </label>
+      <select id="model">
+        <option>gpt-4o</option>
+        <option>gpt-4.1</option>
+      </select>
+	  
+	  <div id="modelStatus"></div>
+
+      <label>System Prompt</label>
+      <textarea id="systemPrompt" rows="6"></textarea>
+
+      <button class="btn">Save</button>
+    </form>
+  </div>
+
+  <!-- HISTORY -->
+  <div id="history" class="tab-content">
+    <h2>Chat History</h2>
+
+    <form id="sessionSearchForm">
+      <label>From</label>
+      <input type="date" id="dateFrom">
+
+      <label>To</label>
+      <input type="date" id="dateTo">
+
+      <button class="btn">Load Sessions</button>
+    </form>
+
+    <label>
+      Session <span id="sessionStatus"></span>
+    </label>
+
+    <select id="sessionSelect">
+      <option value="">-- Select Session --</option>
+    </select>
+
+    <button class="btn" id="loadSessionBtn">Load Chat</button>
+
+    <!-- SESSION META -->
+    <div id="sessionMeta" style="display:none;"></div>
+
+    <!-- TABLE -->
+    <table>
+      <thead>
+        <tr>
+          <th>Message</th>
+          <th>Role</th>
+          <th>Timestamp</th>
+        </tr>
+      </thead>
+      <tbody id="historyTable"></tbody>
+    </table>
+  </div>
+
+  <!-- INFO -->
+  <div id="info" class="tab-content">
+    <h2>Info</h2>
+    <div class="session-meta">
+      System running normally.
+    </div>
+  </div>
+
+</div>
+
+<script>
+//const MODEL_API = "http://localhost:8000/agent/available-models";
+//const SETTINGS_API = "http://localhost:8000/agent/settings";
+//const SESSION_LIST_API = "http://localhost:8000/api/v1/sessions/ids-by-date";
+//const SESSION_LOAD_API = "http://localhost:8000/api/v1/sessions/g";
+
+const MODEL_API = "https://avahai.gravi-tec.de/agent/available-models";
+const SETTINGS_API = "https://avahai.gravi-tec.de/agent/settings";
+const SESSION_LIST_API = "https://avahai.gravi-tec.de/api/v1/sessions/ids-by-date";
+const SESSION_LOAD_API = "https://avahai.gravi-tec.de/api/v1/sessions/g";
+
+/* TABS */
+document.querySelectorAll(".tabs button").forEach(btn => {
+  btn.onclick = function() {
+    document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.tab).classList.add("active");
+  };
+});
+
+/* CLEAR STATUS */
+document.getElementById("sessionSelect").onchange = function() {
+  var s = document.getElementById("sessionStatus");
+  s.textContent = "";
+  s.className = "";
+};
+
+/* LOAD SESSIONS IDS */
+document.getElementById("sessionSearchForm").onsubmit = async function (e) {
+  e.preventDefault();
+
+  const status = document.getElementById("sessionStatus");
+  const select = document.getElementById("sessionSelect");
+
+  const fromRaw = document.getElementById("dateFrom").value; // YYYY-MM-DD
+  const toRaw = document.getElementById("dateTo").value;     // YYYY-MM-DD
+
+  function toDDMMYYYY(dateStr) {
+    if (!dateStr) return "";
+    const [year, month, day] = dateStr.split("-");
+    return `${day}${month}${year}`;
+  }
+
+  const from_time = toDDMMYYYY(fromRaw);
+  const to_time = toDDMMYYYY(toRaw);
+
+  status.textContent = "Loading...";
+  status.className = "status-loading";
+
+  try {
+    const url = `${SESSION_LIST_API}?from_time=${encodeURIComponent(from_time)}&to_time=${encodeURIComponent(to_time)}`;
+
+    const res = await fetch(url);
+	if (!res.ok) throw new Error("Failed session list");
+
+	// backend returns: ["sess1", "sess2"]
+	const sessions = await res.json();
+
+	select.innerHTML = '<option value="">-- Select Session --</option>';
+
+	for (const id of sessions) {
+	  const opt = document.createElement("option");
+	  opt.value = id;
+	  opt.textContent = id;
+	  select.appendChild(opt);
+	}
+
+	status.textContent = sessions.length ? "✓" : "No sessions";
+	status.className = sessions.length ? "status-success" : "status-empty";
+
+  } catch (err) {
+    console.error(err);
+
+    status.textContent = "Error";
+    status.className = "status-error";
+  }
+};
+
+/* LOAD SESSION */
+document.getElementById("loadSessionBtn").onclick = async function () {
+  const id = document.getElementById("sessionSelect").value;
+  if (!id) return alert("Select session");
+
+  const tbody = document.getElementById("historyTable");
+  tbody.innerHTML = "";
+
+  try {
+    const res = await fetch(`${SESSION_LOAD_API}/${encodeURIComponent(id)}`);
+    if (!res.ok) throw new Error("Failed session load");
+
+    const json = await res.json();
+
+    // expected:
+    // {
+    //   session_id,
+    //   message_count,
+    //   data: { kunde, ban_info, bestellungen, messages }
+    // }
+
+    renderMeta(json);
+    renderMessages(json.data?.messages || []);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load session");
+  }
+};
+
+/* META RENDER */
+function renderMeta(json) {
+  var meta = document.getElementById("sessionMeta");
+  meta.style.display = "block";
+  meta.innerHTML = "";
+
+  var box = document.createElement("div");
+  box.className = "session-meta";
+
+  var grid = document.createElement("div");
+  grid.className = "session-meta-grid";
+
+  function add(label, value) {
+    var div = document.createElement("div");
+
+    var strong = document.createElement("strong");
+    strong.textContent = label + ":";
+
+    var br = document.createElement("br");
+    var text = document.createTextNode(value);
+
+    div.appendChild(strong);
+    div.appendChild(br);
+    div.appendChild(text);
+
+    grid.appendChild(div);
+  }
+
+  var k = json.data.kunde || {};
+  var b = json.data.ban_info || {};
+  var orders = json.data.bestellungen || [];
+
+  add("Session", json.session_id);
+  add("Messages", json.message_count);
+  add("Email", k.email || "-");
+  add("Kundennr", k.kundennummer || "-");
+  add("Erfahrung", k.erfahrung || "-");
+  add("Banned", b.is_banned ? "Yes" : "No");
+  add("Strikes", b.strikes || 0);
+  add("Until", b.banned_until || "-");
+  add("Orders", orders.length);
+
+  box.appendChild(grid);
+  meta.appendChild(box);
+
+  /* ===== BESTELLUNGEN ===== */
+  if (orders.length > 0) {
+    var orderBox = document.createElement("div");
+    orderBox.className = "session-meta";
+
+    var title = document.createElement("strong");
+    title.textContent = "Bestellungen:";
+    orderBox.appendChild(title);
+
+    for (var i = 0; i < orders.length; i++) {
+      var o = orders[i];
+
+      var item = document.createElement("div");
+      item.style.marginTop = "10px";
+      item.style.padding = "10px";
+      item.style.background = "#1b1f24";
+      item.style.border = "1px solid #333";
+      item.style.borderRadius = "6px";
+
+      function addLine(label, value) {
+        var line = document.createElement("div");
+
+        var strong = document.createElement("strong");
+        strong.textContent = label + ": ";
+
+        var text = document.createTextNode(value || "-");
+
+        line.appendChild(strong);
+        line.appendChild(text);
+
+        item.appendChild(line);
+      }
+
+      addLine("Offer ID", o.offer_id);
+      addLine("Herkunft", o.herkunft);
+      addLine("Mail bestätigt", o.bestaetigung_per_mail ? "Yes" : "No");
+
+      /* optional: show some formular data */
+      if (o.formular_daten) {
+        var fd = o.formular_daten;
+
+        addLine("Anzahl", fd.anzahl);
+        addLine("Breite (X)", fd.schild_x);
+        addLine("Höhe (Y)", fd.schild_y);
+
+        if (fd.material_kategorie && fd.material_kategorie.name) {
+          addLine("Material", fd.material_kategorie.name);
+        }
+      }
+
+      orderBox.appendChild(item);
+    }
+
+    meta.appendChild(orderBox);
+  }
+}
+
+/* TABLE RENDER */
+function renderMessages(messages) {
+  var tbody = document.getElementById("historyTable");
+  tbody.innerHTML = "";
+
+  if (!messages.length) {
+    var row = document.createElement("tr");
+    var cell = document.createElement("td");
+    cell.colSpan = 3;
+    cell.textContent = "No messages";
+    row.appendChild(cell);
+    tbody.appendChild(row);
+    return;
+  }
+
+  for (var i = 0; i < messages.length; i++) {
+    var m = messages[i];
+
+    var row = document.createElement("tr");
+
+    var td1 = document.createElement("td");
+    td1.textContent = m.content || m.text || "";
+
+    var td2 = document.createElement("td");
+    td2.textContent = m.role || "-";
+
+    var td3 = document.createElement("td");
+    td3.textContent = formatTimestamp(m.timestamp) || "-";
+
+    row.appendChild(td1);
+    row.appendChild(td2);
+    row.appendChild(td3);
+
+    tbody.appendChild(row);
+  }
+}
+
+function formatTimestamp(ms) {
+  if (!ms) { return ""} 
+  const d = new Date(ms);
+
+  const pad = (n) => n.toString().padStart(2, "0");
+
+  return (
+    pad(d.getDate()) + "." +
+    pad(d.getMonth() + 1) + "." +
+    d.getFullYear() + " " +
+    pad(d.getHours()) + ":" +
+    pad(d.getMinutes()) + ":" +
+    pad(d.getSeconds())
+  );
+}
+
+
+
+async function loadModels(selectedModel = null) {
+  const select = document.getElementById("model");
+  const status = document.getElementById("modelStatus");
+
+  status.textContent = "Loading models...";
+  status.className = "status-loading";
+
+  try {
+    const res = await fetch(MODEL_API);
+    if (!res.ok) throw new Error("HTTP " + res.status);
+
+    const data = await res.json();
+    const models = data.models || [];
+
+    select.innerHTML = "";
+
+    if (!models.length) {
+      select.innerHTML = "<option>No models available</option>";
+      status.textContent = "No models found";
+      status.className = "status-empty";
+      return;
+    }
+
+    for (const model of models) {
+      const opt = document.createElement("option");
+      opt.value = model;
+      opt.textContent = model;
+      select.appendChild(opt);
+    }
+
+    if (selectedModel) {
+      select.value = selectedModel;
+    }
+
+    status.textContent = "Models loaded ✓";
+    status.className = "status-success";
+
+  } catch (err) {
+    console.error(err);
+
+    select.innerHTML = "<option>Failed to load models</option>";
+    status.textContent = "Error loading models";
+    status.className = "status-error";
+  }
+}
+
+document.getElementById("fetchModelsBtn").onclick = async function () {
+  const select = document.getElementById("model");
+
+  // remember current user selection
+  const previousSelection = select.value;
+
+  // reload options only
+  await loadModels();
+
+  // restore selection if still valid
+  const exists = [...select.options].some(o => o.value === previousSelection);
+
+  if (exists && previousSelection) {
+    select.value = previousSelection;
+  }
+};
+
+
+async function loadSettings() {
+  try {
+    const res = await fetch(SETTINGS_API);
+    if (!res.ok) throw new Error("Failed to load settings");
+
+    const data = await res.json();
+
+    const modelName = data.model_name;
+    const systemPrompt = data.system_prompt;
+
+    await loadModels(modelName);
+
+    document.getElementById("systemPrompt").value = systemPrompt || "";
+
+  } catch (err) {
+    console.error("Settings load error:", err);
+  }
+}
+
+document.getElementById("settingsForm").onsubmit = async function (e) {
+  e.preventDefault();
+
+  const payload = {
+    model_name: document.getElementById("model").value,
+    system_prompt: document.getElementById("systemPrompt").value
+  };
+
+  try {
+    const res = await fetch(SETTINGS_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error("Save failed");
+
+    alert("Settings saved ✔");
+
+  } catch (err) {
+    console.error(err);
+    alert("Error saving settings");
+  }
+};
+
+window.addEventListener("DOMContentLoaded", async function () {
+  await loadModels();      // 1. populate dropdown first
+  await loadSettings();    // 2. apply selected model + prompt
+});
+
+
+</script>
+
+</body>
+</html>
