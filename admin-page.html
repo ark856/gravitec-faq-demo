@@ -157,6 +157,7 @@ th {
   <div class="tabs">
     <button class="active" data-tab="general">General</button>
     <button data-tab="history">Chat History</button>
+	<button data-tab="order-suggestions">Order Suggestions</button>
     <button data-tab="info">Info</button>
   </div>
 
@@ -224,6 +225,21 @@ th {
       <tbody id="historyTable"></tbody>
     </table>
   </div>
+  
+  <!-- ORDER SUGGESTIONS -->
+	<div id="order-suggestions" class="tab-content">
+	  <h2>Order Suggestions</h2>
+
+	  <label>Select Suggestion</label>
+	  <select id="suggestionSelect">
+		<option value="">-- Select Suggestion --</option>
+	  </select>
+
+	  <button class="btn" id="loadSuggestionBtn">Load Suggestion</button>
+	  <div id="suggestionStatus"></div>
+
+	  <div id="suggestionDetails" style="display:none; margin-top:20px;"></div>
+	</div>
 
   <!-- INFO -->
   <div id="info" class="tab-content">
@@ -240,20 +256,36 @@ th {
 //const SETTINGS_API = "http://localhost:8000/agent/settings?code=gravitec";
 //const SESSION_LIST_API = "http://localhost:8000/api/v1/sessions/ids-by-date";
 //const SESSION_LOAD_API = "http://localhost:8000/api/v1/sessions/g";
+//const ORDER_SUGGESTIONS_API = "http://localhost:8000/api/v1/order-suggestions";
 
 const MODEL_API = "https://avahai.gravi-tec.de/agent/available-models";
-const SETTINGS_API = "https://avahai.gravi-tec.de/agent/settings";
+const SETTINGS_API = "https://avahai.gravi-tec.de/agent/settings?code=gravitec";
 const SESSION_LIST_API = "https://avahai.gravi-tec.de/api/v1/sessions/ids-by-date";
 const SESSION_LOAD_API = "https://avahai.gravi-tec.de/api/v1/sessions/g";
+const ORDER_SUGGESTIONS_API = "https://avahai.gravi-tec.de/api/v1/order-suggestions";
 
-/* TABS */
-document.querySelectorAll(".tabs button").forEach(btn => {
-  btn.onclick = function() {
-    document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById(btn.dataset.tab).classList.add("active");
-  };
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".tabs button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const tabId = btn.dataset.tab;
+      const tabContent = document.getElementById(tabId);
+      if (!tabContent) {
+        console.error("Tab content not found:", tabId);
+        return; // stop here to avoid the TypeError
+      }
+
+      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+      btn.classList.add("active");
+      tabContent.classList.add("active");
+
+      // Lazy-init Order Suggestions tab
+      if (tabId === "order-suggestions") {
+        initOrderSuggestionsTab();
+      }
+    });
+  });
 });
 
 /* CLEAR STATUS */
@@ -615,6 +647,182 @@ window.addEventListener("DOMContentLoaded", async function () {
   await loadModels();      // 1. populate dropdown first
   await loadSettings();    // 2. apply selected model + prompt
 });
+
+
+
+/**-----------------SUGGESTIONS-START-------------------*/
+
+async function initOrderSuggestionsTab() {
+    const select = document.getElementById("suggestionSelect");
+    const loadBtn = document.getElementById("loadSuggestionBtn");
+    const statusEl = document.getElementById("suggestionStatus");
+    const detailsEl = document.getElementById("suggestionDetails");
+
+    // Load suggestions on tab open
+    await loadSuggestionList();
+
+    loadBtn.onclick = async () => {
+        const id = select.value;
+        if (!id) {
+            statusEl.textContent = "Please select a suggestion";
+            statusEl.className = "status-error";
+            return;
+        }
+
+        statusEl.textContent = "Loading...";
+        statusEl.className = "status-loading";
+        detailsEl.style.display = "none";
+        detailsEl.innerHTML = "";
+
+        try {
+            // Fetch full suggestion with price
+            const res = await fetch(`${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+
+            if (!data.success) {
+                throw new Error(data.error || "Failed to calculate price");
+            }
+
+            renderSuggestionDetails(data);
+            statusEl.textContent = "Loaded successfully ✓";
+            statusEl.className = "status-success";
+        } catch (err) {
+            console.error(err);
+            statusEl.textContent = "Error: " + err.message;
+            statusEl.className = "status-error";
+        }
+    };
+}
+
+async function loadSuggestionList() {
+    const select = document.getElementById("suggestionSelect");
+    const statusEl = document.getElementById("suggestionStatus");
+
+    try {
+        const res = await fetch(`${ORDER_SUGGESTIONS_API}/all/descriptions`);
+        if (!res.ok) throw new Error("Failed to load suggestions");
+
+        const descriptions = await res.json(); // expected: { "id1": "Description 1", "id2": "..." }
+
+        select.innerHTML = '<option value="">-- Select Suggestion --</option>';
+
+        Object.entries(descriptions).forEach(([id, desc]) => {
+            const opt = document.createElement("option");
+            opt.value = id;
+            opt.textContent = `${id} — ${desc}`;
+            select.appendChild(opt);
+        });
+
+    } catch (err) {
+        console.error(err);
+        statusEl.textContent = "Failed to load suggestion list";
+        statusEl.className = "status-error";
+    }
+}
+
+function renderSuggestionDetails(data) {
+    const detailsEl = document.getElementById("suggestionDetails");
+    detailsEl.style.display = "block";
+
+    let html = `
+        <div class="info-box">
+            <h3>${data.description || "Order Suggestion"}</h3>
+            <p><strong>ID:</strong> ${data.suggestion_id}</p>
+            <p><strong>Herkunft:</strong> ${data.herkunft || "-"}</p>
+            <p><strong>Stückzahl:</strong> ${data.stueckzahl}</p>
+            <hr>
+            <h4>💰 Price Information</h4>
+            <p><strong>Total Price:</strong> ${data.total_price.toFixed(2)} €</p>
+            <p><strong>Price per Piece:</strong> ${data.price_per_piece.toFixed(2)} €</p>
+    `;
+
+    if (data.price_breakdown) {
+        const pb = data.price_breakdown;
+        html += `<h5>Price Breakdown</h5><ul>`;
+
+        if (pb.material?.total) {
+            html += `<li><strong>Material:</strong> ${pb.material.total.toFixed(2)} € (${pb.material.per_piece.toFixed(2)} €/pc)</li>`;
+        }
+        if (pb.veredelungen?.total) {
+            html += `<li><strong>Veredelungen:</strong> ${pb.veredelungen.total.toFixed(2)} € (${pb.veredelungen.per_piece.toFixed(2)} €/pc)</li>`;
+        }
+        if (pb.handlungen?.total) {
+            html += `<li><strong>Handlungen:</strong> ${pb.handlungen.total.toFixed(2)} € (${pb.handlungen.per_piece.toFixed(2)} €/pc)</li>`;
+        }
+        if (pb.addons?.total) {
+            html += `<li><strong>Addons:</strong> ${pb.addons.total.toFixed(2)} € (${pb.addons.per_piece.toFixed(2)} €/pc)</li>`;
+        }
+
+        html += `</ul>`;
+    }
+
+    // Formular Daten (nested JSON safe)
+    if (data.formular_daten) {
+        html += `<h5>Formular Data</h5>`;
+        html += `<pre style="background:#0f1316; padding:12px; border-radius:6px; overflow:auto; max-height:400px; font-size:0.9em;">`;
+        html += syntaxHighlight(JSON.stringify(data.formular_daten, null, 2));
+        html += `</pre>`;
+    }
+
+    // Delete Button
+    html += `
+        <div style="margin-top:20px;">
+            <button class="btn" style="background:#ff6b6b;" onclick="deleteSuggestion('${data.suggestion_id}')">
+                🗑 Delete Suggestion
+            </button>
+        </div>
+    `;
+
+    html += `</div>`;
+    detailsEl.innerHTML = html;
+}
+
+// Safe JSON pretty-print with no [Object object]
+function syntaxHighlight(json) {
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+        let cls = 'color:#9fffc1;'; // numbers and booleans
+        if (/^"/.test(match)) {
+            if (/:$/.test(match)) cls = 'color:#9fc0ff;'; // keys
+            else cls = 'color:#ffcc99;'; // strings
+        } else if (/true|false/.test(match)) {
+            cls = 'color:#ff79c6;';
+        } else if (/null/.test(match)) {
+            cls = 'color:#ff6b6b;';
+        }
+        return `<span style="${cls}">${match}</span>`;
+    });
+}
+
+// Delete function
+async function deleteSuggestion(id) {
+    if (!confirm(`Delete suggestion ${id}?`)) return;
+
+    try {
+        const res = await fetch(`${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`, {
+            method: "DELETE"
+        });
+
+        if (res.ok) {
+            alert("Suggestion deleted successfully");
+            document.getElementById("suggestionDetails").style.display = "none";
+            await loadSuggestionList(); // refresh list
+        } else {
+            alert("Failed to delete suggestion");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting suggestion");
+    }
+}
+
+/**-----------------SUGGESTIONS-END---------------------*/
+
+
+
+
 
 
 </script>
