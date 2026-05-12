@@ -1,440 +1,853 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-  .gt-chat-container {
-    width: 600px;
-    font-family: 'Source Sans Pro', sans-serif;
-    background: #1b1f24;
-    border: 3px solid #000;
-    display: flex;
-    flex-direction: column;
-    height: 600px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-    color: #ddd;
+    .gt-chat-container {
+      width: 600px;
+      font-family: 'Source Sans Pro', sans-serif;
+      background: #1b1f24;
+      border: 3px solid #000;
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+      color: #ddd;
+    }
+    .gt-chat-header {
+      background: linear-gradient(180deg, #3b75c3, #2858a8);
+      color: white;
+      font-weight: 700;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .gt-chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .gt-chat-message-row {
+      width: 100%;
+      display: flex;
+      margin-bottom: 4px;
+    }
+    .gt-chat-message-row.user {
+      justify-content: flex-end;
+    }
+    .gt-chat-message-row.assistant {
+      justify-content: flex-start;
+    }
+    .gt-chat-message {
+      max-width: 80%;
+      width: auto;
+      background: #232933;
+      color: #f0f0f0;
+      padding: 10px 14px;
+      border-radius: 8px;
+      word-wrap: break-word;
+      line-height: 1.4;
+    }
+    .gt-chat-message span {
+      display: block;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      margin: 0;
+    }
+    .gt-chat-message p {
+      margin: 0;
+      padding: 0;
+    }
+    .gt-chat-message pre,
+    .gt-chat-message code {
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .gt-chat-message.user {
+      background: #2858a8;
+      color: #fff;
+    }
+    .gt-chat-message.assistant {
+      background: #232933;
+      color: #f0f0f0;
+    }
+    .gt-chat-input {
+      display: flex;
+      gap: 10px;
+      padding: 6px 12px;
+      background: #1b1f24;
+      border-top: 1px solid #333;
+      align-items: flex-end;
+    }
+    .gt-chat-textarea-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .gt-chat-input-field {
+      width: 100%;
+      resize: none;
+      border: none;
+      border-radius: 6px;
+      outline: none;
+      background: #0f1316;
+      color: #fff;
+      font-family: inherit;
+      font-size: 15px;
+      line-height: 1.4;
+      padding: 6px 12px;
+      max-height: calc(1.4em * 5 + 12px);
+      overflow-y: auto;
+      box-sizing: border-box;
+    }
+
+    .gt-chat-input-field,
+    .gt-chat-input-field:hover,
+    .gt-chat-input-field:focus {
+      background-color: #0f1316 !important;  /* dark background */
+      color: #fff !important;               /* text color */
+      border: none !important;              /* remove any hover border */
+      box-shadow: none !important;          /* remove glow if applied by theme */
+    }
+
+    /* Button style */
+    .gt-chat-btn-schild {
+      position: relative;
+      display: inline-block;
+      transform: skewX(-2deg);
+      border-radius: 10px;
+      background: linear-gradient(180deg, #3b75c3, #2858a8);
+      border: 1px solid rgba(255,255,255,0.12);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
+      overflow: hidden;
+      min-width: 140px;
+      padding-right: 20px;
+    }
+    .gt-chat-btn-schild > a {
+      display: block;
+      padding: 14px 54px 14px 28px;
+      transform: skewX(2deg);
+      color: white;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    .gt-chat-btn-schild .chip {
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      bottom: 6px;
+      width: 46px;
+      transform: skewX(-2deg);
+      border-radius: 8px;
+      background: linear-gradient(180deg, #fff, #f4f7fc);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      border: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gt-chat-btn-schild .chip span {
+      display: inline-block;
+      transform: skewX(12deg);
+      font-size: 18px;
+      color: #2858a8;
+      font-weight: 900;
+    }
+    .gt-chat-btn-schild:hover {
+      background: linear-gradient(180deg, #3b75c3, #3b75c3);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
+    }
+    /* Typing indicator */
+    .gt-chat-typing {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: #232933;
+      align-self: flex-start;
+      transform: skewX(-12deg);
+    }
+    .gt-chat-typing span {
+      transform: skewX(12deg);
+      display: flex;
+      gap: 4px;
+    }
+    .gt-chat-dot {
+      width: 8px;
+      height: 8px;
+      background: #3b75c3;
+      border-radius: 50%;
+      animation: bounce 1s infinite;
+    }
+    .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
+    .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .gt-clickable {
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
-  .gt-chat-header {
-    background: linear-gradient(180deg, #3b75c3, #2858a8);
-    color: white;
-    font-weight: 700;
-    padding: 14px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.12);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+
+
+  /** CLICKABLE PARTS */
+
+  .gt-chat-message ul {
+    padding-left: 0;
+    list-style: none;
   }
-  .gt-chat-messages {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+
+  /* Base list item */
+  .gt-chat-message li {
+    margin: 4px 6px 4px 0;
   }
-  .gt-chat-message-row {
-    width: 100%;
-    display: flex;
-    margin-bottom: 4px;
-  }
-  .gt-chat-message-row.user {
-    justify-content: flex-end;
-  }
-  .gt-chat-message-row.assistant {
-    justify-content: flex-start;
-  }
-  .gt-chat-message {
-    max-width: 80%;
-    width: auto;
-    background: #232933;
-    color: #f0f0f0;
-    padding: 10px 14px;
-    border-radius: 8px;
-    word-wrap: break-word;
-    line-height: 1.4;
-  }
-  .gt-chat-message span {
-    display: block;
-    overflow-wrap: anywhere;
-    word-break: break-word;
-    margin: 0;
-  }
-  .gt-chat-message p {
-    margin: 0;
-    padding: 0;
-  }
-  .gt-chat-message pre,
-  .gt-chat-message code {
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-  }
-  .gt-chat-message.user {
-    background: #2858a8;
+
+  /* Clickable list item (no bold inside) */
+  .gt-chat-message li:not(:has(strong, b)) {
+    display: inline-block;
+    cursor: pointer;
+
+    background: linear-gradient(180deg, #2f5fa8, #244a84);
     color: #fff;
-  }
-  .gt-chat-message.assistant {
-    background: #232933;
-    color: #f0f0f0;
-  }
-  .gt-chat-input {
-    display: flex;
-    gap: 10px;
-    padding: 6px 12px;
-    background: #1b1f24;
-    border-top: 1px solid #333;
-    align-items: flex-end;
-  }
-  .gt-chat-textarea-wrapper {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  .gt-chat-input-field {
-    width: 100%;
-    resize: none;
-    border: none;
+
+    padding: 5px 12px;
     border-radius: 6px;
-    outline: none;
-    background: #0f1316;
-    color: #fff;
-    font-family: inherit;
-    font-size: 15px;
-    line-height: 1.4;
-    padding: 6px 12px;
-    max-height: calc(1.4em * 5 + 12px);
-    overflow-y: auto;
-    box-sizing: border-box;
+
+    border: 1px solid rgba(255,255,255,0.1);
+
+    box-shadow:
+      0 2px 6px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+
+    font-weight: 600;
+    transition: all 0.15s ease;
   }
 
-  .gt-chat-input-field,
-  .gt-chat-input-field:hover,
-  .gt-chat-input-field:focus {
-    background-color: #0f1316 !important;  /* dark background */
-    color: #fff !important;               /* text color */
-    border: none !important;              /* remove any hover border */
-    box-shadow: none !important;          /* remove glow if applied by theme */
-  }
-
-  /* Button style */
-  .gt-chat-btn-schild {
-    position: relative;
-    display: inline-block;
-    transform: skewX(-2deg);
-    border-radius: 10px;
+  /* Hover for clickable li */
+  .gt-chat-message li:not(:has(strong, b)):hover {
     background: linear-gradient(180deg, #3b75c3, #2858a8);
-    border: 1px solid rgba(255,255,255,0.12);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
-    overflow: hidden;
-    min-width: 140px;
-    padding-right: 20px;
+    transform: translateY(-1px);
   }
-  .gt-chat-btn-schild > a {
-    display: block;
-    padding: 14px 54px 14px 28px;
-    transform: skewX(2deg);
-    color: white;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 16px;
-    position: relative;
-    z-index: 1;
-    text-align: center;
+
+  /* Active */
+  .gt-chat-message li:not(:has(strong, b)):active {
+    transform: scale(0.97);
   }
-  .gt-chat-btn-schild .chip {
-    position: absolute;
-    right: 6px;
-    top: 6px;
-    bottom: 6px;
-    width: 46px;
-    transform: skewX(-2deg);
-    border-radius: 8px;
-    background: linear-gradient(180deg, #fff, #f4f7fc);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    border: 1px solid rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+
+  /* LI WITH bold → neutral (not clickable) */
+  .gt-chat-message li:has(strong, b) {
+    background: transparent;
+    padding: 2px 0;
+    cursor: default;
   }
-  .gt-chat-btn-schild .chip span {
+
+  /* Bold = always clickable mini button */
+  .gt-chat-message strong,
+  .gt-chat-message b {
     display: inline-block;
-    transform: skewX(12deg);
-    font-size: 18px;
-    color: #2858a8;
-    font-weight: 900;
+    cursor: pointer;
+
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    color: #fff;
+
+    padding: 4px 10px;
+    border-radius: 6px;
+
+    border: 1px solid rgba(255,255,255,0.12);
+
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+
+    transition: all 0.15s ease;
   }
-  .gt-chat-btn-schild:hover {
-    background: linear-gradient(180deg, #3b75c3, #3b75c3);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
+
+  /* Bold hover */
+  .gt-chat-message strong:hover,
+  .gt-chat-message b:hover {
+    background: linear-gradient(180deg, #4a86d4, #2f6ad1);
   }
-  /* Typing indicator */
-  .gt-chat-typing {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: #232933;
-    align-self: flex-start;
-    transform: skewX(-12deg);
+
+  /* Feedback */
+  .gt-copied {
+    background: linear-gradient(180deg, #4caf50, #2e7d32) !important;
   }
-  .gt-chat-typing span {
-    transform: skewX(12deg);
-    display: flex;
-    gap: 4px;
-  }
-  .gt-chat-dot {
-    width: 8px;
-    height: 8px;
-    background: #3b75c3;
-    border-radius: 50%;
-    animation: bounce 1s infinite;
-  }
-  .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
-  .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
-  
-  .gt-clickable {
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
+
+  /** -------------------------------- */
+
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+
+    /* Thinking Indicator */
+      .gt-thinking-row {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 4px;
+      }
+
+      .gt-thinking-indicator {
+        max-width: 80%;
+        background: #232933;
+        color: #f0f0f0;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border-left: 3px solid #3b75c3;
+        line-height: 1.4;
+        font-size: 14px;
+      }
+
+      .gt-thinking-indicator.gt-complete {
+        opacity: 0.8;
+      }
+
+      .gt-thinking-indicator.gt-faded {
+        opacity: 0.6;
+      }
+
+      .gt-thinking-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 6px;
+        font-weight: 600;
+        color: #9fc0ff;
+      }
+
+      .gt-thinking-icon {
+        font-size: 18px;
+      }
+
+      .gt-thinking-content {
+        font-size: 13px;
+        font-style: italic;
+        opacity: 0.85;
+        white-space: pre-wrap;
+      }
+
+      /* Tool Calls Container */
+      .gt-tool-row {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin-bottom: 4px;
+      }
+
+      .gt-tool-calls-container {
+        max-width: 80%;
+        background: #232933;
+        color: #f0f0f0;
+        padding: 10px 14px;
+        border-radius: 8px;
+        border-left: 3px solid #4caf50;
+        font-size: 14px;
+      }
+
+      .gt-tool-calls-container.gt-complete {
+        opacity: 0.8;
+      }
+
+      .gt-tools-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #9fffc1;
+      }
+
+      .gt-tools-icon {
+        font-size: 18px;
+      }
+
+      .gt-tools-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .gt-tool-call {
+        background: #1b1f24;
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #2c323c;
+      }
+
+      .gt-tool-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+
+      .gt-tool-status {
+        font-size: 14px;
+      }
+
+      .gt-tool-args {
+        background: #0f1316;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-top: 4px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #cfd8dc;
+      }
+
+      .gt-tool-result {
+        background: #10251a;
+        padding: 6px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-top: 6px;
+        border-left: 3px solid #4caf50;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      /* =========================================================
+           ORDER TOGGLE BUTTON
+        ========================================================= */
+
+        .gt-order-toggle-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+
+          height: 36px;
+
+          padding: 0 12px;
+
+          border-radius: 8px;
+
+          background: #20262f;
+
+          border: 1px solid rgba(255,255,255,0.06);
+
+          color: #b7c3d6;
+
+          font-size: 13px;
+          font-weight: 600;
+
+          cursor: pointer;
+
+          transition:
+            background 0.15s ease,
+            border-color 0.15s ease,
+            color 0.15s ease,
+            transform 0.15s ease;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-toggle-btn:hover {
+          background: #293241;
+
+          border-color: rgba(255,255,255,0.10);
+
+          color: #ffffff;
+
+          transform: translateY(-1px);
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-toggle-btn:active {
+          transform: scale(0.97);
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-toggle-icon {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-toggle-text {
+          white-space: nowrap;
+        }
+
+      /* =========================================================
+           ORDER VIEW
+        ========================================================= */
+
+        .gt-order-loading {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 40px;
+        }
+
+        .gt-order-content {
+          color: #f0f0f0;
+        }
+
+        /* =========================================================
+           MAIN SECTION
+        ========================================================= */
+
+        .gt-order-section {
+          background: #232933;
+
+          border-radius: 10px;
+
+          padding: 16px;
+          margin-bottom: 18px;
+
+          border: 1px solid #2c323c;
+
+          box-shadow:
+            0 4px 14px rgba(0,0,0,0.28);
+        }
+
+        .gt-order-section h3 {
+          color: #3b75c3;
+
+          font-size: 16px;
+          font-weight: 700;
+
+          margin-bottom: 14px;
+          padding-bottom: 8px;
+
+          border-bottom: 2px solid #3b75c3;
+
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        /* =========================================================
+           PILLS CONTAINER
+        ========================================================= */
+
+        .gt-order-pills {
+          display: flex;
+          flex-wrap: wrap;
+
+          align-items: flex-start;
+
+          gap: 10px;
+
+          margin: 6px 0 14px 0;
+        }
+
+        /* =========================================================
+           PILL WRAPPER
+        ========================================================= */
+
+        .gt-order-pill-wrapper {
+          display: flex;
+          flex-direction: column;
+
+          align-items: flex-start;
+
+          position: relative;
+        }
+
+        /* =========================================================
+           MAIN PILL
+        ========================================================= */
+
+        .gt-order-pill {
+          display: inline-flex;
+          align-items: center;
+
+          gap: 8px;
+
+          background:
+            linear-gradient(180deg, #2f5fa8, #244a84);
+
+          color: #fff;
+
+          padding: 7px 13px;
+
+          border-radius: 999px;
+
+          border:
+            1px solid rgba(255,255,255,0.08);
+
+          box-shadow:
+            0 2px 6px rgba(0,0,0,0.35),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+
+          font-size: 12px;
+          line-height: 1;
+
+          transition:
+            background 0.15s ease,
+            transform 0.15s ease,
+            box-shadow 0.15s ease;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-pill.expandable {
+          cursor: pointer;
+        }
+
+        .gt-order-pill.expandable:hover {
+          background:
+            linear-gradient(180deg, #3b75c3, #2858a8);
+
+          transform: translateY(-1px);
+
+          box-shadow:
+            0 4px 12px rgba(0,0,0,0.35),
+            inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+
+        /* =========================================================
+           PILL TEXT
+        ========================================================= */
+
+        .gt-order-pill-label {
+          color: #cfe1ff;
+
+          font-weight: 600;
+
+          opacity: 0.9;
+        }
+
+        .gt-order-pill-value {
+          color: #fff;
+
+          font-weight: 700;
+        }
+
+        /* =========================================================
+           DROPDOWN ARROW
+        ========================================================= */
+
+        .gt-order-pill-arrow {
+          font-size: 10px;
+
+          opacity: 0.72;
+
+          transition:
+            transform 0.18s ease,
+            opacity 0.18s ease;
+        }
+
+        .gt-order-pill-wrapper.open .gt-order-pill-arrow {
+          transform: rotate(180deg);
+          opacity: 1;
+        }
+
+        /* =========================================================
+           DROPDOWN
+        ========================================================= */
+
+        .gt-order-pill-dropdown {
+          width: 100%;
+
+          margin-top: 6px;
+
+          background: #1f252d;
+
+          border-radius: 10px;
+
+          border:
+            1px solid rgba(255,255,255,0.05);
+
+          box-shadow:
+            0 8px 24px rgba(0,0,0,0.45);
+
+          overflow: hidden;
+
+          max-height: 0;
+
+          opacity: 0;
+
+          transition:
+            max-height 0.22s ease,
+            opacity 0.18s ease;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-pill-wrapper.open .gt-order-pill-dropdown {
+          max-height: 500px;
+          opacity: 1;
+        }
+
+        /* =========================================================
+           DROPDOWN DETAIL ROW
+        ========================================================= */
+
+        .gt-order-pill-detail {
+          padding: 8px 12px;
+
+          font-size: 12px;
+          line-height: 1.45;
+
+          color: #9aa7bb;
+
+          border-bottom:
+            1px solid rgba(255,255,255,0.04);
+        }
+
+        .gt-order-pill-detail:last-child {
+          border-bottom: none;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-pill-detail-label {
+          color: #6f86a8;
+
+          font-weight: 600;
+        }
+
+        /* =========================================================
+           SUBSECTIONS
+        ========================================================= */
+
+        .gt-order-subsection-block {
+          margin-top: 22px;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-subsection-title {
+          color: #3b75c3;
+
+          font-size: 15px;
+          font-weight: 700;
+
+          margin-bottom: 12px;
+          padding-bottom: 7px;
+
+          border-bottom: 2px solid #3b75c3;
+
+          text-transform: uppercase;
+
+          letter-spacing: 0.5px;
+        }
+
+        /* =========================================================
+           GENERIC FIELD
+        ========================================================= */
+
+        .gt-order-field {
+          padding: 6px 0;
+
+          font-size: 13px;
+          line-height: 1.5;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-field-label {
+          font-weight: 600;
+
+          color: #9fc0ff;
+
+          display: inline;
+        }
+
+        .gt-order-field-label::after {
+          content: ': ';
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-field-value {
+          color: #ddd;
+
+          display: inline;
+        }
+
+        /* =========================================================
+           EMPTY
+        ========================================================= */
+
+        .gt-order-empty {
+          text-align: center;
+
+          color: #888;
+
+          padding: 60px 20px;
+
+          font-size: 16px;
+        }
+
+        /* =========================================================
+           ERROR
+        ========================================================= */
+
+        .gt-order-error {
+          background: #3d1f1f;
+
+          color: #ff6b6b;
+
+          padding: 16px;
+
+          border-radius: 8px;
+
+          border-left: 4px solid #ff6b6b;
+
+          margin: 20px 0;
+        }
+
+        /* --------------------------------------------------------- */
+
+        .gt-order-error strong {
+          display: block;
+
+          margin-bottom: 8px;
+
+          font-size: 15px;
+        }
 
 
-/** CLICKABLE PARTS */
-
-.gt-chat-message ul {
-  padding-left: 0;
-  list-style: none;
-}
-
-/* Base list item */
-.gt-chat-message li {
-  margin: 4px 6px 4px 0;
-}
-
-/* Clickable list item (no bold inside) */
-.gt-chat-message li:not(:has(strong, b)) {
-  display: inline-block;
-  cursor: pointer;
-
-  background: linear-gradient(180deg, #2f5fa8, #244a84);
-  color: #fff;
-
-  padding: 5px 12px;
-  border-radius: 6px;
-
-  border: 1px solid rgba(255,255,255,0.1);
-
-  box-shadow:
-    0 2px 6px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.05);
-
-  font-weight: 600;
-  transition: all 0.15s ease;
-}
-
-/* Hover for clickable li */
-.gt-chat-message li:not(:has(strong, b)):hover {
-  background: linear-gradient(180deg, #3b75c3, #2858a8);
-  transform: translateY(-1px);
-}
-
-/* Active */
-.gt-chat-message li:not(:has(strong, b)):active {
-  transform: scale(0.97);
-}
-
-/* LI WITH bold → neutral (not clickable) */
-.gt-chat-message li:has(strong, b) {
-  background: transparent;
-  padding: 2px 0;
-  cursor: default;
-}
-
-/* Bold = always clickable mini button */
-.gt-chat-message strong,
-.gt-chat-message b {
-  display: inline-block;
-  cursor: pointer;
-
-  background: linear-gradient(180deg, #3b75c3, #2858a8);
-  color: #fff;
-
-  padding: 4px 10px;
-  border-radius: 6px;
-
-  border: 1px solid rgba(255,255,255,0.12);
-
-  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-
-  transition: all 0.15s ease;
-}
-
-/* Bold hover */
-.gt-chat-message strong:hover,
-.gt-chat-message b:hover {
-  background: linear-gradient(180deg, #4a86d4, #2f6ad1);
-}
-
-/* Feedback */
-.gt-copied {
-  background: linear-gradient(180deg, #4caf50, #2e7d32) !important;
-}
-
-/** -------------------------------- */
-  
-  @keyframes bounce {
-    0%, 80%, 100% { transform: scale(0); }
-    40% { transform: scale(1); }
-  }
-  
-  /* Thinking Indicator */
-	.gt-thinking-row {
-	  width: 100%;
-	  display: flex;
-	  justify-content: flex-start;
-	  margin-bottom: 4px;
-	}
-
-	.gt-thinking-indicator {
-	  max-width: 80%;
-	  background: #232933;
-	  color: #f0f0f0;
-	  padding: 10px 14px;
-	  border-radius: 8px;
-	  border-left: 3px solid #3b75c3;
-	  line-height: 1.4;
-	  font-size: 14px;
-	}
-
-	.gt-thinking-indicator.gt-complete {
-	  opacity: 0.8;
-	}
-
-	.gt-thinking-indicator.gt-faded {
-	  opacity: 0.6;
-	}
-
-	.gt-thinking-header {
-	  display: flex;
-	  align-items: center;
-	  gap: 6px;
-	  margin-bottom: 6px;
-	  font-weight: 600;
-	  color: #9fc0ff;
-	}
-
-	.gt-thinking-icon {
-	  font-size: 18px;
-	}
-
-	.gt-thinking-content {
-	  font-size: 13px;
-	  font-style: italic;
-	  opacity: 0.85;
-	  white-space: pre-wrap;
-	}
-
-	/* Tool Calls Container */
-	.gt-tool-row {
-	  width: 100%;
-	  display: flex;
-	  justify-content: flex-start;
-	  margin-bottom: 4px;
-	}
-
-	.gt-tool-calls-container {
-	  max-width: 80%;
-	  background: #232933;
-	  color: #f0f0f0;
-	  padding: 10px 14px;
-	  border-radius: 8px;
-	  border-left: 3px solid #4caf50;
-	  font-size: 14px;
-	}
-
-	.gt-tool-calls-container.gt-complete {
-	  opacity: 0.8;
-	}
-
-	.gt-tools-header {
-	  display: flex;
-	  align-items: center;
-	  gap: 6px;
-	  margin-bottom: 8px;
-	  font-weight: 600;
-	  color: #9fffc1;
-	}
-
-	.gt-tools-icon {
-	  font-size: 18px;
-	}
-
-	.gt-tools-list {
-	  display: flex;
-	  flex-direction: column;
-	  gap: 8px;
-	}
-
-	.gt-tool-call {
-	  background: #1b1f24;
-	  padding: 8px 10px;
-	  border-radius: 6px;
-	  border: 1px solid #2c323c;
-	}
-
-	.gt-tool-name {
-	  display: flex;
-	  align-items: center;
-	  gap: 6px;
-	  font-size: 13px;
-	  margin-bottom: 4px;
-	}
-
-	.gt-tool-status {
-	  font-size: 14px;
-	}
-
-	.gt-tool-args {
-	  background: #0f1316;
-	  padding: 6px 8px;
-	  border-radius: 4px;
-	  font-size: 12px;
-	  margin-top: 4px;
-	  white-space: pre-wrap;
-	  overflow-wrap: anywhere;
-	  color: #cfd8dc;
-	}
-
-	.gt-tool-result {
-	  background: #10251a;
-	  padding: 6px 8px;
-	  border-radius: 4px;
-	  font-size: 12px;
-	  margin-top: 6px;
-	  border-left: 3px solid #4caf50;
-	  white-space: pre-wrap;
-	  overflow-wrap: anywhere;
-	}
-  
-  
 </style>
 
 
 
 <div class="gt-chat-container">
-  <div class="gt-chat-header">
-	  Gravi-Tec Support Chat
-		<div id="session-id-display" style="float:right; font-size:12px; color:#888; margin-top:8px;"></div>
-  </div>
-  <div class="gt-chat-messages" id="chat"></div>
-  <div class="gt-chat-input">
-    <div class="gt-chat-textarea-wrapper">
-      <textarea
-        id="chatbot-input"
-        class="gt-chat-input-field"
-        placeholder="Nachricht eingeben..."
-        rows="1"
-      ></textarea>
+    <div class="gt-chat-header">
+        Gravi-Tec Support Chat
+        <div id="session-id-display" style="float:right; font-size:12px; color:#888; margin-top:8px;"></div>
     </div>
-    <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
-      <a href="#">Senden</a>
-      <div class="chip"><span>✎</span></div>
+    <div class="gt-chat-messages" id="chat"></div>
+    <div class="gt-chat-messages gt-order-view" id="orderView" style="display: none;">
+        <div class="gt-order-loading" id="orderLoading" style="display: none;">
+            <div class="gt-chat-typing">
+                <span>
+                    <div class="gt-chat-dot"></div>
+                    <div class="gt-chat-dot"></div>
+                    <div class="gt-chat-dot"></div>
+                </span>
+            </div>
+        </div>
+        <div class="gt-order-content" id="orderContent"></div>
     </div>
-  </div>
+    <div class="gt-chat-input">
+        <div class="gt-order-toggle-btn"
+                id="toggleOrderBtn"
+                onclick="toggleOrderView()">
+            <span class="gt-order-toggle-icon">📋</span>
+            <span class="gt-order-toggle-text">Bestellung</span>
+        </div>
+        <div class="gt-chat-textarea-wrapper">
+          <textarea
+                  id="chatbot-input"
+                  class="gt-chat-input-field"
+                  placeholder="Nachricht eingeben..."
+                  rows="1"
+          ></textarea>
+        </div>
+        <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
+            <a href="#">Senden</a>
+            <div class="chip"><span>✎</span></div>
+        </div>
+    </div>
 </div>
 
 
@@ -442,570 +855,1167 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
 <script>
-//const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
-const backendURLstream = 'https://avahai.gravi-tec.de/api/v1/chat/stream';
-//const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
-const STORAGE_KEY = "chat_session_ids";
-const MAX_MESSAGES_IN_STORAGE = 5;
+    //const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
+    const backendURLstream = 'https://avahai.gravi-tec.de/api/v1/chat/stream';
+    //const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
+    const backendCurrentOrderURL = 'https://avahai.gravi-tec.de/api/v1/sessions/g/${sessionID}/current-order'
+    //const backendCurrentOrderURL = 'http://localhost:8000/api/v1/sessions/g/${sessionID}/current-order'
+    //const backendCurrentOrderURL = 'http://localhost:8000/api/v1/sessions/g/test_session_2026_05_11_22_29_25_52z2kidq0/current-order'
+    const STORAGE_KEY = "chat_session_ids";
+    const MAX_MESSAGES_IN_STORAGE = 5;
 
-const chat = document.getElementById('chat');
-const input = document.getElementById('chatbot-input');
-const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('chatbot-input');
+    const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
 
-let messages = [];
-let isWaitingResponse = false;
-let typingIndicator = null;
-let greeted = false;
+    let messages = [];
+    let isWaitingResponse = false;
+    let typingIndicator = null;
+    let greeted = false;
 
-console.log("Session ID: ", sessionID);
-saveSessionId(sessionID);
+    console.log("Session ID: ", sessionID);
+    saveSessionId(sessionID);
 
-// Show greeting immediately since chat is always visible
-addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
-greeted = true;
-document.getElementById('session-id-display').textContent = sessionID;
-resetTextareaHeight();
-document.querySelector('.gt-chat-container').scrollIntoView({ behavior: 'auto', block: 'start' });
+    // Show greeting immediately since chat is always visible
+    addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
+    greeted = true;
+    document.getElementById('session-id-display').textContent = sessionID;
+    resetTextareaHeight();
+    document.querySelector('.gt-chat-container').scrollIntoView({ behavior: 'auto', block: 'start' });
 
-function addMessage(role, content) {
-  messages.push({ role, content, timestamp: Date.now() });
+    function addMessage(role, content) {
+      messages.push({ role, content, timestamp: Date.now() });
 
-  const row = document.createElement('div');
-  row.className = 'gt-chat-message-row ' + role;
+      const row = document.createElement('div');
+      row.className = 'gt-chat-message-row ' + role;
 
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'gt-chat-message ' + role;
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'gt-chat-message ' + role;
 
-  const inner = document.createElement('span');
+      const inner = document.createElement('span');
 
-  const md = window.markdownit();
-  let formattedContent = content
-    .replace(/\\n/g, '\n')
-    .replace(/\\t/g, '&nbsp;&nbsp;')
-    .replace(/\\ /g, ' ');
+      const md = window.markdownit();
+      let formattedContent = content
+        .replace(/\\n/g, '\n')
+        .replace(/\\t/g, '&nbsp;&nbsp;')
+        .replace(/\\ /g, ' ');
 
-  inner.innerHTML = marked.parse(formattedContent);
+      inner.innerHTML = marked.parse(formattedContent);
 
-  msgDiv.appendChild(inner);
-  row.appendChild(msgDiv);
-  chat.appendChild(row);
-}
+      msgDiv.appendChild(inner);
+      row.appendChild(msgDiv);
+      chat.appendChild(row);
+    }
 
-function showTyping() {
-  typingIndicator = document.createElement('div');
-  typingIndicator.className = 'gt-chat-typing';
-  const inner = document.createElement('span');
-  inner.innerHTML = '<div class="gt-chat-dot"></div><div class="gt-chat-dot"></div><div class="gt-chat-dot"></div>';
-  typingIndicator.appendChild(inner);
-  chat.appendChild(typingIndicator);
-}
+    function showTyping() {
+      typingIndicator = document.createElement('div');
+      typingIndicator.className = 'gt-chat-typing';
+      const inner = document.createElement('span');
+      inner.innerHTML = '<div class="gt-chat-dot"></div><div class="gt-chat-dot"></div><div class="gt-chat-dot"></div>';
+      typingIndicator.appendChild(inner);
+      chat.appendChild(typingIndicator);
+    }
 
-function removeTyping() {
-  if (typingIndicator) {
-    chat.removeChild(typingIndicator);
-    typingIndicator = null;
-  }
-}
-
-function addStreamingBotMessage() {
-  const row = document.createElement('div');
-  row.className = 'gt-chat-message-row assistant';
-
-  const msgDiv = document.createElement('div');
-  msgDiv.className = 'gt-chat-message assistant';
-
-  const inner = document.createElement('span');
-  inner.innerHTML = '';
-
-  msgDiv.appendChild(inner);
-  row.appendChild(msgDiv);
-  chat.appendChild(row);
-
-  return inner;
-}
-
-function appendToBotMessage(innerEl, textChunk) {
-  if (!innerEl) return;
-  innerEl._raw = (innerEl._raw || '') + textChunk;
-  innerEl.innerHTML = marked.parse(innerEl._raw);
-}
-
-async function sendMessageStream() {
-  if (isWaitingResponse) return;
-  let hasStartedStreaming = false;
-  let botInnerEl = null;
-  let thinkingEl = null;
-  let toolCallsEl = null;
-  
-  const inputEl = document.querySelector('.gt-chat-input-field');
-  const text = inputEl.value.trim();
-  if (!text) return;
-  
-  isWaitingResponse = true;
-  const sendBtn = document.getElementById('sendBtn');
-  sendBtn.style.pointerEvents = 'none';
-  sendBtn.style.opacity = '0.6';
-  
-  addMessage('user', text);
-  inputEl.value = '';
-  showTyping();
-  
-  try {
-	
-    const userMessage = {
-	  role: 'user',
-	  content: text,
-	  timestamp: Date.now()
-	};
-	
-    const requestBody = {
-	  session_id: sessionID,
-	  message: userMessage
-	};
-    
-    const res = await fetch(backendURLstream, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody)
-    });
-    
-    if (!res.body) throw new Error('Streaming not supported');
-    
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      
-      buffer += decoder.decode(value, { stream: true });
-      const parts = buffer.split('\n\n');
-      buffer = parts.pop();
-      
-      for (const part of parts) {
-        if (!part.startsWith('data:')) continue;
-        
-        const json = JSON.parse(part.replace('data:', '').trim());
-        
-        // Handle different event types
-        switch (json.type) {
-          case 'token':
-            // Regular text streaming
-            if (!hasStartedStreaming) {
-              removeTyping();
-              botInnerEl = addStreamingBotMessage();
-              hasStartedStreaming = true;
-            }
-            appendToBotMessage(botInnerEl, json.text);
-            break;
-          
-          case 'thinking':
-            // AI thinking process
-            if (!thinkingEl) {
-              thinkingEl = addThinkingIndicator();
-            }
-            appendToThinking(thinkingEl, json.content);
-            break;
-          
-          case 'tool_call':
-            // Tool is being called
-            if (!toolCallsEl) {
-              toolCallsEl = addToolCallsContainer();
-            }
-            addToolCall(toolCallsEl, {
-              name: json.tool_name,
-              args: json.args,
-              callId: json.tool_call_id
-            });
-            break;
-          
-          case 'tool_result':
-			  console.log("RAW tool_result event:", json);
-			  console.log("tool_call_id value:", json?.tool_call_id);
-			  console.log("result value:", json?.result);
-			  
-			  const callId = json?.tool_call_id;
-			  if (callId && toolCallsEl) {
-				updateToolResult(toolCallsEl, callId, json.result);
-			  } else {
-				console.error("Missing or invalid tool_call_id in tool_result event!", json);
-			  }
-			  break;
-          
-          case 'tool_args_delta':
-            // Streaming tool arguments (optional - for real-time display)
-            if (toolCallsEl) {
-              updateToolArgs(toolCallsEl, json.args);
-            }
-            break;
-          
-          case 'part_start':
-            // Optional: Log when new parts start
-            console.log(`Starting part ${json.index}: ${json.part_type}`);
-            break;
-          
-          case 'final_result_start':
-            // Model started producing final answer
-            if (thinkingEl) {
-              markThinkingComplete(thinkingEl);
-            }
-            if (toolCallsEl) {
-              markToolCallsComplete(toolCallsEl);
-            }
-            break;
-          
-          case 'final':
-            // Complete - save to message history
-            if (botInnerEl) {
-              messages.push({
-                role: 'assistant',
-                content: botInnerEl._raw || json.output,
-                timestamp: Date.now()
-              });
-            }
-            
-            // Optional: Log usage stats
-            if (json.usage) {
-              console.log('Token usage:', json.usage);
-              // Could display this in UI if desired
-            }
-            break;
-          
-          case 'error':
-            // Error occurred
-            if (!botInnerEl) {
-              botInnerEl = addStreamingBotMessage();
-            }
-            appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.detail);
-            break;
-        }
-        
-        // Legacy error handling
-        if (json.error) {
-          if (!botInnerEl) {
-            botInnerEl = addStreamingBotMessage();
-          }
-          appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
-        }
+    function removeTyping() {
+      if (typingIndicator) {
+        chat.removeChild(typingIndicator);
+        typingIndicator = null;
       }
     }
-  } catch (e) {
-    console.error(e);
-    if (!botInnerEl) botInnerEl = addStreamingBotMessage();
-    appendToBotMessage(botInnerEl, '\n\n❌ Verbindung zum Server fehlgeschlagen.');
-  } finally {
-    isWaitingResponse = false;
-    removeTyping();
-    sendBtn.style.pointerEvents = 'auto';
-    sendBtn.style.opacity = '1';
-    
-    // Clean up thinking/tool indicators if they exist
-    /*if (thinkingEl) {
-      removeThinkingIndicator(thinkingEl);
+
+    function addStreamingBotMessage() {
+      const row = document.createElement('div');
+      row.className = 'gt-chat-message-row assistant';
+
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'gt-chat-message assistant';
+
+      const inner = document.createElement('span');
+      inner.innerHTML = '';
+
+      msgDiv.appendChild(inner);
+      row.appendChild(msgDiv);
+      chat.appendChild(row);
+
+      return inner;
     }
-    if (toolCallsEl) {
-      removeToolCallsContainer(toolCallsEl);
-    }*/
-  }
-}
 
-// ==================== UI Helper Functions ====================
-
-/**
- * Add a thinking indicator to show AI's reasoning process
- */
-function addThinkingIndicator() {
-  const chatContainer = document.getElementById('chat');
-
-  const row = document.createElement('div');
-  row.className = 'gt-thinking-row';
-
-  const thinkingDiv = document.createElement('div');
-  thinkingDiv.className = 'gt-thinking-indicator';
-  thinkingDiv.innerHTML = `
-    <div class="gt-thinking-header">
-      <span>💭</span>
-      <span class="gt-thinking-label">Denkt nach...</span>
-    </div>
-    <div class="gt-thinking-content"></div>
-  `;
-
-  row.appendChild(thinkingDiv);
-  chatContainer.appendChild(row);
-  //scrollToBottom();
-
-  return thinkingDiv;
-}
-
-/**
- * Append text to thinking indicator
- */
-function appendToThinking(thinkingEl, text) {
-  const contentEl = thinkingEl.querySelector('.gt-thinking-content');
-  if (contentEl) {
-    contentEl.textContent += text;
-    //scrollToBottom();
-  }
-}
-
-/**
- * Mark thinking as complete
- */
-function markThinkingComplete(thinkingEl) {
-  if (!thinkingEl) return;
-  thinkingEl.classList.add('gt-complete');
-  const label = thinkingEl.querySelector('.gt-thinking-label');
-  if (label) {
-    label.textContent = 'Denken abgeschlossen';
-  }
-}
-
-
-
-//marking special elements clickable and its content can be copied to textarea
-chat.addEventListener('click', (e) => {
-  const strongTarget = e.target.closest('strong, b');
-
-  // 1. Bold ALWAYS wins
-  if (strongTarget) {
-    e.stopPropagation();
-    handleCopy(strongTarget);
-    return;
-  }
-
-  // 2. List item only if it has NO bold inside
-  const liTarget = e.target.closest('li');
-  if (liTarget) {
-    const hasBold = liTarget.querySelector('strong, b');
-
-    if (!hasBold) {
-      e.stopPropagation();
-      handleCopy(liTarget);
+    function appendToBotMessage(innerEl, textChunk) {
+      if (!innerEl) return;
+      innerEl._raw = (innerEl._raw || '') + textChunk;
+      innerEl.innerHTML = marked.parse(innerEl._raw);
     }
-  }
-});
 
-function handleCopy(el) {
-  const text = el.innerText.trim();
-  copyToTextarea(text);
+    async function sendMessageStream() {
+      if (isWaitingResponse) return;
+      let hasStartedStreaming = false;
+      let botInnerEl = null;
+      let thinkingEl = null;
+      let toolCallsEl = null;
 
-  el.classList.add('gt-copied');
-  setTimeout(() => el.classList.remove('gt-copied'), 300);
-}
+      const inputEl = document.querySelector('.gt-chat-input-field');
+      const text = inputEl.value.trim();
+      if (!text) return;
 
-function copyToTextarea(text) {
-  const input = document.getElementById('chatbot-input');
+      isWaitingResponse = true;
+      const sendBtn = document.getElementById('sendBtn');
+      sendBtn.style.pointerEvents = 'none';
+      sendBtn.style.opacity = '0.6';
 
-  if (input.value.trim().length === 0) {
-    input.value = text;
-  } else {
-    input.value += '\n' + text;
-  }
+      addMessage('user', text);
+      inputEl.value = '';
+      showTyping();
 
-  input.focus();
-  input.dispatchEvent(new Event('input'));
-}
+      try {
 
+        const userMessage = {
+          role: 'user',
+          content: text,
+          timestamp: Date.now()
+        };
 
-/**---------------------------------------*/
+        const requestBody = {
+          session_id: sessionID,
+          message: userMessage
+        };
 
-/**
- * Remove thinking indicator (called after final response)
- */
-function removeThinkingIndicator(thinkingEl) {
-  if (!thinkingEl || !thinkingEl.parentNode) return;
-  
-  // Option 1: Remove after delay
-  /*setTimeout(() => {
-    if (thinkingEl && thinkingEl.parentNode) {
-      thinkingEl.remove();
+        const res = await fetch(backendURLstream, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+
+        if (!res.body) throw new Error('Streaming not supported');
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const parts = buffer.split('\n\n');
+          buffer = parts.pop();
+
+          for (const part of parts) {
+            if (!part.startsWith('data:')) continue;
+
+            const json = JSON.parse(part.replace('data:', '').trim());
+
+            // Handle different event types
+            switch (json.type) {
+              case 'token':
+                // Regular text streaming
+                if (!hasStartedStreaming) {
+                  removeTyping();
+                  botInnerEl = addStreamingBotMessage();
+                  hasStartedStreaming = true;
+                }
+                appendToBotMessage(botInnerEl, json.text);
+                break;
+
+              case 'thinking':
+                // AI thinking process
+                if (!thinkingEl) {
+                  thinkingEl = addThinkingIndicator();
+                }
+                appendToThinking(thinkingEl, json.content);
+                break;
+
+              case 'tool_call':
+                // Tool is being called
+                if (!toolCallsEl) {
+                  toolCallsEl = addToolCallsContainer();
+                }
+                addToolCall(toolCallsEl, {
+                  name: json.tool_name,
+                  args: json.args,
+                  callId: json.tool_call_id
+                });
+                break;
+
+              case 'tool_result':
+                  console.log("RAW tool_result event:", json);
+                  console.log("tool_call_id value:", json?.tool_call_id);
+                  console.log("result value:", json?.result);
+
+                  const callId = json?.tool_call_id;
+                  if (callId && toolCallsEl) {
+                    updateToolResult(toolCallsEl, callId, json.result);
+                  } else {
+                    console.error("Missing or invalid tool_call_id in tool_result event!", json);
+                  }
+                  break;
+
+              case 'tool_args_delta':
+                // Streaming tool arguments (optional - for real-time display)
+                if (toolCallsEl) {
+                  updateToolArgs(toolCallsEl, json.args);
+                }
+                break;
+
+              case 'part_start':
+                // Optional: Log when new parts start
+                console.log(`Starting part ${json.index}: ${json.part_type}`);
+                break;
+
+              case 'final_result_start':
+                // Model started producing final answer
+                if (thinkingEl) {
+                  markThinkingComplete(thinkingEl);
+                }
+                if (toolCallsEl) {
+                  markToolCallsComplete(toolCallsEl);
+                }
+                break;
+
+              case 'final':
+                // Complete - save to message history
+                if (botInnerEl) {
+                  messages.push({
+                    role: 'assistant',
+                    content: botInnerEl._raw || json.output,
+                    timestamp: Date.now()
+                  });
+                }
+
+                // Optional: Log usage stats
+                if (json.usage) {
+                  console.log('Token usage:', json.usage);
+                  // Could display this in UI if desired
+                }
+                break;
+
+              case 'error':
+                // Error occurred
+                if (!botInnerEl) {
+                  botInnerEl = addStreamingBotMessage();
+                }
+                appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.detail);
+                break;
+            }
+
+            // Legacy error handling
+            if (json.error) {
+              if (!botInnerEl) {
+                botInnerEl = addStreamingBotMessage();
+              }
+              appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
+            }
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        if (!botInnerEl) botInnerEl = addStreamingBotMessage();
+        appendToBotMessage(botInnerEl, '\n\n❌ Verbindung zum Server fehlgeschlagen.');
+      } finally {
+        isWaitingResponse = false;
+        removeTyping();
+        sendBtn.style.pointerEvents = 'auto';
+        sendBtn.style.opacity = '1';
+
+        // Clean up thinking/tool indicators if they exist
+        /*if (thinkingEl) {
+          removeThinkingIndicator(thinkingEl);
+        }
+        if (toolCallsEl) {
+          removeToolCallsContainer(toolCallsEl);
+        }*/
+      }
     }
-  }, 2000);*/
-  
-  // Option 2: Just fade it out and keep in history
-  thinkingEl.classList.add('gt-faded');
-}
 
-/**
- * Add container for tool calls
- */
-function addToolCallsContainer() {
-  const chatContainer = document.getElementById('chat');
+    // ==================== UI Helper Functions ====================
 
-  const row = document.createElement('div');
-  row.className = 'gt-tool-row';
+    /**
+     * Add a thinking indicator to show AI's reasoning process
+     */
+    function addThinkingIndicator() {
+      const chatContainer = document.getElementById('chat');
 
-  const toolsDiv = document.createElement('div');
-  toolsDiv.className = 'gt-tool-calls-container';
-  toolsDiv.innerHTML = `
-    <div class="gt-tools-header">
-      <span>🔧</span>
-      <span class="gt-tools-label">Verwendet Werkzeuge...</span>
-    </div>
-    <div class="gt-tools-list"></div>
-  `;
+      const row = document.createElement('div');
+      row.className = 'gt-thinking-row';
 
-  row.appendChild(toolsDiv);
-  chatContainer.appendChild(row);
-  //scrollToBottom();
+      const thinkingDiv = document.createElement('div');
+      thinkingDiv.className = 'gt-thinking-indicator';
+      thinkingDiv.innerHTML = `
+        <div class="gt-thinking-header">
+          <span>💭</span>
+          <span class="gt-thinking-label">Denkt nach...</span>
+        </div>
+        <div class="gt-thinking-content"></div>
+      `;
 
-  return toolsDiv;
-}
+      row.appendChild(thinkingDiv);
+      chatContainer.appendChild(row);
+      //scrollToBottom();
 
-/**
- * Add a tool call to the container
- */
-function addToolCall(toolCallsEl, toolCall) {
-  const listEl = toolCallsEl.querySelector('.gt-tools-list');
-  if (!listEl) return;
-  
-  const toolDiv = document.createElement('div');
-  toolDiv.className = 'gt-tool-call';
-  toolDiv.dataset.callId = toolCall.callId;
-  
-  // Safely stringify args
-  let argsStr;
-  try {
-    argsStr = JSON.stringify(toolCall.args, null, 2);
-  } catch (e) {
-    argsStr = String(toolCall.args);
-  }
-  
-  // Escape HTML to prevent XSS
-  const escapeHtml = (text) => {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  };
-  
-  toolDiv.innerHTML = `
-    <div class="gt-tool-name">
-      <span class="gt-tool-status">⏳</span>
-      <strong>${escapeHtml(toolCall.name)}</strong>
-    </div>
-    <pre class="gt-tool-args">${escapeHtml(argsStr)}</pre>
-    <div class="gt-tool-result" style="display: none;"></div>
-  `;
-  listEl.appendChild(toolDiv);
-  //scrollToBottom();
-}
+      return thinkingDiv;
+    }
 
-/**
- * Update tool call with result
- */
-function updateToolResult(toolCallsEl, callId, result) {
-  const matchingTools = toolCallsEl.querySelectorAll(`[data-call-id="${callId}"]`);
+    /**
+     * Append text to thinking indicator
+     */
+    function appendToThinking(thinkingEl, text) {
+      const contentEl = thinkingEl.querySelector('.gt-thinking-content');
+      if (contentEl) {
+        contentEl.textContent += text;
+        //scrollToBottom();
+      }
+    }
 
-  if (matchingTools.length === 0) {
-    console.warn(`No tool found for callId: ${callId}`);
-    return;
-  }
-
-  if (matchingTools.length > 1) {
-    console.warn(`Found ${matchingTools.length} tools with the same callId ${callId} — this should not happen!`);
-  }
-
-  // We take the last one (or first — doesn't matter much if IDs are correct)
-  const toolDiv = matchingTools[matchingTools.length - 1];
-
-  const statusEl = toolDiv.querySelector('.gt-tool-status');
-  const resultEl = toolDiv.querySelector('.gt-tool-result');
-
-  if (statusEl) statusEl.textContent = '✅';
-
-  if (resultEl) {
-    resultEl.style.display = 'block';
-    let resultStr = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
-    resultEl.textContent = resultStr;
-    console.log(`Tool result [${callId}]:`, resultStr.substring(0, 200));
-  }
-}
-
-/**
- * Update tool arguments while streaming (optional)
- */
-function updateToolArgs(toolCallsEl, argsDelta) {
-  const lastTool = toolCallsEl.querySelector('.gt-tool-call:last-child .gt-tool-args');
-  if (lastTool) {
-    lastTool.textContent += argsDelta;
-    //scrollToBottom();
-  }
-}
-
-/**
- * Mark all tool calls as complete
- */
-function markToolCallsComplete(toolCallsEl) {
-  if (!toolCallsEl) return;
-  toolCallsEl.classList.add('gt-complete');
-  const label = toolCallsEl.querySelector('.gt-tools-label');
-  if (label) {
-    label.textContent = 'Werkzeuge verwendet';
-  }
-}
-
-/**
- * Remove tool calls container
- */
-function removeToolCallsContainer(toolCallsEl) {
-  if (!toolCallsEl) return;
-  toolCallsEl.classList.add('gt-complete');
-}
-
-/**
- * Scroll chat to bottom
- */
-function scrollToBottom() {
-  const chatMessages = document.querySelector('.gt-chat-messages');
-  if (chatMessages) {
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  }
-}
+    /**
+     * Mark thinking as complete
+     */
+    function markThinkingComplete(thinkingEl) {
+      if (!thinkingEl) return;
+      thinkingEl.classList.add('gt-complete');
+      const label = thinkingEl.querySelector('.gt-thinking-label');
+      if (label) {
+        label.textContent = 'Denken abgeschlossen';
+      }
+    }
 
 
-input.addEventListener("keydown", (e) => {
-  if (document.activeElement !== input) return;
-  if (isWaitingResponse) return;
 
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    sendMessageStream();
-  }
-});
+    //marking special elements clickable and its content can be copied to textarea
+    chat.addEventListener('click', (e) => {
+      const strongTarget = e.target.closest('strong, b');
 
-// Auto-resize textarea
-input.addEventListener('input', () => {
-  input.style.height = 'auto';
-  const lineHeight = parseInt(getComputedStyle(input).lineHeight);
-  const maxHeight = lineHeight * 5 + 24;
-  input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
-});
+      // 1. Bold ALWAYS wins
+      if (strongTarget) {
+        e.stopPropagation();
+        handleCopy(strongTarget);
+        return;
+      }
 
-function resetTextareaHeight() {
-  input.style.height = 'auto';                    // reset height
-  const lineHeight = parseInt(getComputedStyle(input).lineHeight);
-  input.style.height = lineHeight + 12 + 'px';   // 1 line + padding
-}
+      // 2. List item only if it has NO bold inside
+      const liTarget = e.target.closest('li');
+      if (liTarget) {
+        const hasBold = liTarget.querySelector('strong, b');
 
-function formatDateNow() {
-  const d = new Date(Date.now());
-  const pad = n => String(n).padStart(2, '0');
-  return (
-    d.getFullYear() + '_' +
-    pad(d.getMonth() + 1) + '_' +
-    pad(d.getDate()) + '_' +
-    pad(d.getHours()) + '_' +
-    pad(d.getMinutes()) + '_' +
-    pad(d.getSeconds())
-  );
-}
+        if (!hasBold) {
+          e.stopPropagation();
+          handleCopy(liTarget);
+        }
+      }
+    });
 
-function saveSessionId(newSessionId) {
-  let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  sessions = sessions.filter(id => id !== newSessionId);
-  sessions.unshift(newSessionId);
-  sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-}
+    function handleCopy(el) {
+      const text = el.innerText.trim();
+      copyToTextarea(text);
+
+      el.classList.add('gt-copied');
+      setTimeout(() => el.classList.remove('gt-copied'), 300);
+    }
+
+    function copyToTextarea(text) {
+      const input = document.getElementById('chatbot-input');
+
+      if (input.value.trim().length === 0) {
+        input.value = text;
+      } else {
+        input.value += '\n' + text;
+      }
+
+      input.focus();
+      input.dispatchEvent(new Event('input'));
+    }
+
+
+    /**---------------------------------------*/
+
+    /**
+     * Remove thinking indicator (called after final response)
+     */
+    function removeThinkingIndicator(thinkingEl) {
+      if (!thinkingEl || !thinkingEl.parentNode) return;
+
+      // Option 1: Remove after delay
+      /*setTimeout(() => {
+        if (thinkingEl && thinkingEl.parentNode) {
+          thinkingEl.remove();
+        }
+      }, 2000);*/
+
+      // Option 2: Just fade it out and keep in history
+      thinkingEl.classList.add('gt-faded');
+    }
+
+    /**
+     * Add container for tool calls
+     */
+    function addToolCallsContainer() {
+      const chatContainer = document.getElementById('chat');
+
+      const row = document.createElement('div');
+      row.className = 'gt-tool-row';
+
+      const toolsDiv = document.createElement('div');
+      toolsDiv.className = 'gt-tool-calls-container';
+      toolsDiv.innerHTML = `
+        <div class="gt-tools-header">
+          <span>🔧</span>
+          <span class="gt-tools-label">Verwendet Werkzeuge...</span>
+        </div>
+        <div class="gt-tools-list"></div>
+      `;
+
+      row.appendChild(toolsDiv);
+      chatContainer.appendChild(row);
+      //scrollToBottom();
+
+      return toolsDiv;
+    }
+
+    /**
+     * Add a tool call to the container
+     */
+    function addToolCall(toolCallsEl, toolCall) {
+      const listEl = toolCallsEl.querySelector('.gt-tools-list');
+      if (!listEl) return;
+
+      const toolDiv = document.createElement('div');
+      toolDiv.className = 'gt-tool-call';
+      toolDiv.dataset.callId = toolCall.callId;
+
+      // Safely stringify args
+      let argsStr;
+      try {
+        argsStr = JSON.stringify(toolCall.args, null, 2);
+      } catch (e) {
+        argsStr = String(toolCall.args);
+      }
+
+      // Escape HTML to prevent XSS
+      const escapeHtml = (text) => {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      };
+
+      toolDiv.innerHTML = `
+        <div class="gt-tool-name">
+          <span class="gt-tool-status">⏳</span>
+          <strong>${escapeHtml(toolCall.name)}</strong>
+        </div>
+        <pre class="gt-tool-args">${escapeHtml(argsStr)}</pre>
+        <div class="gt-tool-result" style="display: none;"></div>
+      `;
+      listEl.appendChild(toolDiv);
+      //scrollToBottom();
+    }
+
+    /**
+     * Update tool call with result
+     */
+    function updateToolResult(toolCallsEl, callId, result) {
+      const matchingTools = toolCallsEl.querySelectorAll(`[data-call-id="${callId}"]`);
+
+      if (matchingTools.length === 0) {
+        console.warn(`No tool found for callId: ${callId}`);
+        return;
+      }
+
+      if (matchingTools.length > 1) {
+        console.warn(`Found ${matchingTools.length} tools with the same callId ${callId} — this should not happen!`);
+      }
+
+      // We take the last one (or first — doesn't matter much if IDs are correct)
+      const toolDiv = matchingTools[matchingTools.length - 1];
+
+      const statusEl = toolDiv.querySelector('.gt-tool-status');
+      const resultEl = toolDiv.querySelector('.gt-tool-result');
+
+      if (statusEl) statusEl.textContent = '✅';
+
+      if (resultEl) {
+        resultEl.style.display = 'block';
+        let resultStr = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+        resultEl.textContent = resultStr;
+        console.log(`Tool result [${callId}]:`, resultStr.substring(0, 200));
+      }
+    }
+
+    /**
+     * Update tool arguments while streaming (optional)
+     */
+    function updateToolArgs(toolCallsEl, argsDelta) {
+      const lastTool = toolCallsEl.querySelector('.gt-tool-call:last-child .gt-tool-args');
+      if (lastTool) {
+        lastTool.textContent += argsDelta;
+        //scrollToBottom();
+      }
+    }
+
+    /**
+     * Mark all tool calls as complete
+     */
+    function markToolCallsComplete(toolCallsEl) {
+      if (!toolCallsEl) return;
+      toolCallsEl.classList.add('gt-complete');
+      const label = toolCallsEl.querySelector('.gt-tools-label');
+      if (label) {
+        label.textContent = 'Werkzeuge verwendet';
+      }
+    }
+
+    /**
+     * Remove tool calls container
+     */
+    function removeToolCallsContainer(toolCallsEl) {
+      if (!toolCallsEl) return;
+      toolCallsEl.classList.add('gt-complete');
+    }
+
+    /**
+     * Scroll chat to bottom
+     */
+    function scrollToBottom() {
+      const chatMessages = document.querySelector('.gt-chat-messages');
+      if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+
+
+    input.addEventListener("keydown", (e) => {
+      if (document.activeElement !== input) return;
+      if (isWaitingResponse) return;
+
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessageStream();
+      }
+    });
+
+    // Auto-resize textarea
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+      const maxHeight = lineHeight * 5 + 24;
+      input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
+    });
+
+    function resetTextareaHeight() {
+      input.style.height = 'auto';                    // reset height
+      const lineHeight = parseInt(getComputedStyle(input).lineHeight);
+      input.style.height = lineHeight + 12 + 'px';   // 1 line + padding
+    }
+
+    function formatDateNow() {
+      const d = new Date(Date.now());
+      const pad = n => String(n).padStart(2, '0');
+      return (
+        d.getFullYear() + '_' +
+        pad(d.getMonth() + 1) + '_' +
+        pad(d.getDate()) + '_' +
+        pad(d.getHours()) + '_' +
+        pad(d.getMinutes()) + '_' +
+        pad(d.getSeconds())
+      );
+    }
+
+    function saveSessionId(newSessionId) {
+      let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      sessions = sessions.filter(id => id !== newSessionId);
+      sessions.unshift(newSessionId);
+      sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    }
+
+    // ==================== Order View Functions ====================
+
+    let isOrderViewActive = false;
+
+    async function toggleOrderView() {
+      const chatView = document.getElementById('chat');
+      const orderView = document.getElementById('orderView');
+
+      const toggleBtn = document.getElementById('toggleOrderBtn');
+
+      const orderLoading = document.getElementById('orderLoading');
+      const orderContent = document.getElementById('orderContent');
+
+      const inputWrapper = document.querySelector(
+        '.gt-chat-textarea-wrapper'
+      );
+
+      const sendBtn = document.getElementById('sendBtn');
+
+      isOrderViewActive = !isOrderViewActive;
+
+      // =========================================================
+      // SWITCH TO ORDER VIEW
+      // =========================================================
+
+      if (isOrderViewActive) {
+
+        // -------------------------------------------------------
+        // VIEW SWITCH
+        // -------------------------------------------------------
+
+        chatView.style.display = 'none';
+        orderView.style.display = 'block';
+
+        // Hide input + send in order mode
+        inputWrapper.style.display = 'none';
+        sendBtn.style.display = 'none';
+
+        // Toggle button text/icon
+        toggleBtn.querySelector(
+          '.gt-order-toggle-text'
+        ).textContent = 'Chat';
+
+        toggleBtn.querySelector(
+          '.gt-order-toggle-icon'
+        ).textContent = '💬';
+
+        // -------------------------------------------------------
+        // LOADING
+        // -------------------------------------------------------
+
+        orderLoading.style.display = 'flex';
+        orderContent.innerHTML = '';
+
+        try {
+
+          const response = await fetch(backendCurrentOrderURL);
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+
+          const data = await response.json();
+
+          // =====================================================
+          // EMPTY
+          // =====================================================
+
+          if (!data || Object.keys(data).length === 0) {
+
+            orderContent.innerHTML = `
+              <div class="gt-order-empty">
+                📋 Keine Bestelldaten verfügbar
+              </div>
+            `;
+
+            return;
+          }
+
+          let html = '';
+
+          // =====================================================
+          // HERKUNFT
+          // =====================================================
+
+          if (data.herkunft) {
+
+            html += `
+              <div class="gt-order-section">
+
+                <h3>Herkunft</h3>
+
+                <div class="gt-order-pills">
+                  ${pill('Quelle', data.herkunft)}
+                </div>
+
+              </div>
+            `;
+          }
+
+          // =====================================================
+          // FORM DATA
+          // =====================================================
+
+          if (data.formular_daten) {
+
+            const form = data.formular_daten;
+
+            html += `
+              <div class="gt-order-section">
+
+                <h3>Bestelldaten</h3>
+            `;
+
+            // =================================================
+            // PRIMARY META PILLS
+            // =================================================
+
+            html += `<div class="gt-order-pills">`;
+
+            // Anzahl
+            if (form.anzahl) {
+              html += pill('Anzahl', form.anzahl);
+            }
+
+            // Dimensions
+            if (form.schild_x) {
+              html += pill(
+                'Breite',
+                `${form.schild_x} mm`
+              );
+            }
+
+            if (form.schild_y) {
+              html += pill(
+                'Höhe',
+                `${form.schild_y} mm`
+              );
+            }
+
+            if (form.schild_z) {
+              html += pill(
+                'Tiefe',
+                `${form.schild_z} mm`
+              );
+            }
+
+            if (form.ver_part_d) {
+              html += pill(
+                'Durchmesser',
+                `${form.ver_part_d} mm`
+              );
+            }
+
+            // Produkt
+            if (form.produkt?.name) {
+              html += pill(
+                'Produkt',
+                form.produkt.name
+              );
+            }
+
+            // Produkt Kategorie
+            if (form.produkt_kategorie?.name) {
+              html += pill(
+                'Produkt Kategorie',
+                form.produkt_kategorie.name
+              );
+            }
+
+            // Material Kategorie
+            if (form.material_kategorie?.name) {
+              html += pill(
+                'Material Kategorie',
+                form.material_kategorie.name
+              );
+            }
+
+            // Material Unterkategorie
+            if (form.material_unterkategorie?.name) {
+              html += pill(
+                'Material Unterkategorie',
+                form.material_unterkategorie.name
+              );
+            }
+
+            html += `</div>`;
+
+            // =================================================
+            // NORMAL FIELDS
+            // =================================================
+
+            const hiddenFields = [
+
+              // dimensions/meta pills
+              'anzahl',
+              'schild_x',
+              'schild_y',
+              'schild_z',
+              'ver_part_d',
+
+              // object pills
+              'produkt',
+              'produkt_kategorie',
+              'material_kategorie',
+              'material_unterkategorie',
+
+              // special collections
+              'veredelungen',
+              'addons',
+              'handlungen'
+            ];
+
+            Object.entries(form).forEach(([key, value]) => {
+
+              if (hiddenFields.includes(key)) {
+                return;
+              }
+
+              if (
+                value === null ||
+                value === undefined ||
+                value === ''
+              ) {
+                return;
+              }
+
+              html += renderField(key, value);
+
+            });
+
+            // =================================================
+            // VEREDLUNGEN
+            // =================================================
+
+            html += renderCompactCollection(
+              'Veredelungen',
+              form.veredelungen
+            );
+
+            // =================================================
+            // HANDLUNGEN
+            // =================================================
+
+            html += renderCompactCollection(
+              'Handlungen',
+              form.handlungen
+            );
+
+            // =================================================
+            // ADDONS
+            // =================================================
+
+            html += renderCompactCollection(
+              'Addons',
+              form.addons
+            );
+
+            html += `
+              </div>
+            `;
+          }
+
+          // =====================================================
+          // FALLBACK EMPTY
+          // =====================================================
+
+          if (!html.trim()) {
+
+            html = `
+              <div class="gt-order-empty">
+                📋 Keine Bestelldaten verfügbar
+              </div>
+            `;
+          }
+
+          orderContent.innerHTML = html;
+
+        } catch (error) {
+
+          console.error(
+            'Error fetching order:',
+            error
+          );
+
+          orderContent.innerHTML = `
+            <div class="gt-order-error">
+
+              <strong>
+                ⚠️ Fehler beim Laden der Bestellung
+              </strong>
+
+              <div>
+                ${escapeHtml(error.message)}
+              </div>
+
+            </div>
+          `;
+
+        } finally {
+
+          orderLoading.style.display = 'none';
+
+        }
+
+      }
+
+      // =========================================================
+      // SWITCH BACK TO CHAT
+      // =========================================================
+
+      else {
+
+        chatView.style.display = 'block';
+        orderView.style.display = 'none';
+
+        // Show input + send again
+        inputWrapper.style.display = 'flex';
+        sendBtn.style.display = 'block';
+
+        // Toggle button text/icon
+        toggleBtn.querySelector(
+          '.gt-order-toggle-text'
+        ).textContent = 'Bestellung';
+
+        toggleBtn.querySelector(
+          '.gt-order-toggle-icon'
+        ).textContent = '📋';
+      }
+    }
+
+    function pill(label, value) {
+      return `
+        <div class="gt-order-pill">
+          ${
+            label
+              ? `
+                <span class="gt-order-pill-label">
+                  ${escapeHtml(label)}:
+                </span>
+              `
+              : ''
+          }
+
+          <span class="gt-order-pill-value">
+            ${escapeHtml(String(value))}
+          </span>
+        </div>
+      `;
+    }
+
+    function expandablePill(name, details = {}) {
+      const entries = Object.entries(details).filter(([k, v]) => {
+        return (
+          k !== 'name' &&
+          v !== null &&
+          v !== undefined &&
+          v !== ''
+        );
+      });
+
+      const hasDetails = entries.length > 0;
+
+      return `
+        <div class="gt-order-pill-wrapper">
+
+          <div
+            class="gt-order-pill ${hasDetails ? 'expandable' : ''}"
+            ${
+              hasDetails
+                ? `onclick="this.parentNode.classList.toggle('open')"`
+                : ''
+            }
+          >
+
+            <span class="gt-order-pill-value">
+              ${escapeHtml(String(name))}
+            </span>
+
+            ${
+              hasDetails
+                ? `
+                  <span class="gt-order-pill-arrow">
+                    ↓
+                  </span>
+                `
+                : ''
+            }
+
+          </div>
+
+          ${
+            hasDetails
+              ? `
+                <div class="gt-order-pill-dropdown">
+
+                  ${entries.map(([k, v]) => `
+                    <div class="gt-order-pill-detail">
+
+                      <span class="gt-order-pill-detail-label">
+                        ${escapeHtml(formatFieldName(k))}:
+                      </span>
+
+                      ${escapeHtml(String(v))}
+
+                    </div>
+                  `).join('')}
+
+                </div>
+              `
+              : ''
+          }
+
+        </div>
+      `;
+    }
+
+    function renderCompactCollection(title, items) {
+      if (!items || !items.length) {
+        return '';
+      }
+
+      let html = `
+        <div class="gt-order-subsection-block">
+
+          <div class="gt-order-subsection-title">
+            ${escapeHtml(title)}
+          </div>
+
+          <div class="gt-order-pills">
+      `;
+
+      items.forEach((item, index) => {
+
+        const name =
+          item.name ||
+          item.bezeichnung ||
+          item.titel ||
+          `#${index + 1}`;
+
+        html += expandablePill(name, item);
+
+      });
+
+      html += `
+          </div>
+
+        </div>
+      `;
+
+      return html;
+    }
+
+    function renderMutedDetails(obj) {
+      const entries = Object.entries(obj).filter(([k, v]) => {
+        return (
+          k !== 'name' &&
+          v !== null &&
+          v !== undefined &&
+          v !== ''
+        );
+      });
+
+      if (!entries.length) return '';
+
+      let html = `
+        <div class="gt-order-detail-card">
+          <div class="gt-order-detail-toggle"
+               onclick="this.parentNode.classList.toggle('open')">
+            Details anzeigen
+          </div>
+
+          <div class="gt-order-detail-content">
+      `;
+
+      entries.forEach(([key, value]) => {
+        html += `
+          <div class="gt-order-detail-row">
+            <span class="gt-order-detail-label">
+              ${escapeHtml(formatFieldName(key))}:
+            </span>
+
+            ${escapeHtml(String(value))}
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      return html;
+    }
+
+    function renderField(key, value) {
+      // Skip rendering if value is falsy
+      if (value === null || value === undefined || value === '') return '';
+
+      // Handle arrays of objects (like veredelungen, handlungen, addons)
+      if (Array.isArray(value)) {
+        if (value.length === 0) return '';
+
+        // Check if array contains objects
+        if (typeof value[0] === 'object' && value[0] !== null) {
+          let html = `<div class="gt-order-field"><span class="gt-order-field-label">${formatFieldName(key)}</span></div>`;
+          value.forEach((item, idx) => {
+            // Extract name for header if available
+            const name = item.name || item.id || `#${idx + 1}`;
+            html += `<div class="gt-order-array-item">`;
+            html += `<div class="gt-order-item-header">${escapeHtml(String(name))}</div>`;
+
+            Object.entries(item).forEach(([k, v]) => {
+              // Skip name since we used it in header, and skip empty values
+              if (k === 'name' || v === null || v === undefined || v === '') return;
+
+              html += `<div class="gt-order-field">`;
+              html += `<span class="gt-order-field-label">${formatFieldName(k)}</span>`;
+              html += `<span class="gt-order-field-value">${formatValue(v)}</span>`;
+              html += `</div>`;
+            });
+            html += `</div>`;
+          });
+          return html;
+        } else {
+          // Array of primitives
+          return `
+            <div class="gt-order-field">
+              <span class="gt-order-field-label">${formatFieldName(key)}</span>
+              <span class="gt-order-field-value">${value.map(v => formatValue(v)).join(', ')}</span>
+            </div>
+          `;
+        }
+      }
+
+      // Handle objects (like produkt_kategorie, material_kategorie, etc.)
+      if (typeof value === 'object' && value !== null) {
+        // Special case: if object has only 'name' or very few fields, display inline
+        const entries = Object.entries(value).filter(([k, v]) => v !== null && v !== undefined && v !== '');
+
+        if (entries.length === 1 && value.name) {
+          return `
+            <div class="gt-order-field">
+              <span class="gt-order-field-label">${formatFieldName(key)}</span>
+              <span class="gt-order-field-value">${formatValue(value.name)}</span>
+            </div>
+          `;
+        }
+
+        // Otherwise render as card
+        let html = `<div class="gt-order-array-item">`;
+        const name = value.name || formatFieldName(key);
+        html += `<div class="gt-order-item-header">${escapeHtml(String(name))}</div>`;
+
+        entries.forEach(([k, v]) => {
+          if (k === 'name') return; // Skip name since we used it in header
+
+          html += `<div class="gt-order-field">`;
+          html += `<span class="gt-order-field-label">${formatFieldName(k)}</span>`;
+          html += `<span class="gt-order-field-value">${formatValue(v)}</span>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+        return html;
+      }
+
+      // Handle primitives
+      return `
+        <div class="gt-order-field">
+          <span class="gt-order-field-label">${formatFieldName(key)}</span>
+          <span class="gt-order-field-value">${formatValue(value)}</span>
+        </div>
+      `;
+    }
+
+    function formatValue(value) {
+      if (typeof value === 'boolean') {
+        return value ? '✓ Ja' : '✗ Nein';
+      }
+      return escapeHtml(String(value));
+    }
+
+    function formatFieldName(name) {
+      return name
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
 </script>
