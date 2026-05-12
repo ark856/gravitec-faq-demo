@@ -804,6 +804,84 @@
 
           font-size: 15px;
         }
+		
+		/* ================================
+		   SUGGESTION BOX WRAPPER
+		================================ */
+
+		.gt-order-suggestion-box {
+		  display: flex;
+		  flex-direction: column;
+		  gap: 10px;
+		  margin-top: 8px;
+		}
+
+		/* LABEL */
+		.gt-order-suggestion-label {
+		  font-size: 12px;
+		  color: #9fc0ff;
+		  font-weight: 600;
+		  text-transform: uppercase;
+		  letter-spacing: 0.5px;
+		}
+
+		/* TEXTAREA */
+		.gt-order-suggestion-textarea {
+		  width: 100%;
+		  min-height: 90px;
+		  resize: vertical;
+
+		  background: #0f1316;
+		  border: 1px solid #2c323c;
+		  border-radius: 8px;
+
+		  color: #fff;
+		  padding: 10px 12px;
+
+		  font-family: inherit;
+		  font-size: 13px;
+		  line-height: 1.4;
+
+		  outline: none;
+		  transition: border 0.15s ease, box-shadow 0.15s ease;
+		}
+
+		.gt-order-suggestion-textarea:focus {
+		  border-color: #3b75c3;
+		  box-shadow: 0 0 0 2px rgba(59,117,195,0.2);
+		}
+
+		/* BUTTON */
+		.gt-order-suggestion-btn {
+		  align-self: flex-start;
+
+		  background: linear-gradient(180deg, #3b75c3, #2858a8);
+		  color: white;
+
+		  border: none;
+		  border-radius: 6px;
+
+		  padding: 8px 14px;
+
+		  font-weight: 700;
+		  font-size: 13px;
+
+		  cursor: pointer;
+
+		  transition: all 0.15s ease;
+		}
+
+		.gt-order-suggestion-btn:disabled {
+		  opacity: 0.4;
+		  cursor: not-allowed;
+		}
+
+		/* STATUS TEXT */
+		.gt-order-suggestion-status {
+		  font-size: 12px;
+		  color: #9fc0ff;
+		  min-height: 16px;
+		}
 
 
 </style>
@@ -817,17 +895,51 @@
     </div>
     <div class="gt-chat-messages" id="chat"></div>
     <div class="gt-chat-messages gt-order-view" id="orderView" style="display: none;">
-        <div class="gt-order-loading" id="orderLoading" style="display: none;">
-            <div class="gt-chat-typing">
-                <span>
-                    <div class="gt-chat-dot"></div>
-                    <div class="gt-chat-dot"></div>
-                    <div class="gt-chat-dot"></div>
-                </span>
-            </div>
-        </div>
-        <div class="gt-order-content" id="orderContent"></div>
-    </div>
+		<div class="gt-order-loading" id="orderLoading" style="display: none;">
+			<div class="gt-chat-typing">
+				<span>
+					<div class="gt-chat-dot"></div>
+					<div class="gt-chat-dot"></div>
+					<div class="gt-chat-dot"></div>
+				</span>
+			</div>
+		</div>
+
+		<!-- MAIN ORDER CONTENT -->
+		<div class="gt-order-content" id="orderContent"></div>
+
+		<!-- ✅ PUT TEMPLATE HERE (important) -->
+		<div id="gt-order-suggestion" class="gt-order-section" style="display:none;">
+		  <h3>Bestellvorschlag</h3>
+
+		  <div class="gt-order-suggestion-box">
+
+			<div class="gt-order-suggestion-label">
+			  Beschreibung
+			</div>
+
+			<textarea
+			  id="gt-order-suggestion-text"
+			  class="gt-order-suggestion-textarea"
+			  placeholder="Beschreibe diesen Bestellvorschlag..."
+			></textarea>
+
+			<button
+			  id="gt-order-suggestion-btn"
+			  class="gt-order-suggestion-btn"
+			  onclick="saveOrderSuggestion()"
+			>
+			  Vorschlag speichern
+			</button>
+
+			<div id="gt-order-suggestion-status"
+				 class="gt-order-suggestion-status">
+			</div>
+
+		  </div>
+		</div>
+
+	</div>
     <div class="gt-chat-input">
         <div class="gt-order-toggle-btn"
                 id="toggleOrderBtn"
@@ -858,10 +970,15 @@
     //const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
     const backendURLstream = 'https://avahai.gravi-tec.de/api/v1/chat/stream';
     //const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
-    const backendCurrentOrderURL = 'https://avahai.gravi-tec.de/api/v1/sessions/g/${sessionID}/current-order'
+    
+	const backendCurrentOrderURL = 'https://avahai.gravi-tec.de/api/v1/sessions/g/${sessionID}/current-order'
     //const backendCurrentOrderURL = 'http://localhost:8000/api/v1/sessions/g/${sessionID}/current-order'
     //const backendCurrentOrderURL = 'http://localhost:8000/api/v1/sessions/g/test_session_2026_05_11_22_29_25_52z2kidq0/current-order'
-    const STORAGE_KEY = "chat_session_ids";
+	
+	const backendSaveSuggestion = 'https://avahai.gravi-tec.de/api/v1/order-suggestions/save'
+	//const backendSaveSuggestion = 'http://localhost:8000/api/v1/order-suggestions/save'
+    
+	const STORAGE_KEY = "chat_session_ids";
     const MAX_MESSAGES_IN_STORAGE = 5;
 
     const chat = document.getElementById('chat');
@@ -872,6 +989,7 @@
     let isWaitingResponse = false;
     let typingIndicator = null;
     let greeted = false;
+	let isOrderViewActive = false;
 
     console.log("Session ID: ", sessionID);
     saveSessionId(sessionID);
@@ -1427,334 +1545,229 @@
 
     // ==================== Order View Functions ====================
 
-    let isOrderViewActive = false;
+    
 
     async function toggleOrderView() {
-      const chatView = document.getElementById('chat');
-      const orderView = document.getElementById('orderView');
+	  const chatView = document.getElementById('chat');
+	  const orderView = document.getElementById('orderView');
 
-      const toggleBtn = document.getElementById('toggleOrderBtn');
+	  const toggleBtn = document.getElementById('toggleOrderBtn');
 
-      const orderLoading = document.getElementById('orderLoading');
-      const orderContent = document.getElementById('orderContent');
+	  const orderLoading = document.getElementById('orderLoading');
+	  const orderContent = document.getElementById('orderContent');
 
-      const inputWrapper = document.querySelector(
-        '.gt-chat-textarea-wrapper'
-      );
+	  const inputWrapper = document.querySelector('.gt-chat-textarea-wrapper');
+	  const sendBtn = document.getElementById('sendBtn');
 
-      const sendBtn = document.getElementById('sendBtn');
+	  const suggestionBox = document.getElementById('gt-order-suggestion');
 
-      isOrderViewActive = !isOrderViewActive;
+	  isOrderViewActive = !isOrderViewActive;
 
-      // =========================================================
-      // SWITCH TO ORDER VIEW
-      // =========================================================
+	  // =====================================================
+	  // OPEN ORDER VIEW
+	  // =====================================================
 
-      if (isOrderViewActive) {
+	  if (isOrderViewActive) {
 
-        // -------------------------------------------------------
-        // VIEW SWITCH
-        // -------------------------------------------------------
+		// ---------------- UI SWITCH ----------------
+		chatView.style.display = 'none';
+		orderView.style.display = 'block';
 
-        chatView.style.display = 'none';
-        orderView.style.display = 'block';
+		inputWrapper.style.display = 'none';
+		sendBtn.style.display = 'none';
 
-        // Hide input + send in order mode
-        inputWrapper.style.display = 'none';
-        sendBtn.style.display = 'none';
+		toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Chat';
+		toggleBtn.querySelector('.gt-order-toggle-icon').textContent = '💬';
 
-        // Toggle button text/icon
-        toggleBtn.querySelector(
-          '.gt-order-toggle-text'
-        ).textContent = 'Chat';
+		// ---------------- RESET STATE ----------------
+		orderLoading.style.display = 'flex';
+		orderContent.innerHTML = '';
 
-        toggleBtn.querySelector(
-          '.gt-order-toggle-icon'
-        ).textContent = '💬';
+		resetOrderSuggestionBox();
 
-        // -------------------------------------------------------
-        // LOADING
-        // -------------------------------------------------------
+		if (suggestionBox) {
+		  suggestionBox.style.display = 'none';
+		}
 
-        orderLoading.style.display = 'flex';
-        orderContent.innerHTML = '';
+		try {
 
-        try {
+		  // =====================================================
+		  // FETCH ORDER
+		  // =====================================================
 
-          const response = await fetch(backendCurrentOrderURL);
+		  const response = await fetch(backendCurrentOrderURL);
 
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
+		  if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+		  }
 
-          const data = await response.json();
+		  const data = await response.json();
 
-          // =====================================================
-          // EMPTY
-          // =====================================================
+		  // =====================================================
+		  // EMPTY STATE
+		  // =====================================================
 
-          if (!data || Object.keys(data).length === 0) {
+		  if (!data || Object.keys(data).length === 0) {
+			orderContent.innerHTML = `
+			  <div class="gt-order-empty">
+				📋 Keine Bestelldaten verfügbar
+			  </div>
+			`;
+			return;
+		  }
 
-            orderContent.innerHTML = `
-              <div class="gt-order-empty">
-                📋 Keine Bestelldaten verfügbar
-              </div>
-            `;
+		  // =====================================================
+		  // RENDER ORDER HTML
+		  // =====================================================
 
-            return;
-          }
+		  let html = '';
 
-          let html = '';
+		  // ---------------- HERKUNFT ----------------
+		  if (data.herkunft) {
+			html += `
+			  <div class="gt-order-section">
+				<h3>Herkunft</h3>
+				<div class="gt-order-pills">
+				  ${pill('Quelle', data.herkunft)}
+				</div>
+			  </div>
+			`;
+		  }
 
-          // =====================================================
-          // HERKUNFT
-          // =====================================================
+		  // ---------------- BESTELLDATEN ----------------
+		  if (data.formular_daten) {
 
-          if (data.herkunft) {
+			const form = data.formular_daten;
 
-            html += `
-              <div class="gt-order-section">
+			html += `
+			  <div class="gt-order-section">
+				<h3>Bestelldaten</h3>
+				<div class="gt-order-pills">
+			`;
 
-                <h3>Herkunft</h3>
-
-                <div class="gt-order-pills">
-                  ${pill('Quelle', data.herkunft)}
-                </div>
-
-              </div>
-            `;
-          }
-
-          // =====================================================
-          // FORM DATA
-          // =====================================================
-
-          if (data.formular_daten) {
-
-            const form = data.formular_daten;
-
-            html += `
-              <div class="gt-order-section">
-
-                <h3>Bestelldaten</h3>
-            `;
-
-            // =================================================
-            // PRIMARY META PILLS
-            // =================================================
-
-            html += `<div class="gt-order-pills">`;
-
-            // Anzahl
-            if (form.anzahl) {
-              html += pill('Anzahl', form.anzahl);
-            }
-
-            // Dimensions
-            if (form.schild_x) {
-              html += pill(
-                'Breite',
-                `${form.schild_x} mm`
-              );
-            }
-
-            if (form.schild_y) {
-              html += pill(
-                'Höhe',
-                `${form.schild_y} mm`
-              );
-            }
-
-            if (form.schild_z) {
-              html += pill(
-                'Tiefe',
-                `${form.schild_z} mm`
-              );
-            }
-
-            if (form.ver_part_d) {
-              html += pill(
-                'Durchmesser',
-                `${form.ver_part_d} mm`
-              );
-            }
-
-            // Produkt
-            if (form.produkt?.name) {
-              html += pill(
-                'Produkt',
-                form.produkt.name
-              );
-            }
-
-            // Produkt Kategorie
-            if (form.produkt_kategorie?.name) {
-              html += pill(
-                'Produkt Kategorie',
-                form.produkt_kategorie.name
-              );
-            }
-
-            // Material Kategorie
-            if (form.material_kategorie?.name) {
-              html += pill(
-                'Material Kategorie',
-                form.material_kategorie.name
-              );
-            }
-
-            // Material Unterkategorie
-            if (form.material_unterkategorie?.name) {
-              html += pill(
-                'Material Unterkategorie',
-                form.material_unterkategorie.name
-              );
-            }
-
-            html += `</div>`;
-
-            // =================================================
-            // NORMAL FIELDS
-            // =================================================
-
-            const hiddenFields = [
-
-              // dimensions/meta pills
-              'anzahl',
-              'schild_x',
-              'schild_y',
-              'schild_z',
-              'ver_part_d',
-
-              // object pills
-              'produkt',
-              'produkt_kategorie',
-              'material_kategorie',
-              'material_unterkategorie',
-
-              // special collections
-              'veredelungen',
-              'addons',
-              'handlungen'
-            ];
-
-            Object.entries(form).forEach(([key, value]) => {
-
-              if (hiddenFields.includes(key)) {
-                return;
-              }
-
-              if (
-                value === null ||
-                value === undefined ||
-                value === ''
-              ) {
-                return;
-              }
-
-              html += renderField(key, value);
-
-            });
-
-            // =================================================
-            // VEREDLUNGEN
-            // =================================================
-
-            html += renderCompactCollection(
-              'Veredelungen',
-              form.veredelungen
-            );
-
-            // =================================================
-            // HANDLUNGEN
-            // =================================================
-
-            html += renderCompactCollection(
-              'Handlungen',
-              form.handlungen
-            );
-
-            // =================================================
-            // ADDONS
-            // =================================================
-
-            html += renderCompactCollection(
-              'Addons',
-              form.addons
-            );
-
-            html += `
-              </div>
-            `;
-          }
-
-          // =====================================================
-          // FALLBACK EMPTY
-          // =====================================================
-
-          if (!html.trim()) {
-
-            html = `
-              <div class="gt-order-empty">
-                📋 Keine Bestelldaten verfügbar
-              </div>
-            `;
-          }
-
-          orderContent.innerHTML = html;
-
-        } catch (error) {
-
-          console.error(
-            'Error fetching order:',
-            error
-          );
-
-          orderContent.innerHTML = `
-            <div class="gt-order-error">
-
-              <strong>
-                ⚠️ Fehler beim Laden der Bestellung
-              </strong>
-
-              <div>
-                ${escapeHtml(error.message)}
-              </div>
-
-            </div>
-          `;
-
-        } finally {
-
-          orderLoading.style.display = 'none';
-
-        }
-
-      }
-
-      // =========================================================
-      // SWITCH BACK TO CHAT
-      // =========================================================
-
-      else {
-
-        chatView.style.display = 'block';
-        orderView.style.display = 'none';
-
-        // Show input + send again
-        inputWrapper.style.display = 'flex';
-        sendBtn.style.display = 'block';
-
-        // Toggle button text/icon
-        toggleBtn.querySelector(
-          '.gt-order-toggle-text'
-        ).textContent = 'Bestellung';
-
-        toggleBtn.querySelector(
-          '.gt-order-toggle-icon'
-        ).textContent = '📋';
-      }
-    }
+			// meta pills
+			if (form.anzahl) html += pill('Anzahl', form.anzahl);
+			if (form.schild_x) html += pill('Breite', `${form.schild_x} mm`);
+			if (form.schild_y) html += pill('Höhe', `${form.schild_y} mm`);
+			if (form.schild_z) html += pill('Tiefe', `${form.schild_z} mm`);
+			if (form.ver_part_d) html += pill('Durchmesser', `${form.ver_part_d} mm`);
+
+			if (form.produkt?.name) html += pill('Produkt', form.produkt.name);
+			if (form.produkt_kategorie?.name) html += pill('Produkt Kategorie', form.produkt_kategorie.name);
+			if (form.material_kategorie?.name) html += pill('Material Kategorie', form.material_kategorie.name);
+			if (form.material_unterkategorie?.name) html += pill('Material Unterkategorie', form.material_unterkategorie.name);
+
+			html += `
+				</div>
+			  </div>
+			`;
+
+			orderContent.innerHTML = html;
+
+			// =====================================================
+			// SHOW SINGLETON SUGGESTION BOX
+			// =====================================================
+
+			if (suggestionBox) {
+			  suggestionBox.style.display = 'block';
+			}
+		  }
+
+		} catch (err) {
+
+		  console.error(err);
+
+		  orderContent.innerHTML = `
+			<div class="gt-order-error">
+			  <strong>⚠️ Fehler beim Laden der Bestellung</strong>
+			  <div>${escapeHtml(err.message)}</div>
+			</div>
+		  `;
+		}
+
+		finally {
+		  orderLoading.style.display = 'none';
+		}
+	  }
+
+	  // =====================================================
+	  // BACK TO CHAT
+	  // =====================================================
+
+	  else {
+
+		chatView.style.display = 'block';
+		orderView.style.display = 'none';
+
+		inputWrapper.style.display = 'flex';
+		sendBtn.style.display = 'block';
+
+		toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Bestellung';
+		toggleBtn.querySelector('.gt-order-toggle-icon').textContent = '📋';
+
+		// hide singleton suggestion box
+		if (suggestionBox) {
+		  suggestionBox.style.display = 'none';
+		}
+	  }
+	}
+	
+	
+	function resetOrderSuggestionBox() {
+	  const textarea = document.getElementById('gt-order-suggestion-text');
+	  const button = document.getElementById('gt-order-suggestion-btn');
+	  const status = document.getElementById('gt-order-suggestion-status');
+
+	  if (!textarea || !button || !status) return;
+
+	  textarea.value = '';
+	  status.textContent = '';
+	}
+	
+	async function saveOrderSuggestion() {
+	  const textarea = document.getElementById('gt-order-suggestion-text');
+	  const status = document.getElementById('gt-order-suggestion-status');
+	  const button = document.getElementById('gt-order-suggestion-btn');
+
+	  const description = textarea.value.trim();
+
+	  if (!description) return;
+
+	  button.disabled = true;
+	  button.textContent = 'Speichert...';
+	  status.textContent = '';
+
+	  try {
+
+		const res = await fetch(backendSaveSuggestion, {
+		  method: 'POST',
+		  headers: { 'Content-Type': 'application/json' },
+		  body: JSON.stringify({
+			session_id: sessionID,
+			//session_id: 'test_session_2026_05_11_22_29_25_52z2kidq0',
+			description
+		  })
+		});
+
+		const data = await res.json();
+
+		if (!res.ok || !data.success) {
+		  throw new Error(data.error || data.detail || 'Fehler beim Speichern');
+		}
+
+		status.innerHTML = `<span style="color:#7dffb2;">✓ Vorschlag gespeichert</span>`;
+		textarea.value = '';
+
+	  } catch (err) {
+
+		status.innerHTML = `<span style="color:#ff8a8a;">${escapeHtml(err.message)}</span>`;
+
+	  } finally {
+
+		button.disabled = false;
+		button.textContent = 'Vorschlag speichern';
+	  }
+	}
 
     function pill(label, value) {
       return `
