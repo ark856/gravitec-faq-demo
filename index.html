@@ -273,6 +273,152 @@
   .gt-copied {
     background: linear-gradient(180deg, #4caf50, #2e7d32) !important;
   }
+  
+  
+  /* =========================================
+	   LEFT COLUMN
+	========================================= */
+
+	.gt-chat-left-controls {
+	  position: relative;
+
+	  display: flex;
+	  flex-direction: column;
+
+	  gap: 8px;
+	}
+
+	/* =========================================
+	   TOGGLE BUTTON
+	========================================= */
+
+	.gt-response-toggle-btn {
+	  height: 36px;
+
+	  border: none;
+
+	  border-radius: 8px;
+
+	  background:
+		linear-gradient(180deg, #3b75c3, #2858a8);
+
+	  color: #fff;
+
+	  font-size: 12px;
+	  font-weight: 700;
+
+	  cursor: pointer;
+
+	  padding: 0 14px;
+
+	  transition: all 0.15s ease;
+	}
+
+	.gt-response-toggle-btn:hover {
+	  transform: translateY(-1px);
+	}
+
+	/* =========================================
+	   TEMPLATE PANEL
+	========================================= */
+
+	.gt-response-template {
+	  position: absolute;
+
+	  bottom: calc(100% + 8px);
+
+	  left: 0;
+
+	  width: 220px;
+
+	  background: #1b1f24;
+
+	  border-radius: 10px;
+
+	  border:
+		1px solid rgba(255,255,255,0.06);
+
+	  box-shadow:
+		0 10px 30px rgba(0,0,0,0.45);
+
+	  padding: 10px;
+
+	  opacity: 0;
+
+	  visibility: hidden;
+
+	  pointer-events: none;
+
+	  transform: translateY(10px);
+
+	  transition:
+		opacity 0.15s ease,
+		transform 0.15s ease,
+		visibility 0.15s ease;
+
+	  z-index: 999;
+	}
+
+	/* ACTIVE */
+
+	.gt-response-template.active {
+	  opacity: 1;
+
+	  visibility: visible;
+
+	  pointer-events: auto;
+
+	  transform: translateY(0);
+	}
+
+	/* =========================================
+	   SCROLL AREA
+	========================================= */
+
+	.gt-response-template-list {
+	  display: flex;
+
+	  flex-wrap: wrap;
+
+	  gap: 6px;
+
+	  max-height: 220px;
+
+	  overflow-y: auto;
+	}
+
+	/* =========================================
+	   RESPONSE BUTTON
+	========================================= */
+
+	.gt-response-template-btn {
+	  border: none;
+
+	  border-radius: 999px;
+
+	  padding: 6px 10px;
+
+	  background:
+		linear-gradient(180deg, #2f5fa8, #244a84);
+
+	  color: #fff;
+
+	  font-size: 11px;
+	  font-weight: 700;
+
+	  cursor: pointer;
+
+	  transition:
+		background 0.15s ease,
+		transform 0.15s ease;
+	}
+
+	.gt-response-template-btn:hover {
+	  background:
+		linear-gradient(180deg, #3b75c3, #2858a8);
+
+	  transform: translateY(-1px);
+	}
 
   /** -------------------------------- */
 
@@ -941,12 +1087,22 @@
 
 	</div>
     <div class="gt-chat-input">
-        <div class="gt-order-toggle-btn"
-                id="toggleOrderBtn"
-                onclick="toggleOrderView()">
-            <span class="gt-order-toggle-icon">📋</span>
-            <span class="gt-order-toggle-text">Bestellung</span>
-        </div>
+        <div class="gt-chat-left-controls"> 
+			<!-- RESPONSE TOGGLE --> 
+			<button type="button" id="gt-response-toggle" class="gt-order-toggle-btn" > 
+				Eingabe<br>Beispiele 
+			</button> 
+			<!-- RESPONSE TEMPLATE --> 
+			<div id="gt-response-template" class="gt-response-template" > 
+				<div id="gt-response-template-list" class="gt-response-template-list" > 
+					<!-- injected buttons --> 
+				</div> 
+			</div> 
+			<!-- ORDER BUTTON --> 
+			<div class="gt-order-toggle-btn" id="toggleOrderBtn" onclick="toggleOrderView()" >  
+				<span class="gt-order-toggle-text"> Bestellung </span> 
+			</div> 
+		</div>
         <div class="gt-chat-textarea-wrapper">
           <textarea
                   id="chatbot-input"
@@ -967,23 +1123,25 @@
 <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
 <script>
-    //const backendURLstream = 'https://gravitec-faq-demo-backend.onrender.com/api/v1/chat/stream';
-    const backendURLstream = 'https://avahai.gravi-tec.de/api/v1/chat/stream';
-    //const backendURLstream = 'http://localhost:8000/api/v1/chat/stream';
-    
-	const backendCurrentOrderURL = 'https://avahai.gravi-tec.de/api/v1/sessions/g/${sessionID}/current-order'
-    //const backendCurrentOrderURL = 'http://localhost:8000/api/v1/sessions/g/${sessionID}/current-order'
-    //const backendCurrentOrderURL = 'http://localhost:8000/api/v1/sessions/g/test_session_2026_05_11_22_29_25_52z2kidq0/current-order'
+	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
 	
-	const backendSaveSuggestion = 'https://avahai.gravi-tec.de/api/v1/order-suggestions/save'
-	//const backendSaveSuggestion = 'http://localhost:8000/api/v1/order-suggestions/save'
-    
+    const isLocalTest = false;
+	const BASE_URL = isLocalTest
+	  ? "http://localhost:8000"
+	  : "https://avahai.gravi-tec.de";
+
+	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
+	const backendURLstream = `${BASE_URL}/api/v1/chat/stream`;
+	const backendCurrentOrderURL = `${BASE_URL}/api/v1/sessions/g/${sessionID}/current-order`;
+	const backendSaveSuggestion = `${BASE_URL}/api/v1/order-suggestions/save`;
+	const possibleResponsesURL = `${BASE_URL}/api/v1/prompt/responses`;
+	
 	const STORAGE_KEY = "chat_session_ids";
     const MAX_MESSAGES_IN_STORAGE = 5;
 
     const chat = document.getElementById('chat');
     const input = document.getElementById('chatbot-input');
-    const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
+    
 
     let messages = [];
     let isWaitingResponse = false;
@@ -1246,7 +1404,100 @@
 
     // ==================== UI Helper Functions ====================
 
-    /**
+    // ========================================
+	// RESPONSE TEMPLATE
+	// ========================================
+
+	const gtResponseTemplate =
+	  document.getElementById('gt-response-template');
+
+	const gtResponseToggle =
+	  document.getElementById('gt-response-toggle');
+
+	const gtResponseList =
+	  document.getElementById('gt-response-template-list');
+
+	// toggle open
+
+	gtResponseToggle.addEventListener('click', () => {
+
+	  gtResponseTemplate.classList.toggle('active');
+
+	});
+	
+	
+	
+	async function loadPossibleResponses() {
+	  try {
+
+		const res = await fetch(
+			possibleResponsesURL
+		);
+
+		if (!res.ok) {
+		  throw new Error('Failed to load responses');
+		}
+
+		const data = await res.json();
+
+		/**
+		 * Expected format (recommended):
+		 * {
+		 *   responses: ["Ja", "Nein", "Preis", ...]
+		 * }
+		 */
+
+		const items = data.responses || data;
+
+		renderResponses(items);
+
+	  } catch (err) {
+		console.error('Response load error:', err);
+	  }
+	}
+	
+	const responseList =
+	  document.getElementById('gt-response-template-list');
+
+	function renderResponses(items = []) {
+	  responseList.innerHTML = '';
+
+	  items.forEach(text => {
+
+		const btn = document.createElement('button');
+
+		btn.className = 'gt-order-toggle-btn';
+		btn.textContent = text;
+
+		btn.onclick = () => {
+		  copyToTextarea(text);
+		};
+
+		responseList.appendChild(btn);
+	  });
+	}
+
+	// close outside
+
+	document.addEventListener('click', (e) => {
+
+	  const inside =
+		gtResponseTemplate.contains(e.target)
+		|| gtResponseToggle.contains(e.target);
+
+	  if (!inside) {
+		gtResponseTemplate.classList.remove('active');
+	  }
+	});
+	
+	loadPossibleResponses();
+
+	
+
+	
+	
+	
+	/**
      * Add a thinking indicator to show AI's reasoning process
      */
     function addThinkingIndicator() {
@@ -1661,6 +1912,23 @@
 				</div>
 			  </div>
 			`;
+			
+			// ---------------- COLLECTIONS ----------------
+
+			html += renderCompactCollection(
+			  'Veredelungen',
+			  form.veredelungen
+			);
+
+			html += renderCompactCollection(
+			  'Addons',
+			  form.addons
+			);
+
+			html += renderCompactCollection(
+			  'Handlungen',
+			  form.handlungen
+			);
 
 			orderContent.innerHTML = html;
 
