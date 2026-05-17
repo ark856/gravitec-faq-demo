@@ -245,24 +245,27 @@ th {
   <div id="info" class="tab-content">
     <h2>Info</h2>
     <div class="session-meta">
-      System running normally.
+      AI Chatbot powered by Linovy for Gravi-Tec
     </div>
   </div>
 
 </div>
 
 <script>
-//const MODEL_API = "http://localhost:8000/agent/available-models";
-//const SETTINGS_API = "http://localhost:8000/agent/settings?code=gravitec";
-//const SESSION_LIST_API = "http://localhost:8000/api/v1/sessions/ids-by-date";
-//const SESSION_LOAD_API = "http://localhost:8000/api/v1/sessions/g";
-//const ORDER_SUGGESTIONS_API = "http://localhost:8000/api/v1/order-suggestions";
+const isLocalTest = false;
 
-const MODEL_API = "https://avahai.gravi-tec.de/agent/available-models";
-const SETTINGS_API = "https://avahai.gravi-tec.de/agent/settings?code=gravitec";
-const SESSION_LIST_API = "https://avahai.gravi-tec.de/api/v1/sessions/ids-by-date";
-const SESSION_LOAD_API = "https://avahai.gravi-tec.de/api/v1/sessions/g";
-const ORDER_SUGGESTIONS_API = "https://avahai.gravi-tec.de/api/v1/order-suggestions";
+const BASE_URL = isLocalTest
+  ? "http://localhost:8000"
+  : "https://avahai.gravi-tec.de";
+
+const MODEL_API = `${BASE_URL}/agent/available-models`;
+const SETTINGS_API = `${BASE_URL}/agent/settings?code=gravitec`;
+const SESSION_LIST_API = `${BASE_URL}/api/v1/sessions/ids-by-date`;
+const SESSION_LOAD_API = `${BASE_URL}/api/v1/sessions/g`;
+const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
+
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".tabs button").forEach(btn => {
