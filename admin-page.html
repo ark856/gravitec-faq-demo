@@ -1,10 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Chatbot Admin</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<!--link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet"-->
 
 <style>
 /* ===== GLOBAL ===== */
@@ -147,9 +141,7 @@ th {
 }
 
 </style>
-</head>
 
-<body>
 
 <div class="admin-container">
   <div class="admin-header">Chatbot Admin</div>
@@ -252,9 +244,9 @@ th {
 </div>
 
 <script>
-const isLocalTest = false;
+let isLocalUrlForChatbotUsed = false;
 
-const BASE_URL = isLocalTest
+const BASE_URL = isLocalUrlForChatbotUsed
   ? "http://localhost:8000"
   : "https://avahai.gravi-tec.de";
 
@@ -264,54 +256,135 @@ const SESSION_LIST_API = `${BASE_URL}/api/v1/sessions/ids-by-date`;
 const SESSION_LOAD_API = `${BASE_URL}/api/v1/sessions/g`;
 const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
 
+/* =========================
+   BOOTSTRAP (WP SAFE)
+========================= */
 
+(function () {
+  function init() {
+    if (window.__ADMIN_INIT__) return;
+    window.__ADMIN_INIT__ = true;
 
+    console.log("Chatbot Admin UI initialized");
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".tabs button").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const tabId = btn.dataset.tab;
-      const tabContent = document.getElementById(tabId);
-      if (!tabContent) {
-        console.error("Tab content not found:", tabId);
-        return; // stop here to avoid the TypeError
-      }
+    initTabs();
+    bindForms();
+    loadModels().then(loadSettings);
+  }
 
-      document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
-      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+  function initTabs() {
+    document.querySelectorAll(".tabs button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tabId = btn.dataset.tab;
+        const tabContent = document.getElementById(tabId);
+        if (!tabContent) return;
 
-      btn.classList.add("active");
-      tabContent.classList.add("active");
+        document.querySelectorAll(".tabs button").forEach(b => b.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
 
-      // Lazy-init Order Suggestions tab
-      if (tabId === "order-suggestions") {
-        initOrderSuggestionsTab();
-      }
+        btn.classList.add("active");
+        tabContent.classList.add("active");
+
+        if (tabId === "order-suggestions") {
+          initOrderSuggestionsTab();
+        }
+      });
     });
-  });
-});
+  }
 
-/* CLEAR STATUS */
-document.getElementById("sessionSelect").onchange = function() {
-  var s = document.getElementById("sessionStatus");
-  s.textContent = "";
-  s.className = "";
+  function bindForms() {
+    document.getElementById("fetchModelsBtn").onclick = async function () {
+      const select = document.getElementById("model");
+      const prev = select.value;
+
+      await loadModels();
+
+      if ([...select.options].some(o => o.value === prev)) {
+        select.value = prev;
+      }
+    };
+
+    document.getElementById("settingsForm").onsubmit = async function (e) {
+      e.preventDefault();
+
+      const payload = {
+        model_name: document.getElementById("model").value,
+        system_prompt: document.getElementById("systemPrompt").value
+      };
+
+      try {
+        const res = await fetch(SETTINGS_API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) throw new Error("Save failed");
+
+        alert("Settings saved ✔");
+      } catch (err) {
+        console.error(err);
+        alert("Error saving settings");
+      }
+    };
+
+    document.getElementById("sessionSearchForm").onsubmit = loadSessions;
+    document.getElementById("loadSessionBtn").onclick = loadSession;
+  }
+
+  function boot() {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init(); // 🔥 CRITICAL for wp-admin
+    }
+  }
+
+  boot();
+})();
+
+/* =========================
+   GLOBAL HELPERS (WP SAFE)
+========================= */
+
+window.deleteSuggestion = async function (id) {
+  if (!confirm(`Delete suggestion ${id}?`)) return;
+
+  try {
+    const res = await fetch(`${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`, {
+      method: "DELETE"
+    });
+
+    if (res.ok) {
+      alert("Suggestion deleted");
+      document.getElementById("suggestionDetails").style.display = "none";
+      loadSuggestionList();
+    } else {
+      alert("Delete failed");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting suggestion");
+  }
 };
 
-/* LOAD SESSIONS IDS */
-document.getElementById("sessionSearchForm").onsubmit = async function (e) {
+/* =========================
+   SESSIONS
+========================= */
+
+async function loadSessions(e) {
   e.preventDefault();
 
   const status = document.getElementById("sessionStatus");
   const select = document.getElementById("sessionSelect");
 
-  const fromRaw = document.getElementById("dateFrom").value; // YYYY-MM-DD
-  const toRaw = document.getElementById("dateTo").value;     // YYYY-MM-DD
+  const fromRaw = document.getElementById("dateFrom").value;
+  const toRaw = document.getElementById("dateTo").value;
 
   function toDDMMYYYY(dateStr) {
     if (!dateStr) return "";
-    const [year, month, day] = dateStr.split("-");
-    return `${day}${month}${year}`;
+    const [y, m, d] = dateStr.split("-");
+    return `${d}${m}${y}`;
   }
 
   const from_time = toDDMMYYYY(fromRaw);
@@ -321,36 +394,33 @@ document.getElementById("sessionSearchForm").onsubmit = async function (e) {
   status.className = "status-loading";
 
   try {
-    const url = `${SESSION_LIST_API}?from_time=${encodeURIComponent(from_time)}&to_time=${encodeURIComponent(to_time)}`;
+    const res = await fetch(
+      `${SESSION_LIST_API}?from_time=${encodeURIComponent(from_time)}&to_time=${encodeURIComponent(to_time)}`
+    );
 
-    const res = await fetch(url);
-	if (!res.ok) throw new Error("Failed session list");
+    if (!res.ok) throw new Error("Failed");
 
-	// backend returns: ["sess1", "sess2"]
-	const sessions = await res.json();
+    const sessions = await res.json();
 
-	select.innerHTML = '<option value="">-- Select Session --</option>';
+    select.innerHTML = '<option value="">-- Select Session --</option>';
 
-	for (const id of sessions) {
-	  const opt = document.createElement("option");
-	  opt.value = id;
-	  opt.textContent = id;
-	  select.appendChild(opt);
-	}
+    for (const id of sessions) {
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = id;
+      select.appendChild(opt);
+    }
 
-	status.textContent = sessions.length ? "✓" : "No sessions";
-	status.className = sessions.length ? "status-success" : "status-empty";
-
+    status.textContent = sessions.length ? "✓" : "No sessions";
+    status.className = sessions.length ? "status-success" : "status-empty";
   } catch (err) {
     console.error(err);
-
     status.textContent = "Error";
     status.className = "status-error";
   }
-};
+}
 
-/* LOAD SESSION */
-document.getElementById("loadSessionBtn").onclick = async function () {
+async function loadSession() {
   const id = document.getElementById("sessionSelect").value;
   if (!id) return alert("Select session");
 
@@ -359,476 +429,207 @@ document.getElementById("loadSessionBtn").onclick = async function () {
 
   try {
     const res = await fetch(`${SESSION_LOAD_API}/${encodeURIComponent(id)}`);
-    if (!res.ok) throw new Error("Failed session load");
+    if (!res.ok) throw new Error("Failed");
 
     const json = await res.json();
 
-    // expected:
-    // {
-    //   session_id,
-    //   message_count,
-    //   data: { kunde, ban_info, bestellungen, messages }
-    // }
-
     renderMeta(json);
     renderMessages(json.data?.messages || []);
-
   } catch (err) {
     console.error(err);
     alert("Failed to load session");
   }
-};
+}
 
-/* META RENDER */
+/* =========================
+   META + MESSAGES
+========================= */
+
 function renderMeta(json) {
-  var meta = document.getElementById("sessionMeta");
+  const meta = document.getElementById("sessionMeta");
   meta.style.display = "block";
   meta.innerHTML = "";
 
-  var box = document.createElement("div");
+  const box = document.createElement("div");
   box.className = "session-meta";
 
-  var grid = document.createElement("div");
+  const grid = document.createElement("div");
   grid.className = "session-meta-grid";
 
   function add(label, value) {
-    var div = document.createElement("div");
+    const div = document.createElement("div");
 
-    var strong = document.createElement("strong");
+    const strong = document.createElement("strong");
     strong.textContent = label + ":";
 
-    var br = document.createElement("br");
-    var text = document.createTextNode(value);
-
     div.appendChild(strong);
-    div.appendChild(br);
-    div.appendChild(text);
+    div.appendChild(document.createElement("br"));
+    div.appendChild(document.createTextNode(value));
 
     grid.appendChild(div);
   }
 
-  var k = json.data.kunde || {};
-  var b = json.data.ban_info || {};
-  var orders = json.data.bestellungen || [];
+  const k = json.data.kunde || {};
+  const b = json.data.ban_info || {};
+  const orders = json.data.bestellungen || [];
 
   add("Session", json.session_id);
   add("Messages", json.message_count);
   add("Email", k.email || "-");
   add("Kundennr", k.kundennummer || "-");
-  add("Erfahrung", k.erfahrung || "-");
   add("Banned", b.is_banned ? "Yes" : "No");
-  add("Strikes", b.strikes || 0);
-  add("Until", b.banned_until || "-");
-  add("Orders", orders.length);
 
   box.appendChild(grid);
   meta.appendChild(box);
-
-  /* ===== BESTELLUNGEN ===== */
-  if (orders.length > 0) {
-    var orderBox = document.createElement("div");
-    orderBox.className = "session-meta";
-
-    var title = document.createElement("strong");
-    title.textContent = "Bestellungen:";
-    orderBox.appendChild(title);
-
-    for (var i = 0; i < orders.length; i++) {
-      var o = orders[i];
-
-      var item = document.createElement("div");
-      item.style.marginTop = "10px";
-      item.style.padding = "10px";
-      item.style.background = "#1b1f24";
-      item.style.border = "1px solid #333";
-      item.style.borderRadius = "6px";
-
-      function addLine(label, value) {
-        var line = document.createElement("div");
-
-        var strong = document.createElement("strong");
-        strong.textContent = label + ": ";
-
-        var text = document.createTextNode(value || "-");
-
-        line.appendChild(strong);
-        line.appendChild(text);
-
-        item.appendChild(line);
-      }
-
-      addLine("Offer ID", o.offer_id);
-      addLine("Herkunft", o.herkunft);
-      addLine("Mail bestätigt", o.bestaetigung_per_mail ? "Yes" : "No");
-
-      /* optional: show some formular data */
-      if (o.formular_daten) {
-        var fd = o.formular_daten;
-
-        addLine("Anzahl", fd.anzahl);
-        addLine("Breite (X)", fd.schild_x);
-        addLine("Höhe (Y)", fd.schild_y);
-
-        if (fd.material_kategorie && fd.material_kategorie.name) {
-          addLine("Material", fd.material_kategorie.name);
-        }
-      }
-
-      orderBox.appendChild(item);
-    }
-
-    meta.appendChild(orderBox);
-  }
 }
 
-/* TABLE RENDER */
 function renderMessages(messages) {
-  var tbody = document.getElementById("historyTable");
+  const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
   if (!messages.length) {
-    var row = document.createElement("tr");
-    var cell = document.createElement("td");
-    cell.colSpan = 3;
-    cell.textContent = "No messages";
-    row.appendChild(cell);
+    const row = document.createElement("tr");
+    const td = document.createElement("td");
+    td.colSpan = 3;
+    td.textContent = "No messages";
+    row.appendChild(td);
     tbody.appendChild(row);
     return;
   }
 
-  for (var i = 0; i < messages.length; i++) {
-    var m = messages[i];
+  for (const m of messages) {
+    const row = document.createElement("tr");
 
-    var row = document.createElement("tr");
-
-    var td1 = document.createElement("td");
-    td1.textContent = m.content || m.text || "";
-
-    var td2 = document.createElement("td");
-    td2.textContent = m.role || "-";
-
-    var td3 = document.createElement("td");
-    td3.textContent = formatTimestamp(m.timestamp) || "-";
-
-    row.appendChild(td1);
-    row.appendChild(td2);
-    row.appendChild(td3);
+    row.innerHTML = `
+      <td>${m.content || m.text || ""}</td>
+      <td>${m.role || "-"}</td>
+      <td>${formatTimestamp(m.timestamp)}</td>
+    `;
 
     tbody.appendChild(row);
   }
 }
 
 function formatTimestamp(ms) {
-  if (!ms) { return ""} 
+  if (!ms) return "";
   const d = new Date(ms);
 
-  const pad = (n) => n.toString().padStart(2, "0");
+  const pad = n => n.toString().padStart(2, "0");
 
-  return (
-    pad(d.getDate()) + "." +
-    pad(d.getMonth() + 1) + "." +
-    d.getFullYear() + " " +
-    pad(d.getHours()) + ":" +
-    pad(d.getMinutes()) + ":" +
-    pad(d.getSeconds())
-  );
+  return `${pad(d.getDate())}.${pad(d.getMonth() + 1)}.${d.getFullYear()} ${pad(
+    d.getHours()
+  )}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 }
 
-
+/* =========================
+   MODELS + SETTINGS
+========================= */
 
 async function loadModels(selectedModel = null) {
   const select = document.getElementById("model");
   const status = document.getElementById("modelStatus");
 
-  status.textContent = "Loading models...";
+  status.textContent = "Loading...";
   status.className = "status-loading";
 
   try {
     const res = await fetch(MODEL_API);
-    if (!res.ok) throw new Error("HTTP " + res.status);
-
     const data = await res.json();
+
     const models = data.models || [];
 
     select.innerHTML = "";
 
-    if (!models.length) {
-      select.innerHTML = "<option>No models available</option>";
-      status.textContent = "No models found";
-      status.className = "status-empty";
-      return;
-    }
-
-    for (const model of models) {
+    for (const m of models) {
       const opt = document.createElement("option");
-      opt.value = model;
-      opt.textContent = model;
+      opt.value = m;
+      opt.textContent = m;
       select.appendChild(opt);
     }
 
-    if (selectedModel) {
-      select.value = selectedModel;
-    }
+    if (selectedModel) select.value = selectedModel;
 
-    status.textContent = "Models loaded ✓";
+    status.textContent = "Loaded ✓";
     status.className = "status-success";
-
   } catch (err) {
     console.error(err);
-
-    select.innerHTML = "<option>Failed to load models</option>";
-    status.textContent = "Error loading models";
+    status.textContent = "Error";
     status.className = "status-error";
   }
 }
 
-document.getElementById("fetchModelsBtn").onclick = async function () {
-  const select = document.getElementById("model");
-
-  // remember current user selection
-  const previousSelection = select.value;
-
-  // reload options only
-  await loadModels();
-
-  // restore selection if still valid
-  const exists = [...select.options].some(o => o.value === previousSelection);
-
-  if (exists && previousSelection) {
-    select.value = previousSelection;
-  }
-};
-
-
 async function loadSettings() {
   try {
     const res = await fetch(SETTINGS_API);
-    if (!res.ok) throw new Error("Failed to load settings");
-
     const data = await res.json();
 
-    const modelName = data.model_name;
-    const systemPrompt = data.system_prompt;
-
-    await loadModels(modelName);
-
-    document.getElementById("systemPrompt").value = systemPrompt || "";
-
+    await loadModels(data.model_name);
+    document.getElementById("systemPrompt").value = data.system_prompt || "";
   } catch (err) {
-    console.error("Settings load error:", err);
+    console.error(err);
   }
 }
 
-document.getElementById("settingsForm").onsubmit = async function (e) {
-  e.preventDefault();
-
-  const payload = {
-    model_name: document.getElementById("model").value,
-    system_prompt: document.getElementById("systemPrompt").value
-  };
-
-  try {
-    const res = await fetch(SETTINGS_API, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) throw new Error("Save failed");
-
-    alert("Settings saved ✔");
-
-  } catch (err) {
-    console.error(err);
-    alert("Error saving settings");
-  }
-};
-
-window.addEventListener("DOMContentLoaded", async function () {
-  await loadModels();      // 1. populate dropdown first
-  await loadSettings();    // 2. apply selected model + prompt
-});
-
-
-
-/**-----------------SUGGESTIONS-START-------------------*/
+/* =========================
+   ORDER SUGGESTIONS
+========================= */
 
 async function initOrderSuggestionsTab() {
-    const select = document.getElementById("suggestionSelect");
-    const loadBtn = document.getElementById("loadSuggestionBtn");
-    const statusEl = document.getElementById("suggestionStatus");
-    const detailsEl = document.getElementById("suggestionDetails");
+  const select = document.getElementById("suggestionSelect");
+  const btn = document.getElementById("loadSuggestionBtn");
+  const status = document.getElementById("suggestionStatus");
+  const details = document.getElementById("suggestionDetails");
 
-    // Load suggestions on tab open
-    await loadSuggestionList();
+  await loadSuggestionList();
 
-    loadBtn.onclick = async () => {
-        const id = select.value;
-        if (!id) {
-            statusEl.textContent = "Please select a suggestion";
-            statusEl.className = "status-error";
-            return;
-        }
+  btn.onclick = async () => {
+    const id = select.value;
+    if (!id) return;
 
-        statusEl.textContent = "Loading...";
-        statusEl.className = "status-loading";
-        detailsEl.style.display = "none";
-        detailsEl.innerHTML = "";
+    status.textContent = "Loading...";
+    details.style.display = "none";
 
-        try {
-            // Fetch full suggestion with price
-            const res = await fetch(`${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    try {
+      const res = await fetch(`${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`);
+      const data = await res.json();
 
-            const data = await res.json();
+      renderSuggestionDetails(data);
 
-            if (!data.success) {
-                throw new Error(data.error || "Failed to calculate price");
-            }
-
-            renderSuggestionDetails(data);
-            statusEl.textContent = "Loaded successfully ✓";
-            statusEl.className = "status-success";
-        } catch (err) {
-            console.error(err);
-            statusEl.textContent = "Error: " + err.message;
-            statusEl.className = "status-error";
-        }
-    };
+      status.textContent = "Loaded ✓";
+    } catch (err) {
+      console.error(err);
+      status.textContent = "Error";
+    }
+  };
 }
 
 async function loadSuggestionList() {
-    const select = document.getElementById("suggestionSelect");
-    const statusEl = document.getElementById("suggestionStatus");
+  const select = document.getElementById("suggestionSelect");
 
-    try {
-        const res = await fetch(`${ORDER_SUGGESTIONS_API}/all/descriptions`);
-        if (!res.ok) throw new Error("Failed to load suggestions");
+  const res = await fetch(`${ORDER_SUGGESTIONS_API}/all/descriptions`);
+  const data = await res.json();
 
-        const descriptions = await res.json(); // expected: { "id1": "Description 1", "id2": "..." }
+  select.innerHTML = '<option value="">-- Select --</option>';
 
-        select.innerHTML = '<option value="">-- Select Suggestion --</option>';
-
-        Object.entries(descriptions).forEach(([id, desc]) => {
-            const opt = document.createElement("option");
-            opt.value = id;
-            opt.textContent = `${id} — ${desc}`;
-            select.appendChild(opt);
-        });
-
-    } catch (err) {
-        console.error(err);
-        statusEl.textContent = "Failed to load suggestion list";
-        statusEl.className = "status-error";
-    }
+  for (const [id, desc] of Object.entries(data)) {
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.textContent = `${id} — ${desc}`;
+    select.appendChild(opt);
+  }
 }
 
 function renderSuggestionDetails(data) {
-    const detailsEl = document.getElementById("suggestionDetails");
-    detailsEl.style.display = "block";
+  const el = document.getElementById("suggestionDetails");
+  el.style.display = "block";
 
-    let html = `
-        <div class="info-box">
-            <h3>${data.description || "Order Suggestion"}</h3>
-            <p><strong>ID:</strong> ${data.suggestion_id}</p>
-            <p><strong>Herkunft:</strong> ${data.herkunft || "-"}</p>
-            <p><strong>Stückzahl:</strong> ${data.stueckzahl}</p>
-            <hr>
-            <h4>💰 Price Information</h4>
-            <p><strong>Total Price:</strong> ${data.total_price.toFixed(2)} €</p>
-            <p><strong>Price per Piece:</strong> ${data.price_per_piece.toFixed(2)} €</p>
-    `;
-
-    if (data.price_breakdown) {
-        const pb = data.price_breakdown;
-        html += `<h5>Price Breakdown</h5><ul>`;
-
-        if (pb.material?.total) {
-            html += `<li><strong>Material:</strong> ${pb.material.total.toFixed(2)} € (${pb.material.per_piece.toFixed(2)} €/pc)</li>`;
-        }
-        if (pb.veredelungen?.total) {
-            html += `<li><strong>Veredelungen:</strong> ${pb.veredelungen.total.toFixed(2)} € (${pb.veredelungen.per_piece.toFixed(2)} €/pc)</li>`;
-        }
-        if (pb.handlungen?.total) {
-            html += `<li><strong>Handlungen:</strong> ${pb.handlungen.total.toFixed(2)} € (${pb.handlungen.per_piece.toFixed(2)} €/pc)</li>`;
-        }
-        if (pb.addons?.total) {
-            html += `<li><strong>Addons:</strong> ${pb.addons.total.toFixed(2)} € (${pb.addons.per_piece.toFixed(2)} €/pc)</li>`;
-        }
-
-        html += `</ul>`;
-    }
-
-    // Formular Daten (nested JSON safe)
-    if (data.formular_daten) {
-        html += `<h5>Formular Data</h5>`;
-        html += `<pre style="background:#0f1316; padding:12px; border-radius:6px; overflow:auto; max-height:400px; font-size:0.9em;">`;
-        html += syntaxHighlight(JSON.stringify(data.formular_daten, null, 2));
-        html += `</pre>`;
-    }
-
-    // Delete Button
-    html += `
-        <div style="margin-top:20px;">
-            <button class="btn" style="background:#ff6b6b;" onclick="deleteSuggestion('${data.suggestion_id}')">
-                🗑 Delete Suggestion
-            </button>
-        </div>
-    `;
-
-    html += `</div>`;
-    detailsEl.innerHTML = html;
+  el.innerHTML = `
+    <div class="info-box">
+      <h3>${data.description}</h3>
+      <p><strong>ID:</strong> ${data.suggestion_id}</p>
+      <p><strong>Total:</strong> ${data.total_price.toFixed(2)} €</p>
+    </div>
+  `;
 }
-
-// Safe JSON pretty-print with no [Object object]
-function syntaxHighlight(json) {
-    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-        let cls = 'color:#9fffc1;'; // numbers and booleans
-        if (/^"/.test(match)) {
-            if (/:$/.test(match)) cls = 'color:#9fc0ff;'; // keys
-            else cls = 'color:#ffcc99;'; // strings
-        } else if (/true|false/.test(match)) {
-            cls = 'color:#ff79c6;';
-        } else if (/null/.test(match)) {
-            cls = 'color:#ff6b6b;';
-        }
-        return `<span style="${cls}">${match}</span>`;
-    });
-}
-
-// Delete function
-async function deleteSuggestion(id) {
-    if (!confirm(`Delete suggestion ${id}?`)) return;
-
-    try {
-        const res = await fetch(`${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`, {
-            method: "DELETE"
-        });
-
-        if (res.ok) {
-            alert("Suggestion deleted successfully");
-            document.getElementById("suggestionDetails").style.display = "none";
-            await loadSuggestionList(); // refresh list
-        } else {
-            alert("Failed to delete suggestion");
-        }
-    } catch (err) {
-        console.error(err);
-        alert("Error deleting suggestion");
-    }
-}
-
-/**-----------------SUGGESTIONS-END---------------------*/
-
-
-
-
-
 
 </script>
-
-</body>
-</html>
