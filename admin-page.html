@@ -244,9 +244,9 @@ th {
 </div>
 
 <script>
-let isLocalUrlForChatbotUsed = false;
+const isLocalTest = false;
 
-const BASE_URL = isLocalUrlForChatbotUsed
+const BASE_URL = isLocalTest
   ? "http://localhost:8000"
   : "https://avahai.gravi-tec.de";
 
@@ -336,7 +336,7 @@ const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", init);
     } else {
-      init(); // 🔥 CRITICAL for wp-admin
+      init(); // IMPORTANT for wp-admin
     }
   }
 
@@ -344,16 +344,17 @@ const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
 })();
 
 /* =========================
-   GLOBAL HELPERS (WP SAFE)
+   GLOBAL DELETE (WP SAFE)
 ========================= */
 
 window.deleteSuggestion = async function (id) {
   if (!confirm(`Delete suggestion ${id}?`)) return;
 
   try {
-    const res = await fetch(`${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`, {
-      method: "DELETE"
-    });
+    const res = await fetch(
+      `${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`,
+      { method: "DELETE" }
+    );
 
     if (res.ok) {
       alert("Suggestion deleted");
@@ -398,18 +399,18 @@ async function loadSessions(e) {
       `${SESSION_LIST_API}?from_time=${encodeURIComponent(from_time)}&to_time=${encodeURIComponent(to_time)}`
     );
 
-    if (!res.ok) throw new Error("Failed");
+    if (!res.ok) throw new Error("Failed session list");
 
     const sessions = await res.json();
 
     select.innerHTML = '<option value="">-- Select Session --</option>';
 
-    for (const id of sessions) {
+    sessions.forEach(id => {
       const opt = document.createElement("option");
       opt.value = id;
       opt.textContent = id;
       select.appendChild(opt);
-    }
+    });
 
     status.textContent = sessions.length ? "✓" : "No sessions";
     status.className = sessions.length ? "status-success" : "status-empty";
@@ -429,7 +430,7 @@ async function loadSession() {
 
   try {
     const res = await fetch(`${SESSION_LOAD_API}/${encodeURIComponent(id)}`);
-    if (!res.ok) throw new Error("Failed");
+    if (!res.ok) throw new Error("Failed session load");
 
     const json = await res.json();
 
@@ -458,14 +459,7 @@ function renderMeta(json) {
 
   function add(label, value) {
     const div = document.createElement("div");
-
-    const strong = document.createElement("strong");
-    strong.textContent = label + ":";
-
-    div.appendChild(strong);
-    div.appendChild(document.createElement("br"));
-    div.appendChild(document.createTextNode(value));
-
+    div.innerHTML = `<strong>${label}:</strong><br>${value ?? "-"}`;
     grid.appendChild(div);
   }
 
@@ -475,8 +469,8 @@ function renderMeta(json) {
 
   add("Session", json.session_id);
   add("Messages", json.message_count);
-  add("Email", k.email || "-");
-  add("Kundennr", k.kundennummer || "-");
+  add("Email", k.email);
+  add("Kundennr", k.kundennummer);
   add("Banned", b.is_banned ? "Yes" : "No");
 
   box.appendChild(grid);
@@ -488,12 +482,7 @@ function renderMessages(messages) {
   tbody.innerHTML = "";
 
   if (!messages.length) {
-    const row = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 3;
-    td.textContent = "No messages";
-    row.appendChild(td);
-    tbody.appendChild(row);
+    tbody.innerHTML = `<tr><td colspan="3">No messages</td></tr>`;
     return;
   }
 
@@ -540,12 +529,12 @@ async function loadModels(selectedModel = null) {
 
     select.innerHTML = "";
 
-    for (const m of models) {
+    models.forEach(m => {
       const opt = document.createElement("option");
       opt.value = m;
       opt.textContent = m;
       select.appendChild(opt);
-    }
+    });
 
     if (selectedModel) select.value = selectedModel;
 
@@ -571,7 +560,7 @@ async function loadSettings() {
 }
 
 /* =========================
-   ORDER SUGGESTIONS
+   ORDER SUGGESTIONS (FULL FIXED)
 ========================= */
 
 async function initOrderSuggestionsTab() {
@@ -590,7 +579,10 @@ async function initOrderSuggestionsTab() {
     details.style.display = "none";
 
     try {
-      const res = await fetch(`${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`);
+      const res = await fetch(
+        `${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`
+      );
+
       const data = await res.json();
 
       renderSuggestionDetails(data);
@@ -609,7 +601,7 @@ async function loadSuggestionList() {
   const res = await fetch(`${ORDER_SUGGESTIONS_API}/all/descriptions`);
   const data = await res.json();
 
-  select.innerHTML = '<option value="">-- Select --</option>';
+  select.innerHTML = '<option value="">-- Select Suggestion --</option>';
 
   for (const [id, desc] of Object.entries(data)) {
     const opt = document.createElement("option");
@@ -623,13 +615,86 @@ function renderSuggestionDetails(data) {
   const el = document.getElementById("suggestionDetails");
   el.style.display = "block";
 
-  el.innerHTML = `
+  let html = `
     <div class="info-box">
-      <h3>${data.description}</h3>
+      <h3>${data.description || "Order Suggestion"}</h3>
       <p><strong>ID:</strong> ${data.suggestion_id}</p>
-      <p><strong>Total:</strong> ${data.total_price.toFixed(2)} €</p>
+      <p><strong>Herkunft:</strong> ${data.herkunft || "-"}</p>
+      <p><strong>Stückzahl:</strong> ${data.stueckzahl || "-"}</p>
+
+      <hr>
+
+      <h4>💰 Price</h4>
+      <p><strong>Total:</strong> ${(data.total_price ?? 0).toFixed(2)} €</p>
+      <p><strong>Per Piece:</strong> ${(data.price_per_piece ?? 0).toFixed(2)} €</p>
+  `;
+
+  const pb = data.price_breakdown;
+  if (pb) {
+    html += `<h5>Breakdown</h5><ul>`;
+
+    if (pb.material?.total != null)
+      html += `<li>Material: ${pb.material.total.toFixed(2)} €</li>`;
+
+    if (pb.veredelungen?.total != null)
+      html += `<li>Veredelungen: ${pb.veredelungen.total.toFixed(2)} €</li>`;
+
+    if (pb.handlungen?.total != null)
+      html += `<li>Handlungen: ${pb.handlungen.total.toFixed(2)} €</li>`;
+
+    if (pb.addons?.total != null)
+      html += `<li>Addons: ${pb.addons.total.toFixed(2)} €</li>`;
+
+    html += `</ul>`;
+  }
+
+  if (data.formular_daten) {
+    html += `
+      <h5>Formular Data</h5>
+      <pre style="background:#0f1316;padding:12px;border-radius:6px;overflow:auto;max-height:400px;">
+        ${syntaxHighlight(JSON.stringify(data.formular_daten, null, 2))}
+      </pre>
+    `;
+  }
+
+  html += `
+    <div style="margin-top:20px;">
+      <button class="btn" style="background:#ff6b6b;"
+        onclick="deleteSuggestion('${data.suggestion_id}')">
+        🗑 Delete Suggestion
+      </button>
     </div>
   `;
+
+  el.innerHTML = html;
+}
+
+/* =========================
+   JSON HIGHLIGHT
+========================= */
+
+function syntaxHighlight(json) {
+  json = json
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  return json.replace(
+    /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+    match => {
+      let cls = "color:#9fffc1;";
+
+      if (/^"/.test(match)) {
+        cls = /:$/.test(match) ? "color:#9fc0ff;" : "color:#ffcc99;";
+      } else if (/true|false/.test(match)) {
+        cls = "color:#ff79c6;";
+      } else if (/null/.test(match)) {
+        cls = "color:#ff6b6b;";
+      }
+
+      return `<span style="${cls}">${match}</span>`;
+    }
+  );
 }
 
 </script>
