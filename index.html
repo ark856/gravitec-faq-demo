@@ -1130,7 +1130,6 @@
 	  ? "http://localhost:8000"
 	  : "https://avahai.gravi-tec.de";
 
-	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
 	const backendURLstream = `${BASE_URL}/api/v1/chat/stream`;
 	const backendCurrentOrderURL = `${BASE_URL}/api/v1/sessions/g/${sessionID}/current-order`;
 	const backendSaveSuggestion = `${BASE_URL}/api/v1/order-suggestions/save`;
@@ -1828,7 +1827,6 @@
 		sendBtn.style.display = 'none';
 
 		toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Chat';
-		toggleBtn.querySelector('.gt-order-toggle-icon').textContent = '💬';
 
 		// ---------------- RESET STATE ----------------
 		orderLoading.style.display = 'flex';
@@ -1971,7 +1969,6 @@
 		sendBtn.style.display = 'block';
 
 		toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Bestellung';
-		toggleBtn.querySelector('.gt-order-toggle-icon').textContent = '📋';
 
 		// hide singleton suggestion box
 		if (suggestionBox) {
