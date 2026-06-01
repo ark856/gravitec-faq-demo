@@ -313,7 +313,7 @@ const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
       };
 
       try {
-        const res = await fetch(SETTINGS_API, {
+        const res = await apiFetch(SETTINGS_API, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -344,6 +344,24 @@ const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
 })();
 
 /* =========================
+   FETCH WRAPPER
+========================= */
+
+const ADMIN_TOKEN = "gravitec";
+
+async function apiFetch(url, options = {}) {
+  const headers = {
+    "X-ADMIN-Token": ADMIN_TOKEN,
+    ...(options.headers || {})
+  };
+
+  return fetch(url, {
+    ...options,
+    headers
+  });
+}
+
+/* =========================
    GLOBAL DELETE (WP SAFE)
 ========================= */
 
@@ -351,8 +369,8 @@ window.deleteSuggestion = async function (id) {
   if (!confirm(`Delete suggestion ${id}?`)) return;
 
   try {
-    const res = await fetch(
-      `${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`,
+    const res = await apiFetch(
+	`${ORDER_SUGGESTIONS_API}/d/${encodeURIComponent(id)}`,
       { method: "DELETE" }
     );
 
@@ -395,8 +413,8 @@ async function loadSessions(e) {
   status.className = "status-loading";
 
   try {
-    const res = await fetch(
-      `${SESSION_LIST_API}?from_time=${encodeURIComponent(from_time)}&to_time=${encodeURIComponent(to_time)}`
+    const res = await apiFetch(
+  `${SESSION_LIST_API}?from_time=${encodeURIComponent(from_time)}&to_time=${encodeURIComponent(to_time)}`
     );
 
     if (!res.ok) throw new Error("Failed session list");
@@ -429,7 +447,7 @@ async function loadSession() {
   tbody.innerHTML = "";
 
   try {
-    const res = await fetch(`${SESSION_LOAD_API}/${encodeURIComponent(id)}`);
+    const res = await apiFetch(`${SESSION_LOAD_API}/${encodeURIComponent(id)}`);
     if (!res.ok) throw new Error("Failed session load");
 
     const json = await res.json();
@@ -522,7 +540,7 @@ async function loadModels(selectedModel = null) {
   status.className = "status-loading";
 
   try {
-    const res = await fetch(MODEL_API);
+    const res = await apiFetch(MODEL_API);
     const data = await res.json();
 
     const models = data.models || [];
@@ -549,7 +567,7 @@ async function loadModels(selectedModel = null) {
 
 async function loadSettings() {
   try {
-    const res = await fetch(SETTINGS_API);
+    const res = await apiFetch(SETTINGS_API);
     const data = await res.json();
 
     await loadModels(data.model_name);
@@ -579,8 +597,8 @@ async function initOrderSuggestionsTab() {
     details.style.display = "none";
 
     try {
-      const res = await fetch(
-        `${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`
+      const res = await apiFetch(
+  `${ORDER_SUGGESTIONS_API}/g/${encodeURIComponent(id)}/price`
       );
 
       const data = await res.json();
@@ -598,7 +616,7 @@ async function initOrderSuggestionsTab() {
 async function loadSuggestionList() {
   const select = document.getElementById("suggestionSelect");
 
-  const res = await fetch(`${ORDER_SUGGESTIONS_API}/all/descriptions`);
+  const res = await apiFetch(`${ORDER_SUGGESTIONS_API}/all/descriptions`);
   const data = await res.json();
 
   select.innerHTML = '<option value="">-- Select Suggestion --</option>';
@@ -634,16 +652,16 @@ function renderSuggestionDetails(data) {
     html += `<h5>Breakdown</h5><ul>`;
 
     if (pb.material?.total != null)
-      html += `<li>Material: ${pb.material.total.toFixed(2)} €</li>`;
+	  html += `<li>Material: ${Number(pb.material.total).toFixed(2)} €</li>`;
 
-    if (pb.veredelungen?.total != null)
-      html += `<li>Veredelungen: ${pb.veredelungen.total.toFixed(2)} €</li>`;
+	if (pb.veredelungen?.total != null)
+	  html += `<li>Veredelungen: ${Number(pb.veredelungen.total).toFixed(2)} €</li>`;
 
-    if (pb.handlungen?.total != null)
-      html += `<li>Handlungen: ${pb.handlungen.total.toFixed(2)} €</li>`;
+	if (pb.handlungen?.total != null)
+	  html += `<li>Handlungen: ${Number(pb.handlungen.total).toFixed(2)} €</li>`;
 
-    if (pb.addons?.total != null)
-      html += `<li>Addons: ${pb.addons.total.toFixed(2)} €</li>`;
+	if (pb.addons?.total != null)
+	  html += `<li>Addons: ${Number(pb.addons.total).toFixed(2)} €</li>`;
 
     html += `</ul>`;
   }
