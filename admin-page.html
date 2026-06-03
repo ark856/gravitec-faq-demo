@@ -621,12 +621,16 @@ async function loadSuggestionList() {
 
   select.innerHTML = '<option value="">-- Select Suggestion --</option>';
 
-  for (const [id, desc] of Object.entries(data)) {
-    const opt = document.createElement("option");
-    opt.value = id;
-    opt.textContent = `${id} — ${desc}`;
-    select.appendChild(opt);
-  }
+  Object.entries(data)
+	  .sort(([idA], [idB]) =>
+		idA.toLowerCase().localeCompare(idB.toLowerCase())
+	  )
+	  .forEach(([id, desc]) => {
+		const opt = document.createElement("option");
+		opt.value = id;
+		opt.textContent = `${id} — ${desc}`;
+		select.appendChild(opt);
+	  });
 }
 
 function renderSuggestionDetails(data) {
