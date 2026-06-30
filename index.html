@@ -1,2299 +1,1701 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-    .gt-chat-container {
-      width: 600px;
-      font-family: 'Source Sans Pro', sans-serif;
-      background: #1b1f24;
-      border: 3px solid #000;
-      display: flex;
-      flex-direction: column;
-      height: 600px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
-      color: #ddd;
-    }
-    .gt-chat-header {
-      background: linear-gradient(180deg, #3b75c3, #2858a8);
-      color: white;
-      font-weight: 700;
-      padding: 14px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    .gt-chat-messages {
-      flex: 1;
-      padding: 20px;
-      overflow-y: auto;
-    }
-    .gt-chat-message-row {
-      width: 100%;
-      display: flex;
-      margin-bottom: 4px;
-    }
-    .gt-chat-message-row.user {
-      justify-content: flex-end;
-    }
-    .gt-chat-message-row.assistant {
-      justify-content: flex-start;
-    }
-    .gt-chat-message {
-      max-width: 80%;
-      width: auto;
-      background: #232933;
-      color: #f0f0f0;
-      padding: 10px 14px;
-      border-radius: 8px;
-      word-wrap: break-word;
-      line-height: 1.4;
-    }
-    .gt-chat-message span {
-      display: block;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-      margin: 0;
-    }
-    .gt-chat-message p {
-      margin: 0;
-      padding: 0;
-    }
-    .gt-chat-message pre,
-    .gt-chat-message code {
-      white-space: pre-wrap;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-    }
-    .gt-chat-message.user {
-      background: #2858a8;
-      color: #fff;
-    }
-    .gt-chat-message.assistant {
-      background: #232933;
-      color: #f0f0f0;
-    }
-    .gt-chat-input {
-      display: flex;
-      gap: 10px;
-      padding: 6px 12px;
-      background: #1b1f24;
-      border-top: 1px solid #333;
-      align-items: flex-end;
-    }
-    .gt-chat-textarea-wrapper {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    .gt-chat-input-field {
-      width: 100%;
-      resize: none;
-      border: none;
-      border-radius: 6px;
-      outline: none;
-      background: #0f1316;
-      color: #fff;
-      font-family: inherit;
-      font-size: 15px;
-      line-height: 1.4;
-      padding: 6px 12px;
-      max-height: calc(1.4em * 5 + 12px);
-      overflow-y: auto;
-      box-sizing: border-box;
-    }
-
-    .gt-chat-input-field,
-    .gt-chat-input-field:hover,
-    .gt-chat-input-field:focus {
-      background-color: #0f1316 !important;  /* dark background */
-      color: #fff !important;               /* text color */
-      border: none !important;              /* remove any hover border */
-      box-shadow: none !important;          /* remove glow if applied by theme */
-    }
-
-    /* Button style */
-    .gt-chat-btn-schild {
-      position: relative;
-      display: inline-block;
-      transform: skewX(-2deg);
-      border-radius: 10px;
-      background: linear-gradient(180deg, #3b75c3, #2858a8);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
-      overflow: hidden;
-      min-width: 140px;
-      padding-right: 20px;
-    }
-    .gt-chat-btn-schild > a {
-      display: block;
-      padding: 14px 54px 14px 28px;
-      transform: skewX(2deg);
-      color: white;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: 16px;
-      position: relative;
-      z-index: 1;
-      text-align: center;
-    }
-    .gt-chat-btn-schild .chip {
-      position: absolute;
-      right: 6px;
-      top: 6px;
-      bottom: 6px;
-      width: 46px;
-      transform: skewX(-2deg);
-      border-radius: 8px;
-      background: linear-gradient(180deg, #fff, #f4f7fc);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      border: 1px solid rgba(0,0,0,0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .gt-chat-btn-schild .chip span {
-      display: inline-block;
-      transform: skewX(12deg);
-      font-size: 18px;
-      color: #2858a8;
-      font-weight: 900;
-    }
-    .gt-chat-btn-schild:hover {
-      background: linear-gradient(180deg, #3b75c3, #3b75c3);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
-    }
-    /* Typing indicator */
-    .gt-chat-typing {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 10px 14px;
-      border-radius: 12px;
-      background: #232933;
-      align-self: flex-start;
-      transform: skewX(-12deg);
-    }
-    .gt-chat-typing span {
-      transform: skewX(12deg);
-      display: flex;
-      gap: 4px;
-    }
-    .gt-chat-dot {
-      width: 8px;
-      height: 8px;
-      background: #3b75c3;
-      border-radius: 50%;
-      animation: bounce 1s infinite;
-    }
-    .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
-    .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    .gt-clickable {
-    cursor: pointer;
-    transition: all 0.15s ease;
+  /* ============================================================
+     1.  LAYOUT
+  ============================================================ */
+  .gt-chat-container {
+    width: 601px;
+    font-family: 'Source Sans Pro', sans-serif;
+    background: #1b1f24;
+    border: 3px solid #000;
+    display: flex;
+    flex-direction: column;
+    height: 600px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    color: #ddd;
+  }
+  .gt-chat-header {
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    color: white;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .gt-chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
   }
 
-
-  /** CLICKABLE PARTS */
-
-  .gt-chat-message ul {
-    padding-left: 0;
-    list-style: none;
+  /* ============================================================
+     2.  MESSAGES
+  ============================================================ */
+  .gt-chat-message-row {
+    width: 100%;
+    display: flex;
+    margin-bottom: 4px;
+  }
+  .gt-chat-message-row.user {
+    justify-content: flex-end;
+  }
+  .gt-chat-message-row.assistant {
+    justify-content: flex-start;
+  }
+  .gt-chat-message {
+    max-width: 80%;
+    width: auto;
+    background: #232933;
+    color: #f0f0f0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    word-wrap: break-word;
+    line-height: 1.4;
+  }
+  .gt-chat-message span {
+    display: block;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    margin: 0;
+  }
+  .gt-chat-message p {
+    margin: 0;
+    padding: 0;
+  }
+  .gt-chat-message pre,
+  .gt-chat-message code {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+  .gt-chat-message.user {
+    background: #2858a8;
+    color: #fff;
+  }
+  .gt-chat-message.assistant {
+    background: #232933;
+    color: #f0f0f0;
   }
 
-  /* Base list item */
-  .gt-chat-message li {
-    margin: 4px 6px 4px 0;
+  /* ============================================================
+     3.  INPUT
+  ============================================================ */
+  .gt-chat-input {
+    display: flex;
+    gap: 10px;
+    padding: 6px 12px;
+    background: #1b1f24;
+    border-top: 1px solid #333;
+    align-items: flex-end;
+  }
+  .gt-chat-textarea-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .gt-chat-input-field {
+    width: 100%;
+    resize: none;
+    border: none;
+    border-radius: 6px;
+    outline: none;
+    background: #0f1316;
+    color: #fff;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+    padding: 6px 12px;
+    max-height: calc(1.4em * 5 + 12px);
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+  .gt-chat-input-field,
+  .gt-chat-input-field:hover,
+  .gt-chat-input-field:focus {
+    background-color: #0f1316 !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
-  /* Clickable list item (no bold inside) */
-  .gt-chat-message li:not(:has(strong, b)) {
+  /* ============================================================
+     4.  SEND BUTTON
+  ============================================================ */
+  .gt-chat-btn-schild {
+    position: relative;
     display: inline-block;
-    cursor: pointer;
+    transform: skewX(-2deg);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    border: 1px solid rgba(255,255,255,0.12);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
+    overflow: hidden;
+    min-width: 140px;
+    padding-right: 20px;
+  }
+  .gt-chat-btn-schild > a {
+    display: block;
+    padding: 14px 54px 14px 28px;
+    transform: skewX(2deg);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .gt-chat-btn-schild .chip {
+    position: absolute;
+    right: 6px;
+    top: 6px;
+    bottom: 6px;
+    width: 46px;
+    transform: skewX(-2deg);
+    border-radius: 8px;
+    background: linear-gradient(180deg, #fff, #f4f7fc);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gt-chat-btn-schild .chip span {
+    display: inline-block;
+    transform: skewX(12deg);
+    font-size: 18px;
+    color: #2858a8;
+    font-weight: 900;
+  }
+  .gt-chat-btn-schild:hover {
+    background: linear-gradient(180deg, #3b75c3, #3b75c3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
+  }
 
+  /* ============================================================
+     5.  TYPING INDICATOR
+  ============================================================ */
+  .gt-chat-typing {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #232933;
+    align-self: flex-start;
+    transform: skewX(-12deg);
+  }
+  .gt-chat-typing span {
+    transform: skewX(12deg);
+    display: flex;
+    gap: 4px;
+  }
+  .gt-chat-dot {
+    width: 8px;
+    height: 8px;
+    background: #3b75c3;
+    border-radius: 50%;
+    animation: bounce 1s infinite;
+  }
+  .gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
+  .gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0); }
+    40% { transform: scale(1); }
+  }
+
+
+
+  /* ============================================================
+     7.  USER OPTIONS  (NEW)
+  ============================================================ */
+  .gt-answer-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+  }
+  .gt-answer-options-label {
+    width: 100%;
+    font-size: 11px;
+    font-weight: 600;
+    color: #6f86a8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 2px;
+  }
+  .gt-answer-option-btn {
+    display: inline-flex;
+    align-items: center;
     background: linear-gradient(180deg, #2f5fa8, #244a84);
     color: #fff;
-
-    padding: 5px 12px;
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 6px;
-
-    border: 1px solid rgba(255,255,255,0.1);
-
-    box-shadow:
-      0 2px 6px rgba(0,0,0,0.4),
-      inset 0 1px 0 rgba(255,255,255,0.05);
-
+    padding: 7px 16px;
+    font-size: 13px;
     font-weight: 600;
+    cursor: pointer;
     transition: all 0.15s ease;
+    font-family: inherit;
+    line-height: 1;
+  }
+  .gt-answer-option-btn:hover {
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .gt-answer-option-btn:active {
+    transform: scale(0.97);
   }
 
-  /* Hover for clickable li */
-  .gt-chat-message li:not(:has(strong, b)):hover {
+  /* ============================================================
+     8.  LEFT CONTROLS & RESPONSE TEMPLATES
+  ============================================================ */
+  .gt-chat-left-controls {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .gt-response-toggle-btn {
+    height: 36px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0 14px;
+    transition: all 0.15s ease;
+  }
+  .gt-response-toggle-btn:hover {
+    transform: translateY(-1px);
+  }
+  .gt-response-template {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    width: 220px;
+    background: #1b1f24;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+    padding: 10px;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+    z-index: 999;
+  }
+  .gt-response-template.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .gt-response-template-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .gt-response-template-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 6px 10px;
+    background: linear-gradient(180deg, #2f5fa8, #244a84);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease;
+  }
+  .gt-response-template-btn:hover {
     background: linear-gradient(180deg, #3b75c3, #2858a8);
     transform: translateY(-1px);
   }
 
-  /* Active */
-  .gt-chat-message li:not(:has(strong, b)):active {
+  /* ============================================================
+     9.  THINKING INDICATOR
+  ============================================================ */
+  .gt-thinking-row {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 4px;
+  }
+  .gt-thinking-indicator {
+    max-width: 80%;
+    background: #232933;
+    color: #f0f0f0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid #3b75c3;
+    line-height: 1.4;
+    font-size: 14px;
+  }
+  .gt-thinking-indicator.gt-complete {
+    opacity: 0.8;
+  }
+  .gt-thinking-indicator.gt-faded {
+    opacity: 0.6;
+  }
+  .gt-thinking-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-weight: 600;
+    color: #9fc0ff;
+  }
+  .gt-thinking-icon {
+    font-size: 18px;
+  }
+  .gt-thinking-content {
+    font-size: 13px;
+    font-style: italic;
+    opacity: 0.85;
+    white-space: pre-wrap;
+  }
+
+  /* ============================================================
+     10.  TOOL CALLS
+  ============================================================ */
+  .gt-tool-row {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 4px;
+  }
+  .gt-tool-calls-container {
+    max-width: 80%;
+    background: #232933;
+    color: #f0f0f0;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid #4caf50;
+    font-size: 14px;
+  }
+  .gt-tool-calls-container.gt-complete {
+    opacity: 0.8;
+  }
+  .gt-tools-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #9fffc1;
+  }
+  .gt-tools-icon {
+    font-size: 18px;
+  }
+  .gt-tools-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .gt-tool-call {
+    background: #1b1f24;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #2c323c;
+  }
+  .gt-tool-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .gt-tool-status {
+    font-size: 14px;
+  }
+  .gt-tool-args {
+    background: #0f1316;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 4px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    color: #cfd8dc;
+  }
+  .gt-tool-result {
+    background: #10251a;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-top: 6px;
+    border-left: 3px solid #4caf50;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  /* ============================================================
+     11.  ORDER TOGGLE BUTTON
+  ============================================================ */
+  .gt-order-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: #20262f;
+    border: 1px solid rgba(255,255,255,0.06);
+    color: #b7c3d6;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  }
+  .gt-order-toggle-btn:hover {
+    background: #293241;
+    border-color: rgba(255,255,255,0.10);
+    color: #ffffff;
+    transform: translateY(-1px);
+  }
+  .gt-order-toggle-btn:active {
     transform: scale(0.97);
   }
-
-  /* LI WITH bold → neutral (not clickable) */
-  .gt-chat-message li:has(strong, b) {
-    background: transparent;
-    padding: 2px 0;
-    cursor: default;
+  .gt-order-toggle-icon {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+  .gt-order-toggle-text {
+    white-space: nowrap;
   }
 
-  /* Bold = always clickable mini button */
-  .gt-chat-message strong,
-  .gt-chat-message b {
-    display: inline-block;
-    cursor: pointer;
-
-    background: linear-gradient(180deg, #3b75c3, #2858a8);
+  /* ============================================================
+     12.  ORDER VIEW
+  ============================================================ */
+  .gt-order-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+  }
+  .gt-order-content {
+    color: #f0f0f0;
+  }
+  .gt-order-section {
+    background: #232933;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 18px;
+    border: 1px solid #2c323c;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+  }
+  .gt-order-section h3 {
+    color: #3b75c3;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3b75c3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .gt-order-pills {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 6px 0 14px 0;
+  }
+  .gt-order-pill-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    position: relative;
+  }
+  .gt-order-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(180deg, #2f5fa8, #244a84);
     color: #fff;
+    padding: 7px 13px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+    font-size: 12px;
+    line-height: 1;
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .gt-order-pill.expandable {
+    cursor: pointer;
+  }
+  .gt-order-pill.expandable:hover {
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .gt-order-pill-label {
+    color: #cfe1ff;
+    font-weight: 600;
+    opacity: 0.9;
+  }
+  .gt-order-pill-value {
+    color: #fff;
+    font-weight: 700;
+  }
+  .gt-order-pill-arrow {
+    font-size: 10px;
+    opacity: 0.72;
+    transition: transform 0.18s ease, opacity 0.18s ease;
+  }
+  .gt-order-pill-wrapper.open .gt-order-pill-arrow {
+    transform: rotate(180deg);
+    opacity: 1;
+  }
+  .gt-order-pill-dropdown {
+    width: 100%;
+    margin-top: 6px;
+    background: #1f252d;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.22s ease, opacity 0.18s ease;
+  }
+  .gt-order-pill-wrapper.open .gt-order-pill-dropdown {
+    max-height: 500px;
+    opacity: 1;
+  }
+  .gt-order-pill-detail {
+    padding: 8px 12px;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #9aa7bb;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .gt-order-pill-detail:last-child {
+    border-bottom: none;
+  }
+  .gt-order-pill-detail-label {
+    color: #6f86a8;
+    font-weight: 600;
+  }
+  .gt-order-subsection-block {
+    margin-top: 22px;
+  }
+  .gt-order-subsection-title {
+    color: #3b75c3;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-bottom: 7px;
+    border-bottom: 2px solid #3b75c3;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .gt-order-field {
+    padding: 6px 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .gt-order-field-label {
+    font-weight: 600;
+    color: #9fc0ff;
+    display: inline;
+  }
+  .gt-order-field-label::after {
+    content: ': ';
+  }
+  .gt-order-field-value {
+    color: #ddd;
+    display: inline;
+  }
+  .gt-order-empty {
+    text-align: center;
+    color: #888;
+    padding: 60px 20px;
+    font-size: 16px;
+  }
+  .gt-order-error {
+    background: #3d1f1f;
+    color: #ff6b6b;
+    padding: 16px;
+    border-radius: 8px;
+    border-left: 4px solid #ff6b6b;
+    margin: 20px 0;
+  }
+  .gt-order-error strong {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
 
-    padding: 4px 10px;
+  /* ============================================================
+     13.  ORDER SUGGESTION
+  ============================================================ */
+  .gt-order-suggestion-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .gt-order-suggestion-label {
+    font-size: 12px;
+    color: #9fc0ff;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .gt-order-suggestion-textarea {
+    width: 100%;
+    min-height: 90px;
+    resize: vertical;
+    background: #0f1316;
+    border: 1px solid #2c323c;
+    border-radius: 8px;
+    color: #fff;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    outline: none;
+    transition: border 0.15s ease, box-shadow 0.15s ease;
+  }
+  .gt-order-suggestion-textarea:focus {
+    border-color: #3b75c3;
+    box-shadow: 0 0 0 2px rgba(59,117,195,0.2);
+  }
+  .gt-order-suggestion-btn {
+    align-self: flex-start;
+    background: linear-gradient(180deg, #3b75c3, #2858a8);
+    color: white;
+    border: none;
     border-radius: 6px;
-
-    border: 1px solid rgba(255,255,255,0.12);
-
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-
+    padding: 8px 14px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
     transition: all 0.15s ease;
   }
-
-  /* Bold hover */
-  .gt-chat-message strong:hover,
-  .gt-chat-message b:hover {
-    background: linear-gradient(180deg, #4a86d4, #2f6ad1);
+  .gt-order-suggestion-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
   }
-
-  /* Feedback */
-  .gt-copied {
-    background: linear-gradient(180deg, #4caf50, #2e7d32) !important;
+  .gt-order-suggestion-status {
+    font-size: 12px;
+    color: #9fc0ff;
+    min-height: 16px;
   }
-  
-  
-  /* =========================================
-	   LEFT COLUMN
-	========================================= */
-
-	.gt-chat-left-controls {
-	  position: relative;
-
-	  display: flex;
-	  flex-direction: column;
-
-	  gap: 8px;
-	}
-
-	/* =========================================
-	   TOGGLE BUTTON
-	========================================= */
-
-	.gt-response-toggle-btn {
-	  height: 36px;
-
-	  border: none;
-
-	  border-radius: 8px;
-
-	  background:
-		linear-gradient(180deg, #3b75c3, #2858a8);
-
-	  color: #fff;
-
-	  font-size: 12px;
-	  font-weight: 700;
-
-	  cursor: pointer;
-
-	  padding: 0 14px;
-
-	  transition: all 0.15s ease;
-	}
-
-	.gt-response-toggle-btn:hover {
-	  transform: translateY(-1px);
-	}
-
-	/* =========================================
-	   TEMPLATE PANEL
-	========================================= */
-
-	.gt-response-template {
-	  position: absolute;
-
-	  bottom: calc(100% + 8px);
-
-	  left: 0;
-
-	  width: 220px;
-
-	  background: #1b1f24;
-
-	  border-radius: 10px;
-
-	  border:
-		1px solid rgba(255,255,255,0.06);
-
-	  box-shadow:
-		0 10px 30px rgba(0,0,0,0.45);
-
-	  padding: 10px;
-
-	  opacity: 0;
-
-	  visibility: hidden;
-
-	  pointer-events: none;
-
-	  transform: translateY(10px);
-
-	  transition:
-		opacity 0.15s ease,
-		transform 0.15s ease,
-		visibility 0.15s ease;
-
-	  z-index: 999;
-	}
-
-	/* ACTIVE */
-
-	.gt-response-template.active {
-	  opacity: 1;
-
-	  visibility: visible;
-
-	  pointer-events: auto;
-
-	  transform: translateY(0);
-	}
-
-	/* =========================================
-	   SCROLL AREA
-	========================================= */
-
-	.gt-response-template-list {
-	  display: flex;
-
-	  flex-wrap: wrap;
-
-	  gap: 6px;
-
-	  max-height: 220px;
-
-	  overflow-y: auto;
-	}
-
-	/* =========================================
-	   RESPONSE BUTTON
-	========================================= */
-
-	.gt-response-template-btn {
-	  border: none;
-
-	  border-radius: 999px;
-
-	  padding: 6px 10px;
-
-	  background:
-		linear-gradient(180deg, #2f5fa8, #244a84);
-
-	  color: #fff;
-
-	  font-size: 11px;
-	  font-weight: 700;
-
-	  cursor: pointer;
-
-	  transition:
-		background 0.15s ease,
-		transform 0.15s ease;
-	}
-
-	.gt-response-template-btn:hover {
-	  background:
-		linear-gradient(180deg, #3b75c3, #2858a8);
-
-	  transform: translateY(-1px);
-	}
-
-  /** -------------------------------- */
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1); }
-    }
-
-    /* Thinking Indicator */
-      .gt-thinking-row {
-        width: 100%;
-        display: flex;
-        justify-content: flex-start;
-        margin-bottom: 4px;
-      }
-
-      .gt-thinking-indicator {
-        max-width: 80%;
-        background: #232933;
-        color: #f0f0f0;
-        padding: 10px 14px;
-        border-radius: 8px;
-        border-left: 3px solid #3b75c3;
-        line-height: 1.4;
-        font-size: 14px;
-      }
-
-      .gt-thinking-indicator.gt-complete {
-        opacity: 0.8;
-      }
-
-      .gt-thinking-indicator.gt-faded {
-        opacity: 0.6;
-      }
-
-      .gt-thinking-header {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: #9fc0ff;
-      }
-
-      .gt-thinking-icon {
-        font-size: 18px;
-      }
-
-      .gt-thinking-content {
-        font-size: 13px;
-        font-style: italic;
-        opacity: 0.85;
-        white-space: pre-wrap;
-      }
-
-      /* Tool Calls Container */
-      .gt-tool-row {
-        width: 100%;
-        display: flex;
-        justify-content: flex-start;
-        margin-bottom: 4px;
-      }
-
-      .gt-tool-calls-container {
-        max-width: 80%;
-        background: #232933;
-        color: #f0f0f0;
-        padding: 10px 14px;
-        border-radius: 8px;
-        border-left: 3px solid #4caf50;
-        font-size: 14px;
-      }
-
-      .gt-tool-calls-container.gt-complete {
-        opacity: 0.8;
-      }
-
-      .gt-tools-header {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        margin-bottom: 8px;
-        font-weight: 600;
-        color: #9fffc1;
-      }
-
-      .gt-tools-icon {
-        font-size: 18px;
-      }
-
-      .gt-tools-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .gt-tool-call {
-        background: #1b1f24;
-        padding: 8px 10px;
-        border-radius: 6px;
-        border: 1px solid #2c323c;
-      }
-
-      .gt-tool-name {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        margin-bottom: 4px;
-      }
-
-      .gt-tool-status {
-        font-size: 14px;
-      }
-
-      .gt-tool-args {
-        background: #0f1316;
-        padding: 6px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        margin-top: 4px;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-        color: #cfd8dc;
-      }
-
-      .gt-tool-result {
-        background: #10251a;
-        padding: 6px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        margin-top: 6px;
-        border-left: 3px solid #4caf50;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-      }
-
-      /* =========================================================
-           ORDER TOGGLE BUTTON
-        ========================================================= */
-
-        .gt-order-toggle-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-
-          height: 36px;
-
-          padding: 0 12px;
-
-          border-radius: 8px;
-
-          background: #20262f;
-
-          border: 1px solid rgba(255,255,255,0.06);
-
-          color: #b7c3d6;
-
-          font-size: 13px;
-          font-weight: 600;
-
-          cursor: pointer;
-
-          transition:
-            background 0.15s ease,
-            border-color 0.15s ease,
-            color 0.15s ease,
-            transform 0.15s ease;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-toggle-btn:hover {
-          background: #293241;
-
-          border-color: rgba(255,255,255,0.10);
-
-          color: #ffffff;
-
-          transform: translateY(-1px);
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-toggle-btn:active {
-          transform: scale(0.97);
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-toggle-icon {
-          font-size: 14px;
-          opacity: 0.9;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-toggle-text {
-          white-space: nowrap;
-        }
-
-      /* =========================================================
-           ORDER VIEW
-        ========================================================= */
-
-        .gt-order-loading {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          padding: 40px;
-        }
-
-        .gt-order-content {
-          color: #f0f0f0;
-        }
-
-        /* =========================================================
-           MAIN SECTION
-        ========================================================= */
-
-        .gt-order-section {
-          background: #232933;
-
-          border-radius: 10px;
-
-          padding: 16px;
-          margin-bottom: 18px;
-
-          border: 1px solid #2c323c;
-
-          box-shadow:
-            0 4px 14px rgba(0,0,0,0.28);
-        }
-
-        .gt-order-section h3 {
-          color: #3b75c3;
-
-          font-size: 16px;
-          font-weight: 700;
-
-          margin-bottom: 14px;
-          padding-bottom: 8px;
-
-          border-bottom: 2px solid #3b75c3;
-
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        /* =========================================================
-           PILLS CONTAINER
-        ========================================================= */
-
-        .gt-order-pills {
-          display: flex;
-          flex-wrap: wrap;
-
-          align-items: flex-start;
-
-          gap: 10px;
-
-          margin: 6px 0 14px 0;
-        }
-
-        /* =========================================================
-           PILL WRAPPER
-        ========================================================= */
-
-        .gt-order-pill-wrapper {
-          display: flex;
-          flex-direction: column;
-
-          align-items: flex-start;
-
-          position: relative;
-        }
-
-        /* =========================================================
-           MAIN PILL
-        ========================================================= */
-
-        .gt-order-pill {
-          display: inline-flex;
-          align-items: center;
-
-          gap: 8px;
-
-          background:
-            linear-gradient(180deg, #2f5fa8, #244a84);
-
-          color: #fff;
-
-          padding: 7px 13px;
-
-          border-radius: 999px;
-
-          border:
-            1px solid rgba(255,255,255,0.08);
-
-          box-shadow:
-            0 2px 6px rgba(0,0,0,0.35),
-            inset 0 1px 0 rgba(255,255,255,0.05);
-
-          font-size: 12px;
-          line-height: 1;
-
-          transition:
-            background 0.15s ease,
-            transform 0.15s ease,
-            box-shadow 0.15s ease;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-pill.expandable {
-          cursor: pointer;
-        }
-
-        .gt-order-pill.expandable:hover {
-          background:
-            linear-gradient(180deg, #3b75c3, #2858a8);
-
-          transform: translateY(-1px);
-
-          box-shadow:
-            0 4px 12px rgba(0,0,0,0.35),
-            inset 0 1px 0 rgba(255,255,255,0.06);
-        }
-
-        /* =========================================================
-           PILL TEXT
-        ========================================================= */
-
-        .gt-order-pill-label {
-          color: #cfe1ff;
-
-          font-weight: 600;
-
-          opacity: 0.9;
-        }
-
-        .gt-order-pill-value {
-          color: #fff;
-
-          font-weight: 700;
-        }
-
-        /* =========================================================
-           DROPDOWN ARROW
-        ========================================================= */
-
-        .gt-order-pill-arrow {
-          font-size: 10px;
-
-          opacity: 0.72;
-
-          transition:
-            transform 0.18s ease,
-            opacity 0.18s ease;
-        }
-
-        .gt-order-pill-wrapper.open .gt-order-pill-arrow {
-          transform: rotate(180deg);
-          opacity: 1;
-        }
-
-        /* =========================================================
-           DROPDOWN
-        ========================================================= */
-
-        .gt-order-pill-dropdown {
-          width: 100%;
-
-          margin-top: 6px;
-
-          background: #1f252d;
-
-          border-radius: 10px;
-
-          border:
-            1px solid rgba(255,255,255,0.05);
-
-          box-shadow:
-            0 8px 24px rgba(0,0,0,0.45);
-
-          overflow: hidden;
-
-          max-height: 0;
-
-          opacity: 0;
-
-          transition:
-            max-height 0.22s ease,
-            opacity 0.18s ease;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-pill-wrapper.open .gt-order-pill-dropdown {
-          max-height: 500px;
-          opacity: 1;
-        }
-
-        /* =========================================================
-           DROPDOWN DETAIL ROW
-        ========================================================= */
-
-        .gt-order-pill-detail {
-          padding: 8px 12px;
-
-          font-size: 12px;
-          line-height: 1.45;
-
-          color: #9aa7bb;
-
-          border-bottom:
-            1px solid rgba(255,255,255,0.04);
-        }
-
-        .gt-order-pill-detail:last-child {
-          border-bottom: none;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-pill-detail-label {
-          color: #6f86a8;
-
-          font-weight: 600;
-        }
-
-        /* =========================================================
-           SUBSECTIONS
-        ========================================================= */
-
-        .gt-order-subsection-block {
-          margin-top: 22px;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-subsection-title {
-          color: #3b75c3;
-
-          font-size: 15px;
-          font-weight: 700;
-
-          margin-bottom: 12px;
-          padding-bottom: 7px;
-
-          border-bottom: 2px solid #3b75c3;
-
-          text-transform: uppercase;
-
-          letter-spacing: 0.5px;
-        }
-
-        /* =========================================================
-           GENERIC FIELD
-        ========================================================= */
-
-        .gt-order-field {
-          padding: 6px 0;
-
-          font-size: 13px;
-          line-height: 1.5;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-field-label {
-          font-weight: 600;
-
-          color: #9fc0ff;
-
-          display: inline;
-        }
-
-        .gt-order-field-label::after {
-          content: ': ';
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-field-value {
-          color: #ddd;
-
-          display: inline;
-        }
-
-        /* =========================================================
-           EMPTY
-        ========================================================= */
-
-        .gt-order-empty {
-          text-align: center;
-
-          color: #888;
-
-          padding: 60px 20px;
-
-          font-size: 16px;
-        }
-
-        /* =========================================================
-           ERROR
-        ========================================================= */
-
-        .gt-order-error {
-          background: #3d1f1f;
-
-          color: #ff6b6b;
-
-          padding: 16px;
-
-          border-radius: 8px;
-
-          border-left: 4px solid #ff6b6b;
-
-          margin: 20px 0;
-        }
-
-        /* --------------------------------------------------------- */
-
-        .gt-order-error strong {
-          display: block;
-
-          margin-bottom: 8px;
-
-          font-size: 15px;
-        }
-		
-		/* ================================
-		   SUGGESTION BOX WRAPPER
-		================================ */
-
-		.gt-order-suggestion-box {
-		  display: flex;
-		  flex-direction: column;
-		  gap: 10px;
-		  margin-top: 8px;
-		}
-
-		/* LABEL */
-		.gt-order-suggestion-label {
-		  font-size: 12px;
-		  color: #9fc0ff;
-		  font-weight: 600;
-		  text-transform: uppercase;
-		  letter-spacing: 0.5px;
-		}
-
-		/* TEXTAREA */
-		.gt-order-suggestion-textarea {
-		  width: 100%;
-		  min-height: 90px;
-		  resize: vertical;
-
-		  background: #0f1316;
-		  border: 1px solid #2c323c;
-		  border-radius: 8px;
-
-		  color: #fff;
-		  padding: 10px 12px;
-
-		  font-family: inherit;
-		  font-size: 13px;
-		  line-height: 1.4;
-
-		  outline: none;
-		  transition: border 0.15s ease, box-shadow 0.15s ease;
-		}
-
-		.gt-order-suggestion-textarea:focus {
-		  border-color: #3b75c3;
-		  box-shadow: 0 0 0 2px rgba(59,117,195,0.2);
-		}
-
-		/* BUTTON */
-		.gt-order-suggestion-btn {
-		  align-self: flex-start;
-
-		  background: linear-gradient(180deg, #3b75c3, #2858a8);
-		  color: white;
-
-		  border: none;
-		  border-radius: 6px;
-
-		  padding: 8px 14px;
-
-		  font-weight: 700;
-		  font-size: 13px;
-
-		  cursor: pointer;
-
-		  transition: all 0.15s ease;
-		}
-
-		.gt-order-suggestion-btn:disabled {
-		  opacity: 0.4;
-		  cursor: not-allowed;
-		}
-
-		/* STATUS TEXT */
-		.gt-order-suggestion-status {
-		  font-size: 12px;
-		  color: #9fc0ff;
-		  min-height: 16px;
-		}
-
-
 </style>
 
 
-
 <div class="gt-chat-container">
-    <div class="gt-chat-header">
-        Gravi-Tec Support Chat
-        <div id="session-id-display" style="float:right; font-size:12px; color:#888; margin-top:8px;"></div>
+  <div class="gt-chat-header">
+    Gravi-Tec Support Chat
+    <div id="session-id-display" style="float:right; font-size:12px; color:#888; margin-top:8px;"></div>
+  </div>
+  <div class="gt-chat-messages" id="chat"></div>
+  <div class="gt-chat-messages gt-order-view" id="orderView" style="display: none;">
+    <div class="gt-order-loading" id="orderLoading" style="display: none;">
+      <div class="gt-chat-typing">
+        <span>
+          <div class="gt-chat-dot"></div>
+          <div class="gt-chat-dot"></div>
+          <div class="gt-chat-dot"></div>
+        </span>
+      </div>
     </div>
-    <div class="gt-chat-messages" id="chat"></div>
-    <div class="gt-chat-messages gt-order-view" id="orderView" style="display: none;">
-		<div class="gt-order-loading" id="orderLoading" style="display: none;">
-			<div class="gt-chat-typing">
-				<span>
-					<div class="gt-chat-dot"></div>
-					<div class="gt-chat-dot"></div>
-					<div class="gt-chat-dot"></div>
-				</span>
-			</div>
-		</div>
 
-		<!-- MAIN ORDER CONTENT -->
-		<div class="gt-order-content" id="orderContent"></div>
+    <!-- MAIN ORDER CONTENT -->
+    <div class="gt-order-content" id="orderContent"></div>
 
-		<!-- ✅ PUT TEMPLATE HERE (important) -->
-		<div id="gt-order-suggestion" class="gt-order-section" style="display:none;">
-		  <h3>Bestellvorschlag</h3>
-
-		  <div class="gt-order-suggestion-box">
-
-			<div class="gt-order-suggestion-label">
-			  Beschreibung
-			</div>
-
-			<textarea
-			  id="gt-order-suggestion-text"
-			  class="gt-order-suggestion-textarea"
-			  placeholder="Beschreibe diesen Bestellvorschlag..."
-			></textarea>
-
-			<button
-			  id="gt-order-suggestion-btn"
-			  class="gt-order-suggestion-btn"
-			  onclick="saveOrderSuggestion()"
-			>
-			  Vorschlag speichern
-			</button>
-
-			<div id="gt-order-suggestion-status"
-				 class="gt-order-suggestion-status">
-			</div>
-
-		  </div>
-		</div>
-
-	</div>
-    <div class="gt-chat-input">
-        <div class="gt-chat-left-controls"> 
-			<!-- RESPONSE TOGGLE --> 
-			<button type="button" id="gt-response-toggle" class="gt-order-toggle-btn" > 
-				Eingabe<br>Beispiele 
-			</button> 
-			<!-- RESPONSE TEMPLATE --> 
-			<div id="gt-response-template" class="gt-response-template" > 
-				<div id="gt-response-template-list" class="gt-response-template-list" > 
-					<!-- injected buttons --> 
-				</div> 
-			</div> 
-			<!-- ORDER BUTTON --> 
-			<div class="gt-order-toggle-btn" id="toggleOrderBtn" onclick="toggleOrderView()" >  
-				<span class="gt-order-toggle-text"> Bestellung </span> 
-			</div> 
-		</div>
-        <div class="gt-chat-textarea-wrapper">
-          <textarea
-                  id="chatbot-input"
-                  class="gt-chat-input-field"
-                  placeholder="Nachricht eingeben..."
-                  rows="1"
-          ></textarea>
+    <!-- ORDER SUGGESTION -->
+    <div id="gt-order-suggestion" class="gt-order-section" style="display:none;">
+      <h3>Bestellvorschlag</h3>
+      <div class="gt-order-suggestion-box">
+        <div class="gt-order-suggestion-label">
+          Beschreibung
         </div>
-        <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
-            <a href="#">Senden</a>
-            <div class="chip"><span>✎</span></div>
+        <textarea
+          id="gt-order-suggestion-text"
+          class="gt-order-suggestion-textarea"
+          placeholder="Beschreibe diesen Bestellvorschlag..."
+        ></textarea>
+        <button
+          id="gt-order-suggestion-btn"
+          class="gt-order-suggestion-btn"
+          onclick="saveOrderSuggestion()"
+        >
+          Vorschlag speichern
+        </button>
+        <div id="gt-order-suggestion-status"
+           class="gt-order-suggestion-status">
         </div>
+      </div>
     </div>
+  </div>
+  <div class="gt-chat-input">
+    <div class="gt-chat-left-controls">
+      <!-- RESPONSE TOGGLE -->
+      <button type="button" id="gt-response-toggle" class="gt-order-toggle-btn" >
+        Eingabe<br>Beispiele
+      </button>
+      <!-- RESPONSE TEMPLATE -->
+      <div id="gt-response-template" class="gt-response-template" >
+        <div id="gt-response-template-list" class="gt-response-template-list" >
+          <!-- injected buttons -->
+        </div>
+      </div>
+      <!-- ORDER BUTTON -->
+      <div class="gt-order-toggle-btn" id="toggleOrderBtn" onclick="toggleOrderView()" >
+        <span class="gt-order-toggle-text"> Bestellung </span>
+      </div>
+    </div>
+    <div class="gt-chat-textarea-wrapper">
+      <textarea
+        id="chatbot-input"
+        class="gt-chat-input-field"
+        placeholder="Nachricht eingeben..."
+        rows="1"
+      ></textarea>
+    </div>
+    <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
+      <a href="#">Senden</a>
+      <div class="chip"><span>&#9998;</span></div>
+    </div>
+  </div>
 </div>
-
 
 
 <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
 <script>
-	const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
-	
-    const isLocalTest = false;
-	const BASE_URL = isLocalTest
-	  ? "http://localhost:8000"
-	  : "https://avahai.gravi-tec.de";
+  // ============================================================
+  //  3a.  CONFIG & STATE
+  // ============================================================
 
-	const backendURLstream = `${BASE_URL}/api/v1/chat/stream`;
-	const backendCurrentOrderURL = `${BASE_URL}/api/v1/sessions/g/${sessionID}/current-order`;
-	const backendSaveSuggestion = `${BASE_URL}/api/v1/order-suggestions/save`;
-	const possibleResponsesURL = `${BASE_URL}/api/v1/prompt/responses`;
-	
-	const STORAGE_KEY = "chat_session_ids";
-    const MAX_MESSAGES_IN_STORAGE = 5;
+  const sessionID = "test_session_" + formatDateNow() + "_" + Math.random().toString(36).substr(2, 9);
+  const isLocalTest = false;
+  const BASE_URL = isLocalTest
+    ? "http://localhost:8000"
+    : "https://avahai.gravi-tec.de";
 
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('chatbot-input');
-    
+  const backendURLstream = BASE_URL + "/api/v1/chat/stream";
+  const backendCurrentOrderURL = BASE_URL + "/api/v1/sessions/g/" + sessionID + "/current-order";
+  const backendSaveSuggestion = BASE_URL + "/api/v1/order-suggestions/save";
+  const possibleResponsesURL = BASE_URL + "/api/v1/prompt/responses";
 
-    let messages = [];
-    let isWaitingResponse = false;
-    let typingIndicator = null;
-    let greeted = false;
-	let isOrderViewActive = false;
+  const STORAGE_KEY = "chat_session_ids";
+  const MAX_MESSAGES_IN_STORAGE = 5;
 
-    console.log("Session ID: ", sessionID);
-    saveSessionId(sessionID);
+  let messages = [];
+  let isWaitingResponse = false;
+  let typingIndicator = null;
+  let greeted = false;
+  let isOrderViewActive = false;
 
-    // Show greeting immediately since chat is always visible
-    addMessage('assistant', '👋 Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
-    greeted = true;
-    document.getElementById('session-id-display').textContent = sessionID;
-    resetTextareaHeight();
-    document.querySelector('.gt-chat-container').scrollIntoView({ behavior: 'auto', block: 'start' });
+  console.log("Session ID: ", sessionID);
+  saveSessionId(sessionID);
+  document.getElementById('session-id-display').textContent = sessionID;
 
-    function addMessage(role, content) {
-      messages.push({ role, content, timestamp: Date.now() });
+  // ============================================================
+  //  3b.  DOM REFERENCES
+  // ============================================================
 
-      const row = document.createElement('div');
-      row.className = 'gt-chat-message-row ' + role;
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('chatbot-input');
 
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'gt-chat-message ' + role;
+  // --- response template ---
+  const gtResponseTemplate = document.getElementById('gt-response-template');
+  const gtResponseToggle   = document.getElementById('gt-response-toggle');
+  const gtResponseList     = document.getElementById('gt-response-template-list');
 
-      const inner = document.createElement('span');
 
-      const md = window.markdownit();
-      let formattedContent = content
-        .replace(/\\n/g, '\n')
-        .replace(/\\t/g, '&nbsp;&nbsp;')
-        .replace(/\\ /g, ' ');
+  // ============================================================
+  //  3c.  SSE STREAM HANDLER
+  // ============================================================
 
-      inner.innerHTML = marked.parse(formattedContent);
+  async function sendMessageStream() {
+    if (isWaitingResponse) return;
+    let hasStartedStreaming = false;
+    let botInnerEl = null;
+    let thinkingEl = null;
+    let toolCallsEl = null;
 
-      msgDiv.appendChild(inner);
-      row.appendChild(msgDiv);
-      chat.appendChild(row);
-    }
+    const inputEl = document.querySelector('.gt-chat-input-field');
+    const text = inputEl.value.trim();
+    if (!text) return;
 
-    function showTyping() {
-      typingIndicator = document.createElement('div');
-      typingIndicator.className = 'gt-chat-typing';
-      const inner = document.createElement('span');
-      inner.innerHTML = '<div class="gt-chat-dot"></div><div class="gt-chat-dot"></div><div class="gt-chat-dot"></div>';
-      typingIndicator.appendChild(inner);
-      chat.appendChild(typingIndicator);
-    }
+    isWaitingResponse = true;
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.style.pointerEvents = 'none';
+    sendBtn.style.opacity = '0.6';
 
-    function removeTyping() {
-      if (typingIndicator) {
-        chat.removeChild(typingIndicator);
-        typingIndicator = null;
-      }
-    }
+    addMessage('user', text);
+    inputEl.value = '';
+    showTyping();
 
-    function addStreamingBotMessage() {
-      const row = document.createElement('div');
-      row.className = 'gt-chat-message-row assistant';
+    try {
+      const userMessage = {
+        role: 'user',
+        content: text,
+        timestamp: Date.now()
+      };
 
-      const msgDiv = document.createElement('div');
-      msgDiv.className = 'gt-chat-message assistant';
+      const requestBody = {
+        session_id: sessionID,
+        message: userMessage
+      };
 
-      const inner = document.createElement('span');
-      inner.innerHTML = '';
+      const res = await fetch(backendURLstream, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
+      });
 
-      msgDiv.appendChild(inner);
-      row.appendChild(msgDiv);
-      chat.appendChild(row);
+      if (!res.body) throw new Error('Streaming not supported');
 
-      return inner;
-    }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-    function appendToBotMessage(innerEl, textChunk) {
-      if (!innerEl) return;
-      innerEl._raw = (innerEl._raw || '') + textChunk;
-      innerEl.innerHTML = marked.parse(innerEl._raw);
-    }
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
 
-    async function sendMessageStream() {
-      if (isWaitingResponse) return;
-      let hasStartedStreaming = false;
-      let botInnerEl = null;
-      let thinkingEl = null;
-      let toolCallsEl = null;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop();
 
-      const inputEl = document.querySelector('.gt-chat-input-field');
-      const text = inputEl.value.trim();
-      if (!text) return;
+        for (const part of parts) {
+          if (!part.startsWith('data:')) continue;
 
-      isWaitingResponse = true;
-      const sendBtn = document.getElementById('sendBtn');
-      sendBtn.style.pointerEvents = 'none';
-      sendBtn.style.opacity = '0.6';
+          const json = JSON.parse(part.replace('data:', '').trim());
 
-      addMessage('user', text);
-      inputEl.value = '';
-      showTyping();
+          switch (json.type) {
 
-      try {
+            case 'token':
+              if (!hasStartedStreaming) {
+                removeTyping();
+                botInnerEl = addStreamingBotMessage();
+                hasStartedStreaming = true;
+              }
+              appendToBotMessage(botInnerEl, json.text);
+              break;
 
-        const userMessage = {
-          role: 'user',
-          content: text,
-          timestamp: Date.now()
-        };
+            case 'thinking':
+              if (!thinkingEl) {
+                thinkingEl = addThinkingIndicator();
+              }
+              appendToThinking(thinkingEl, json.content);
+              break;
 
-        const requestBody = {
-          session_id: sessionID,
-          message: userMessage
-        };
+            case 'tool_call':
+              if (!toolCallsEl) {
+                toolCallsEl = addToolCallsContainer();
+              }
+              addToolCall(toolCallsEl, {
+                name: json.tool_name,
+                args: json.args,
+                callId: json.tool_call_id
+              });
+              break;
 
-        const res = await fetch(backendURLstream, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
-        });
+            case 'tool_result':
+              const callId = json?.tool_call_id;
+              if (callId && toolCallsEl) {
+                updateToolResult(toolCallsEl, callId, json.result);
+              }
+              break;
 
-        if (!res.body) throw new Error('Streaming not supported');
+            case 'tool_args_delta':
+              if (toolCallsEl) {
+                updateToolArgs(toolCallsEl, json.args);
+              }
+              break;
 
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
+            case 'part_start':
+              console.log('Starting part ' + json.index + ': ' + json.part_type);
+              break;
 
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
+            case 'final_result_start':
+              if (thinkingEl)  markThinkingComplete(thinkingEl);
+              if (toolCallsEl) markToolCallsComplete(toolCallsEl);
+              break;
 
-          buffer += decoder.decode(value, { stream: true });
-          const parts = buffer.split('\n\n');
-          buffer = parts.pop();
+            case 'user_options':
+              console.log('[SSE] user_options event:', JSON.stringify(json.options));
+              if (botInnerEl) {
+                appendUserOptions(botInnerEl, json.options);
+              } else {
+                console.warn('[SSE] user_options: botInnerEl is null, cannot render');
+              }
+              break;
 
-          for (const part of parts) {
-            if (!part.startsWith('data:')) continue;
-
-            const json = JSON.parse(part.replace('data:', '').trim());
-
-            // Handle different event types
-            switch (json.type) {
-              case 'token':
-                // Regular text streaming
-                if (!hasStartedStreaming) {
-                  removeTyping();
-                  botInnerEl = addStreamingBotMessage();
-                  hasStartedStreaming = true;
-                }
-                appendToBotMessage(botInnerEl, json.text);
-                break;
-
-              case 'thinking':
-                // AI thinking process
-                if (!thinkingEl) {
-                  thinkingEl = addThinkingIndicator();
-                }
-                appendToThinking(thinkingEl, json.content);
-                break;
-
-              case 'tool_call':
-                // Tool is being called
-                if (!toolCallsEl) {
-                  toolCallsEl = addToolCallsContainer();
-                }
-                addToolCall(toolCallsEl, {
-                  name: json.tool_name,
-                  args: json.args,
-                  callId: json.tool_call_id
+            case 'final':
+              if (botInnerEl) {
+                messages.push({
+                  role: 'assistant',
+                  content: botInnerEl._raw || json.output,
+                  timestamp: Date.now()
                 });
-                break;
+              }
+              if (json.usage) {
+                console.log('Token usage:', json.usage);
+              }
+              break;
 
-              case 'tool_result':
-                  console.log("RAW tool_result event:", json);
-                  console.log("tool_call_id value:", json?.tool_call_id);
-                  console.log("result value:", json?.result);
-
-                  const callId = json?.tool_call_id;
-                  if (callId && toolCallsEl) {
-                    updateToolResult(toolCallsEl, callId, json.result);
-                  } else {
-                    console.error("Missing or invalid tool_call_id in tool_result event!", json);
-                  }
-                  break;
-
-              case 'tool_args_delta':
-                // Streaming tool arguments (optional - for real-time display)
-                if (toolCallsEl) {
-                  updateToolArgs(toolCallsEl, json.args);
-                }
-                break;
-
-              case 'part_start':
-                // Optional: Log when new parts start
-                console.log(`Starting part ${json.index}: ${json.part_type}`);
-                break;
-
-              case 'final_result_start':
-                // Model started producing final answer
-                if (thinkingEl) {
-                  markThinkingComplete(thinkingEl);
-                }
-                if (toolCallsEl) {
-                  markToolCallsComplete(toolCallsEl);
-                }
-                break;
-
-              case 'final':
-                // Complete - save to message history
-                if (botInnerEl) {
-                  messages.push({
-                    role: 'assistant',
-                    content: botInnerEl._raw || json.output,
-                    timestamp: Date.now()
-                  });
-                }
-
-                // Optional: Log usage stats
-                if (json.usage) {
-                  console.log('Token usage:', json.usage);
-                  // Could display this in UI if desired
-                }
-                break;
-
-              case 'error':
-                // Error occurred
-                if (!botInnerEl) {
-                  botInnerEl = addStreamingBotMessage();
-                }
-                appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.detail);
-                break;
-            }
-
-            // Legacy error handling
-            if (json.error) {
+            case 'error':
               if (!botInnerEl) {
                 botInnerEl = addStreamingBotMessage();
               }
-              appendToBotMessage(botInnerEl, '\n\n⚠️ ' + json.message);
+              appendToBotMessage(botInnerEl, '\n\n\u26A0\uFE0F ' + json.detail);
+              break;
+          }
+
+          // Legacy error
+          if (json.error) {
+            if (!botInnerEl) {
+              botInnerEl = addStreamingBotMessage();
             }
+            appendToBotMessage(botInnerEl, '\n\n\u26A0\uFE0F ' + json.message);
           }
         }
-      } catch (e) {
-        console.error(e);
-        if (!botInnerEl) botInnerEl = addStreamingBotMessage();
-        appendToBotMessage(botInnerEl, '\n\n❌ Verbindung zum Server fehlgeschlagen.');
-      } finally {
-        isWaitingResponse = false;
-        removeTyping();
-        sendBtn.style.pointerEvents = 'auto';
-        sendBtn.style.opacity = '1';
-
-        // Clean up thinking/tool indicators if they exist
-        /*if (thinkingEl) {
-          removeThinkingIndicator(thinkingEl);
-        }
-        if (toolCallsEl) {
-          removeToolCallsContainer(toolCallsEl);
-        }*/
       }
+    } catch (e) {
+      console.error(e);
+      if (!botInnerEl) botInnerEl = addStreamingBotMessage();
+      appendToBotMessage(botInnerEl, '\n\n\u274C Verbindung zum Server fehlgeschlagen.');
+    } finally {
+      isWaitingResponse = false;
+      removeTyping();
+      sendBtn.style.pointerEvents = 'auto';
+      sendBtn.style.opacity = '1';
+    }
+  }
+
+
+  // ============================================================
+  //  3d.  MESSAGE RENDERERS
+  // ============================================================
+
+  function addMessage(role, content) {
+    messages.push({ role: role, content: content, timestamp: Date.now() });
+
+    const row = document.createElement('div');
+    row.className = 'gt-chat-message-row ' + role;
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'gt-chat-message ' + role;
+
+    const inner = document.createElement('span');
+
+    let formattedContent = content
+      .replace(/\\n/g, '\n')
+      .replace(/\\t/g, '&nbsp;&nbsp;')
+      .replace(/\\ /g, ' ');
+
+    inner.innerHTML = marked.parse(formattedContent);
+
+    msgDiv.appendChild(inner);
+    row.appendChild(msgDiv);
+    chat.appendChild(row);
+  }
+
+  function showTyping() {
+    typingIndicator = document.createElement('div');
+    typingIndicator.className = 'gt-chat-typing';
+    const inner = document.createElement('span');
+    inner.innerHTML = '<div class="gt-chat-dot"></div><div class="gt-chat-dot"></div><div class="gt-chat-dot"></div>';
+    typingIndicator.appendChild(inner);
+    chat.appendChild(typingIndicator);
+  }
+
+  function removeTyping() {
+    if (typingIndicator) {
+      chat.removeChild(typingIndicator);
+      typingIndicator = null;
+    }
+  }
+
+  function addStreamingBotMessage() {
+    const row = document.createElement('div');
+    row.className = 'gt-chat-message-row assistant';
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = 'gt-chat-message assistant';
+
+    const inner = document.createElement('span');
+    inner.innerHTML = '';
+
+    msgDiv.appendChild(inner);
+    row.appendChild(msgDiv);
+    chat.appendChild(row);
+
+    return inner;
+  }
+
+  function appendToBotMessage(innerEl, textChunk) {
+    if (!innerEl) return;
+    innerEl._raw = (innerEl._raw || '') + textChunk;
+    innerEl.innerHTML = marked.parse(innerEl._raw);
+  }
+
+
+  // ============================================================
+  //  3e.  THINKING INDICATOR
+  // ============================================================
+
+  function addThinkingIndicator() {
+    const row = document.createElement('div');
+    row.className = 'gt-thinking-row';
+
+    const thinkingDiv = document.createElement('div');
+    thinkingDiv.className = 'gt-thinking-indicator';
+    thinkingDiv.innerHTML =
+      '<div class="gt-thinking-header">' +
+        '<span>&#128173;</span>' +
+        '<span class="gt-thinking-label">Denkt nach...</span>' +
+      '</div>' +
+      '<div class="gt-thinking-content"></div>';
+
+    row.appendChild(thinkingDiv);
+    chat.appendChild(row);
+
+    return thinkingDiv;
+  }
+
+  function appendToThinking(thinkingEl, text) {
+    const contentEl = thinkingEl.querySelector('.gt-thinking-content');
+    if (contentEl) {
+      contentEl.textContent += text;
+    }
+  }
+
+  function markThinkingComplete(thinkingEl) {
+    if (!thinkingEl) return;
+    thinkingEl.classList.add('gt-complete');
+    const label = thinkingEl.querySelector('.gt-thinking-label');
+    if (label) {
+      label.textContent = 'Denken abgeschlossen';
+    }
+  }
+
+  function removeThinkingIndicator(thinkingEl) {
+    if (!thinkingEl || !thinkingEl.parentNode) return;
+    thinkingEl.classList.add('gt-faded');
+  }
+
+
+  // ============================================================
+  //  3f.  TOOL CALLS
+  // ============================================================
+
+  function addToolCallsContainer() {
+    const row = document.createElement('div');
+    row.className = 'gt-tool-row';
+
+    const toolsDiv = document.createElement('div');
+    toolsDiv.className = 'gt-tool-calls-container';
+    toolsDiv.innerHTML =
+      '<div class="gt-tools-header">' +
+        '<span>&#128295;</span>' +
+        '<span class="gt-tools-label">Verwendet Werkzeuge...</span>' +
+      '</div>' +
+      '<div class="gt-tools-list"></div>';
+
+    row.appendChild(toolsDiv);
+    chat.appendChild(row);
+
+    return toolsDiv;
+  }
+
+  function addToolCall(toolCallsEl, toolCall) {
+    const listEl = toolCallsEl.querySelector('.gt-tools-list');
+    if (!listEl) return;
+
+    const toolDiv = document.createElement('div');
+    toolDiv.className = 'gt-tool-call';
+    toolDiv.dataset.callId = toolCall.callId;
+
+    let argsStr;
+    try {
+      argsStr = JSON.stringify(toolCall.args, null, 2);
+    } catch (e) {
+      argsStr = String(toolCall.args);
     }
 
-    // ==================== UI Helper Functions ====================
+    toolDiv.innerHTML =
+      '<div class="gt-tool-name">' +
+        '<span class="gt-tool-status">&#9203;</span>' +
+        '<strong>' + escapeHtml(toolCall.name) + '</strong>' +
+      '</div>' +
+      '<pre class="gt-tool-args">' + escapeHtml(argsStr) + '</pre>' +
+      '<div class="gt-tool-result" style="display: none;"></div>';
 
-    // ========================================
-	// RESPONSE TEMPLATE
-	// ========================================
+    listEl.appendChild(toolDiv);
+  }
 
-	const gtResponseTemplate =
-	  document.getElementById('gt-response-template');
+  function updateToolResult(toolCallsEl, callId, result) {
+    const matchingTools = toolCallsEl.querySelectorAll('[data-call-id="' + callId + '"]');
+    if (matchingTools.length === 0) {
+      console.warn('No tool found for callId: ' + callId);
+      return;
+    }
+    if (matchingTools.length > 1) {
+      console.warn('Found ' + matchingTools.length + ' tools with the same callId ' + callId);
+    }
+    const toolDiv = matchingTools[matchingTools.length - 1];
+    const statusEl = toolDiv.querySelector('.gt-tool-status');
+    const resultEl = toolDiv.querySelector('.gt-tool-result');
 
-	const gtResponseToggle =
-	  document.getElementById('gt-response-toggle');
+    if (statusEl) statusEl.textContent = '\u2705';
+    if (resultEl) {
+      resultEl.style.display = 'block';
+      var resultStr = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
+      resultEl.textContent = resultStr;
+    }
+  }
 
-	const gtResponseList =
-	  document.getElementById('gt-response-template-list');
+  function updateToolArgs(toolCallsEl, argsDelta) {
+    const lastTool = toolCallsEl.querySelector('.gt-tool-call:last-child .gt-tool-args');
+    if (lastTool) {
+      lastTool.textContent += argsDelta;
+    }
+  }
 
-	// toggle open
+  function markToolCallsComplete(toolCallsEl) {
+    if (!toolCallsEl) return;
+    toolCallsEl.classList.add('gt-complete');
+    const label = toolCallsEl.querySelector('.gt-tools-label');
+    if (label) {
+      label.textContent = 'Werkzeuge verwendet';
+    }
+  }
 
-	gtResponseToggle.addEventListener('click', () => {
+  function removeToolCallsContainer(toolCallsEl) {
+    if (!toolCallsEl) return;
+    toolCallsEl.classList.add('gt-complete');
+  }
 
-	  gtResponseTemplate.classList.toggle('active');
 
-	});
-	
-	
-	
-	async function loadPossibleResponses() {
-	  try {
+  // ============================================================
+  //  3g.  USER OPTIONS  (NEW)
+  // ============================================================
 
-		const res = await fetch(
-			possibleResponsesURL
-		);
+  /**
+   * Render user_options buttons inside the same message container,
+   * directly after the message text <span>
+   */
+  function appendUserOptions(innerEl, options) {
+    console.log('appendUserOptions called, options:', JSON.stringify(options));
+    if (!innerEl) return;
 
-		if (!res.ok) {
-		  throw new Error('Failed to load responses');
-		}
+    var parentMsg = innerEl.parentNode; // .gt-chat-message
 
-		const data = await res.json();
+    var container = parentMsg.querySelector('.gt-answer-options');
 
-		/**
-		 * Expected format (recommended):
-		 * {
-		 *   responses: ["Ja", "Nein", "Preis", ...]
-		 * }
-		 */
-
-		const items = data.responses || data;
-
-		renderResponses(items);
-
-	  } catch (err) {
-		console.error('Response load error:', err);
-	  }
-	}
-	
-	const responseList =
-	  document.getElementById('gt-response-template-list');
-
-	function renderResponses(items = []) {
-	  responseList.innerHTML = '';
-
-	  items.forEach(text => {
-
-		const btn = document.createElement('button');
-
-		btn.className = 'gt-order-toggle-btn';
-		btn.textContent = text;
-
-		btn.onclick = () => {
-		  copyToTextarea(text);
-		};
-
-		responseList.appendChild(btn);
-	  });
-	}
-
-	// close outside
-
-	document.addEventListener('click', (e) => {
-
-	  const inside =
-		gtResponseTemplate.contains(e.target)
-		|| gtResponseToggle.contains(e.target);
-
-	  if (!inside) {
-		gtResponseTemplate.classList.remove('active');
-	  }
-	});
-	
-	loadPossibleResponses();
-
-	
-
-	
-	
-	
-	/**
-     * Add a thinking indicator to show AI's reasoning process
-     */
-    function addThinkingIndicator() {
-      const chatContainer = document.getElementById('chat');
-
-      const row = document.createElement('div');
-      row.className = 'gt-thinking-row';
-
-      const thinkingDiv = document.createElement('div');
-      thinkingDiv.className = 'gt-thinking-indicator';
-      thinkingDiv.innerHTML = `
-        <div class="gt-thinking-header">
-          <span>💭</span>
-          <span class="gt-thinking-label">Denkt nach...</span>
-        </div>
-        <div class="gt-thinking-content"></div>
-      `;
-
-      row.appendChild(thinkingDiv);
-      chatContainer.appendChild(row);
-      //scrollToBottom();
-
-      return thinkingDiv;
+    // empty or no options → hide container
+    if (!options || !options.length) {
+      if (container) container.style.display = 'none';
+      return;
     }
 
-    /**
-     * Append text to thinking indicator
-     */
-    function appendToThinking(thinkingEl, text) {
-      const contentEl = thinkingEl.querySelector('.gt-thinking-content');
-      if (contentEl) {
-        contentEl.textContent += text;
-        //scrollToBottom();
-      }
+    // ensure visible
+    if (!container) {
+      container = document.createElement('div');
+      container.className = 'gt-answer-options';
+      parentMsg.appendChild(container);
+    }
+    container.style.display = '';
+
+    // clear only buttons, keep label
+    var labelEl = container.querySelector('.gt-answer-options-label');
+    if (!labelEl) {
+      labelEl = document.createElement('div');
+      labelEl.className = 'gt-answer-options-label';
+      labelEl.textContent = 'M\u00F6gliche Eingaben';
+      container.appendChild(labelEl);
     }
 
-    /**
-     * Mark thinking as complete
-     */
-    function markThinkingComplete(thinkingEl) {
-      if (!thinkingEl) return;
-      thinkingEl.classList.add('gt-complete');
-      const label = thinkingEl.querySelector('.gt-thinking-label');
-      if (label) {
-        label.textContent = 'Denken abgeschlossen';
-      }
-    }
-
-
-
-    //marking special elements clickable and its content can be copied to textarea
-    chat.addEventListener('click', (e) => {
-      const strongTarget = e.target.closest('strong, b');
-
-      // 1. Bold ALWAYS wins
-      if (strongTarget) {
-        e.stopPropagation();
-        handleCopy(strongTarget);
-        return;
-      }
-
-      // 2. List item only if it has NO bold inside
-      const liTarget = e.target.closest('li');
-      if (liTarget) {
-        const hasBold = liTarget.querySelector('strong, b');
-
-        if (!hasBold) {
-          e.stopPropagation();
-          handleCopy(liTarget);
-        }
-      }
+    options.forEach(function(opt) {
+      var escaped = opt.replace(/"/g, '');
+      if (container.querySelector('[data-option="' + escaped + '"]')) return;
+      var btn = document.createElement('button');
+      btn.className = 'gt-answer-option-btn';
+      btn.setAttribute('data-option', escaped);
+      btn.textContent = opt;
+      btn.addEventListener('click', function() {
+        copyToTextarea(opt);
+      });
+      container.appendChild(btn);
     });
+  }
 
-    function handleCopy(el) {
-      const text = el.innerText.trim();
-      copyToTextarea(text);
 
-      el.classList.add('gt-copied');
-      setTimeout(() => el.classList.remove('gt-copied'), 300);
+  // ============================================================
+  //  3h.  RESPONSE TEMPLATES
+  // ============================================================
+
+  // toggle panel
+  gtResponseToggle.addEventListener('click', function() {
+    gtResponseTemplate.classList.toggle('active');
+  });
+
+  // close when clicking outside
+  document.addEventListener('click', function(e) {
+    var inside = gtResponseTemplate.contains(e.target) || gtResponseToggle.contains(e.target);
+    if (!inside) {
+      gtResponseTemplate.classList.remove('active');
     }
+  });
 
-    function copyToTextarea(text) {
-      const input = document.getElementById('chatbot-input');
-
-      if (input.value.trim().length === 0) {
-        input.value = text;
-      } else {
-        input.value += '\n' + text;
-      }
-
-      input.focus();
-      input.dispatchEvent(new Event('input'));
+  async function loadPossibleResponses() {
+    try {
+      var res = await fetch(possibleResponsesURL);
+      if (!res.ok) throw new Error('Failed to load responses');
+      var data = await res.json();
+      var items = data.responses || data;
+      renderResponses(items);
+    } catch (err) {
+      console.error('Response load error:', err);
     }
+  }
+
+  var responseList = document.getElementById('gt-response-template-list');
+
+  function renderResponses(items) {
+    if (!items) items = [];
+    responseList.innerHTML = '';
+    items.forEach(function(text) {
+      var btn = document.createElement('button');
+      btn.className = 'gt-order-toggle-btn';
+      btn.textContent = text;
+      btn.onclick = function() { copyToTextarea(text); };
+      responseList.appendChild(btn);
+    });
+  }
+
+  loadPossibleResponses();
 
 
-    /**---------------------------------------*/
+  // ============================================================
+  //  3i.  COPY TO TEXTAREA (used by user options & response templates)
+  // ============================================================
 
-    /**
-     * Remove thinking indicator (called after final response)
-     */
-    function removeThinkingIndicator(thinkingEl) {
-      if (!thinkingEl || !thinkingEl.parentNode) return;
-
-      // Option 1: Remove after delay
-      /*setTimeout(() => {
-        if (thinkingEl && thinkingEl.parentNode) {
-          thinkingEl.remove();
-        }
-      }, 2000);*/
-
-      // Option 2: Just fade it out and keep in history
-      thinkingEl.classList.add('gt-faded');
+  function copyToTextarea(text) {
+    var inp = document.getElementById('chatbot-input');
+    if (inp.value.trim().length === 0) {
+      inp.value = text;
+    } else {
+      inp.value += '\n' + text;
     }
+    inp.focus();
+    inp.dispatchEvent(new Event('input'));
+  }
 
-    /**
-     * Add container for tool calls
-     */
-    function addToolCallsContainer() {
-      const chatContainer = document.getElementById('chat');
 
-      const row = document.createElement('div');
-      row.className = 'gt-tool-row';
+  // ============================================================
+  //  3j.  INPUT HANDLING
+  // ============================================================
 
-      const toolsDiv = document.createElement('div');
-      toolsDiv.className = 'gt-tool-calls-container';
-      toolsDiv.innerHTML = `
-        <div class="gt-tools-header">
-          <span>🔧</span>
-          <span class="gt-tools-label">Verwendet Werkzeuge...</span>
-        </div>
-        <div class="gt-tools-list"></div>
-      `;
-
-      row.appendChild(toolsDiv);
-      chatContainer.appendChild(row);
-      //scrollToBottom();
-
-      return toolsDiv;
+  input.addEventListener('keydown', function(e) {
+    if (document.activeElement !== input) return;
+    if (isWaitingResponse) return;
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessageStream();
     }
+  });
 
-    /**
-     * Add a tool call to the container
-     */
-    function addToolCall(toolCallsEl, toolCall) {
-      const listEl = toolCallsEl.querySelector('.gt-tools-list');
-      if (!listEl) return;
+  input.addEventListener('input', function() {
+    input.style.height = 'auto';
+    var lineH = parseInt(getComputedStyle(input).lineHeight, 10);
+    var maxH = lineH * 5 + 24;
+    input.style.height = Math.min(input.scrollHeight, maxH) + 'px';
+  });
 
-      const toolDiv = document.createElement('div');
-      toolDiv.className = 'gt-tool-call';
-      toolDiv.dataset.callId = toolCall.callId;
+  function resetTextareaHeight() {
+    input.style.height = 'auto';
+    var lineH = parseInt(getComputedStyle(input).lineHeight, 10);
+    input.style.height = lineH + 12 + 'px';
+  }
 
-      // Safely stringify args
-      let argsStr;
+
+  // ============================================================
+  //  3k.  ORDER VIEW
+  // ============================================================
+
+  async function toggleOrderView() {
+    var chatView = document.getElementById('chat');
+    var orderView = document.getElementById('orderView');
+    var toggleBtn = document.getElementById('toggleOrderBtn');
+    var orderLoading = document.getElementById('orderLoading');
+    var orderContent = document.getElementById('orderContent');
+    var inputWrapper = document.querySelector('.gt-chat-textarea-wrapper');
+    var sendBtn = document.getElementById('sendBtn');
+    var suggestionBox = document.getElementById('gt-order-suggestion');
+
+    isOrderViewActive = !isOrderViewActive;
+
+    if (isOrderViewActive) {
+      // ---- switch to order view ----
+      chatView.style.display = 'none';
+      orderView.style.display = 'block';
+      inputWrapper.style.display = 'none';
+      sendBtn.style.display = 'none';
+      toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Chat';
+
+      orderLoading.style.display = 'flex';
+      orderContent.innerHTML = '';
+      resetOrderSuggestionBox();
+      if (suggestionBox) suggestionBox.style.display = 'none';
+
       try {
-        argsStr = JSON.stringify(toolCall.args, null, 2);
-      } catch (e) {
-        argsStr = String(toolCall.args);
+        var response = await fetch(backendCurrentOrderURL);
+        if (!response.ok) throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+        var data = await response.json();
+
+        if (!data || Object.keys(data).length === 0) {
+          orderContent.innerHTML =
+            '<div class="gt-order-empty">' +
+              '\uD83D\uDCCB Keine Bestelldaten verf\u00FCgbar' +
+            '</div>';
+          return;
+        }
+
+        var html = '';
+
+        if (data.herkunft) {
+          html +=
+            '<div class="gt-order-section">' +
+              '<h3>Herkunft</h3>' +
+              '<div class="gt-order-pills">' +
+                pill('Quelle', data.herkunft) +
+              '</div>' +
+            '</div>';
+        }
+
+        if (data.formular_daten) {
+          var form = data.formular_daten;
+          html +=
+            '<div class="gt-order-section">' +
+              '<h3>Bestelldaten</h3>' +
+              '<div class="gt-order-pills">';
+
+          if (form.anzahl)     html += pill('Anzahl', form.anzahl);
+          if (form.schild_x)   html += pill('Breite', form.schild_x + ' mm');
+          if (form.schild_y)   html += pill('H\u00F6he', form.schild_y + ' mm');
+          if (form.schild_z)   html += pill('Tiefe', form.schild_z + ' mm');
+          if (form.ver_part_d) html += pill('Durchmesser', form.ver_part_d + ' mm');
+
+          if (form.produkt?.name)                    html += pill('Produkt', form.produkt.name);
+          if (form.produkt_kategorie?.name)          html += pill('Produkt Kategorie', form.produkt_kategorie.name);
+          if (form.material_kategorie?.name)         html += pill('Material Kategorie', form.material_kategorie.name);
+          if (form.material_unterkategorie?.name)    html += pill('Material Unterkategorie', form.material_unterkategorie.name);
+          if (form.material?.name)                   html += pill('Material', form.material.name);
+
+          html +=
+              '</div>' +
+            '</div>';
+
+          html += renderCompactCollection('Veredelungen', form.veredelungen);
+          html += renderCompactCollection('Addons', form.addons);
+          html += renderCompactCollection('Handlungen', form.handlungen);
+
+          orderContent.innerHTML = html;
+
+          if (suggestionBox) suggestionBox.style.display = 'block';
+        }
+      } catch (err) {
+        console.error(err);
+        orderContent.innerHTML =
+          '<div class="gt-order-error">' +
+            '<strong>\u26A0\uFE0F Fehler beim Laden der Bestellung</strong>' +
+            '<div>' + escapeHtml(err.message) + '</div>' +
+          '</div>';
+      } finally {
+        orderLoading.style.display = 'none';
       }
+    } else {
+      // ---- back to chat ----
+      chatView.style.display = 'block';
+      orderView.style.display = 'none';
+      inputWrapper.style.display = 'flex';
+      sendBtn.style.display = 'block';
+      toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Bestellung';
+      if (suggestionBox) suggestionBox.style.display = 'none';
+    }
+  }
 
-      // Escape HTML to prevent XSS
-      const escapeHtml = (text) => {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
-      };
+  function resetOrderSuggestionBox() {
+    var ta = document.getElementById('gt-order-suggestion-text');
+    var btn = document.getElementById('gt-order-suggestion-btn');
+    var st  = document.getElementById('gt-order-suggestion-status');
+    if (!ta || !btn || !st) return;
+    ta.value = '';
+    st.textContent = '';
+  }
 
-      toolDiv.innerHTML = `
-        <div class="gt-tool-name">
-          <span class="gt-tool-status">⏳</span>
-          <strong>${escapeHtml(toolCall.name)}</strong>
-        </div>
-        <pre class="gt-tool-args">${escapeHtml(argsStr)}</pre>
-        <div class="gt-tool-result" style="display: none;"></div>
-      `;
-      listEl.appendChild(toolDiv);
-      //scrollToBottom();
+  async function saveOrderSuggestion() {
+    var textarea = document.getElementById('gt-order-suggestion-text');
+    var status   = document.getElementById('gt-order-suggestion-status');
+    var button   = document.getElementById('gt-order-suggestion-btn');
+    var description = textarea.value.trim();
+    if (!description) return;
+
+    button.disabled = true;
+    button.textContent = 'Speichert...';
+    status.textContent = '';
+
+    try {
+      var res = await fetch(backendSaveSuggestion, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: sessionID,
+          description: description
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.detail || 'Fehler beim Speichern');
+      }
+      status.innerHTML = '<span style="color:#7dffb2;">\u2713 Vorschlag gespeichert</span>';
+      textarea.value = '';
+    } catch (err) {
+      status.innerHTML = '<span style="color:#ff8a8a;">' + escapeHtml(err.message) + '</span>';
+    } finally {
+      button.disabled = false;
+      button.textContent = 'Vorschlag speichern';
+    }
+  }
+
+
+  // ============================================================
+  //  3l.  ORDER RENDERERS
+  // ============================================================
+
+  function pill(label, value) {
+    return (
+      '<div class="gt-order-pill">' +
+        (label
+          ? '<span class="gt-order-pill-label">' + escapeHtml(label) + ':</span>'
+          : '') +
+        '<span class="gt-order-pill-value">' + escapeHtml(String(value)) + '</span>' +
+      '</div>'
+    );
+  }
+
+  function expandablePill(name, details) {
+    if (!details) details = {};
+    var entries = Object.entries(details).filter(function(kv) {
+      return kv[0] !== 'name' && kv[1] !== null && kv[1] !== undefined && kv[1] !== '';
+    });
+    var hasDetails = entries.length > 0;
+
+    var html =
+      '<div class="gt-order-pill-wrapper">' +
+        '<div class="gt-order-pill' + (hasDetails ? ' expandable' : '') + '"' +
+          (hasDetails ? ' onclick="this.parentNode.classList.toggle(\'open\')"' : '') + '>' +
+          '<span class="gt-order-pill-value">' + escapeHtml(String(name)) + '</span>' +
+          (hasDetails ? '<span class="gt-order-pill-arrow">\u2193</span>' : '') +
+        '</div>';
+
+    if (hasDetails) {
+      html += '<div class="gt-order-pill-dropdown">';
+      entries.forEach(function(kv) {
+        html +=
+          '<div class="gt-order-pill-detail">' +
+            '<span class="gt-order-pill-detail-label">' + escapeHtml(formatFieldName(kv[0])) + ':</span> ' +
+            escapeHtml(String(kv[1])) +
+          '</div>';
+      });
+      html += '</div>';
     }
 
-    /**
-     * Update tool call with result
-     */
-    function updateToolResult(toolCallsEl, callId, result) {
-      const matchingTools = toolCallsEl.querySelectorAll(`[data-call-id="${callId}"]`);
+    html += '</div>';
+    return html;
+  }
 
-      if (matchingTools.length === 0) {
-        console.warn(`No tool found for callId: ${callId}`);
-        return;
-      }
+  function renderCompactCollection(title, items) {
+    if (!items || !items.length) return '';
+    var html =
+      '<div class="gt-order-subsection-block">' +
+        '<div class="gt-order-subsection-title">' + escapeHtml(title) + '</div>' +
+        '<div class="gt-order-pills">';
 
-      if (matchingTools.length > 1) {
-        console.warn(`Found ${matchingTools.length} tools with the same callId ${callId} — this should not happen!`);
-      }
-
-      // We take the last one (or first — doesn't matter much if IDs are correct)
-      const toolDiv = matchingTools[matchingTools.length - 1];
-
-      const statusEl = toolDiv.querySelector('.gt-tool-status');
-      const resultEl = toolDiv.querySelector('.gt-tool-result');
-
-      if (statusEl) statusEl.textContent = '✅';
-
-      if (resultEl) {
-        resultEl.style.display = 'block';
-        let resultStr = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
-        resultEl.textContent = resultStr;
-        console.log(`Tool result [${callId}]:`, resultStr.substring(0, 200));
-      }
-    }
-
-    /**
-     * Update tool arguments while streaming (optional)
-     */
-    function updateToolArgs(toolCallsEl, argsDelta) {
-      const lastTool = toolCallsEl.querySelector('.gt-tool-call:last-child .gt-tool-args');
-      if (lastTool) {
-        lastTool.textContent += argsDelta;
-        //scrollToBottom();
-      }
-    }
-
-    /**
-     * Mark all tool calls as complete
-     */
-    function markToolCallsComplete(toolCallsEl) {
-      if (!toolCallsEl) return;
-      toolCallsEl.classList.add('gt-complete');
-      const label = toolCallsEl.querySelector('.gt-tools-label');
-      if (label) {
-        label.textContent = 'Werkzeuge verwendet';
-      }
-    }
-
-    /**
-     * Remove tool calls container
-     */
-    function removeToolCallsContainer(toolCallsEl) {
-      if (!toolCallsEl) return;
-      toolCallsEl.classList.add('gt-complete');
-    }
-
-    /**
-     * Scroll chat to bottom
-     */
-    function scrollToBottom() {
-      const chatMessages = document.querySelector('.gt-chat-messages');
-      if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
-    }
-
-
-    input.addEventListener("keydown", (e) => {
-      if (document.activeElement !== input) return;
-      if (isWaitingResponse) return;
-
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessageStream();
-      }
+    items.forEach(function(item, index) {
+      var name = item.name || item.bezeichnung || item.titel || ('#' + (index + 1));
+      html += expandablePill(name, item);
     });
 
-    // Auto-resize textarea
-    input.addEventListener('input', () => {
-      input.style.height = 'auto';
-      const lineHeight = parseInt(getComputedStyle(input).lineHeight);
-      const maxHeight = lineHeight * 5 + 24;
-      input.style.height = Math.min(input.scrollHeight, maxHeight) + 'px';
+    html +=
+        '</div>' +
+      '</div>';
+    return html;
+  }
+
+  function renderMutedDetails(obj) {
+    if (!obj) return '';
+    var entries = Object.entries(obj).filter(function(kv) {
+      return kv[0] !== 'name' && kv[1] !== null && kv[1] !== undefined && kv[1] !== '';
+    });
+    if (!entries.length) return '';
+
+    var html =
+      '<div class="gt-order-detail-card">' +
+        '<div class="gt-order-detail-toggle" onclick="this.parentNode.classList.toggle(\'open\')">' +
+          'Details anzeigen' +
+        '</div>' +
+        '<div class="gt-order-detail-content">';
+
+    entries.forEach(function(kv) {
+      html +=
+        '<div class="gt-order-detail-row">' +
+          '<span class="gt-order-detail-label">' + escapeHtml(formatFieldName(kv[0])) + ':</span> ' +
+          escapeHtml(String(kv[1])) +
+        '</div>';
     });
 
-    function resetTextareaHeight() {
-      input.style.height = 'auto';                    // reset height
-      const lineHeight = parseInt(getComputedStyle(input).lineHeight);
-      input.style.height = lineHeight + 12 + 'px';   // 1 line + padding
-    }
-
-    function formatDateNow() {
-      const d = new Date(Date.now());
-      const pad = n => String(n).padStart(2, '0');
-      return (
-        d.getFullYear() + '_' +
-        pad(d.getMonth() + 1) + '_' +
-        pad(d.getDate()) + '_' +
-        pad(d.getHours()) + '_' +
-        pad(d.getMinutes()) + '_' +
-        pad(d.getSeconds())
-      );
-    }
-
-    function saveSessionId(newSessionId) {
-      let sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      sessions = sessions.filter(id => id !== newSessionId);
-      sessions.unshift(newSessionId);
-      sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-    }
-
-    // ==================== Order View Functions ====================
-
-    
-
-    async function toggleOrderView() {
-	  const chatView = document.getElementById('chat');
-	  const orderView = document.getElementById('orderView');
-
-	  const toggleBtn = document.getElementById('toggleOrderBtn');
-
-	  const orderLoading = document.getElementById('orderLoading');
-	  const orderContent = document.getElementById('orderContent');
-
-	  const inputWrapper = document.querySelector('.gt-chat-textarea-wrapper');
-	  const sendBtn = document.getElementById('sendBtn');
-
-	  const suggestionBox = document.getElementById('gt-order-suggestion');
-
-	  isOrderViewActive = !isOrderViewActive;
-
-	  // =====================================================
-	  // OPEN ORDER VIEW
-	  // =====================================================
-
-	  if (isOrderViewActive) {
-
-		// ---------------- UI SWITCH ----------------
-		chatView.style.display = 'none';
-		orderView.style.display = 'block';
-
-		inputWrapper.style.display = 'none';
-		sendBtn.style.display = 'none';
-
-		toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Chat';
-
-		// ---------------- RESET STATE ----------------
-		orderLoading.style.display = 'flex';
-		orderContent.innerHTML = '';
-
-		resetOrderSuggestionBox();
-
-		if (suggestionBox) {
-		  suggestionBox.style.display = 'none';
-		}
-
-		try {
-
-		  // =====================================================
-		  // FETCH ORDER
-		  // =====================================================
-
-		  const response = await fetch(backendCurrentOrderURL);
-
-		  if (!response.ok) {
-			throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-		  }
-
-		  const data = await response.json();
-
-		  // =====================================================
-		  // EMPTY STATE
-		  // =====================================================
-
-		  if (!data || Object.keys(data).length === 0) {
-			orderContent.innerHTML = `
-			  <div class="gt-order-empty">
-				📋 Keine Bestelldaten verfügbar
-			  </div>
-			`;
-			return;
-		  }
-
-		  // =====================================================
-		  // RENDER ORDER HTML
-		  // =====================================================
-
-		  let html = '';
-
-		  // ---------------- HERKUNFT ----------------
-		  if (data.herkunft) {
-			html += `
-			  <div class="gt-order-section">
-				<h3>Herkunft</h3>
-				<div class="gt-order-pills">
-				  ${pill('Quelle', data.herkunft)}
-				</div>
-			  </div>
-			`;
-		  }
-
-		  // ---------------- BESTELLDATEN ----------------
-		  if (data.formular_daten) {
-
-			const form = data.formular_daten;
-
-			html += `
-			  <div class="gt-order-section">
-				<h3>Bestelldaten</h3>
-				<div class="gt-order-pills">
-			`;
-
-			// meta pills
-			if (form.anzahl) html += pill('Anzahl', form.anzahl);
-			if (form.schild_x) html += pill('Breite', `${form.schild_x} mm`);
-			if (form.schild_y) html += pill('Höhe', `${form.schild_y} mm`);
-			if (form.schild_z) html += pill('Tiefe', `${form.schild_z} mm`);
-			if (form.ver_part_d) html += pill('Durchmesser', `${form.ver_part_d} mm`);
-
-			if (form.produkt?.name) html += pill('Produkt', form.produkt.name);
-			if (form.produkt_kategorie?.name) html += pill('Produkt Kategorie', form.produkt_kategorie.name);
-			if (form.material_kategorie?.name) html += pill('Material Kategorie', form.material_kategorie.name);
-			if (form.material_unterkategorie?.name) html += pill('Material Unterkategorie', form.material_unterkategorie.name);
-
-			html += `
-				</div>
-			  </div>
-			`;
-			
-			// ---------------- COLLECTIONS ----------------
-
-			html += renderCompactCollection(
-			  'Veredelungen',
-			  form.veredelungen
-			);
-
-			html += renderCompactCollection(
-			  'Addons',
-			  form.addons
-			);
-
-			html += renderCompactCollection(
-			  'Handlungen',
-			  form.handlungen
-			);
-
-			orderContent.innerHTML = html;
-
-			// =====================================================
-			// SHOW SINGLETON SUGGESTION BOX
-			// =====================================================
-
-			if (suggestionBox) {
-			  suggestionBox.style.display = 'block';
-			}
-		  }
-
-		} catch (err) {
-
-		  console.error(err);
-
-		  orderContent.innerHTML = `
-			<div class="gt-order-error">
-			  <strong>⚠️ Fehler beim Laden der Bestellung</strong>
-			  <div>${escapeHtml(err.message)}</div>
-			</div>
-		  `;
-		}
-
-		finally {
-		  orderLoading.style.display = 'none';
-		}
-	  }
-
-	  // =====================================================
-	  // BACK TO CHAT
-	  // =====================================================
-
-	  else {
-
-		chatView.style.display = 'block';
-		orderView.style.display = 'none';
-
-		inputWrapper.style.display = 'flex';
-		sendBtn.style.display = 'block';
-
-		toggleBtn.querySelector('.gt-order-toggle-text').textContent = 'Bestellung';
-
-		// hide singleton suggestion box
-		if (suggestionBox) {
-		  suggestionBox.style.display = 'none';
-		}
-	  }
-	}
-	
-	
-	function resetOrderSuggestionBox() {
-	  const textarea = document.getElementById('gt-order-suggestion-text');
-	  const button = document.getElementById('gt-order-suggestion-btn');
-	  const status = document.getElementById('gt-order-suggestion-status');
-
-	  if (!textarea || !button || !status) return;
-
-	  textarea.value = '';
-	  status.textContent = '';
-	}
-	
-	async function saveOrderSuggestion() {
-	  const textarea = document.getElementById('gt-order-suggestion-text');
-	  const status = document.getElementById('gt-order-suggestion-status');
-	  const button = document.getElementById('gt-order-suggestion-btn');
-
-	  const description = textarea.value.trim();
-
-	  if (!description) return;
-
-	  button.disabled = true;
-	  button.textContent = 'Speichert...';
-	  status.textContent = '';
-
-	  try {
-
-		const res = await fetch(backendSaveSuggestion, {
-		  method: 'POST',
-		  headers: { 'Content-Type': 'application/json' },
-		  body: JSON.stringify({
-			session_id: sessionID,
-			//session_id: 'test_session_2026_05_11_22_29_25_52z2kidq0',
-			description
-		  })
-		});
-
-		const data = await res.json();
-
-		if (!res.ok || !data.success) {
-		  throw new Error(data.error || data.detail || 'Fehler beim Speichern');
-		}
-
-		status.innerHTML = `<span style="color:#7dffb2;">✓ Vorschlag gespeichert</span>`;
-		textarea.value = '';
-
-	  } catch (err) {
-
-		status.innerHTML = `<span style="color:#ff8a8a;">${escapeHtml(err.message)}</span>`;
-
-	  } finally {
-
-		button.disabled = false;
-		button.textContent = 'Vorschlag speichern';
-	  }
-	}
-
-    function pill(label, value) {
-      return `
-        <div class="gt-order-pill">
-          ${
-            label
-              ? `
-                <span class="gt-order-pill-label">
-                  ${escapeHtml(label)}:
-                </span>
-              `
-              : ''
-          }
-
-          <span class="gt-order-pill-value">
-            ${escapeHtml(String(value))}
-          </span>
-        </div>
-      `;
-    }
-
-    function expandablePill(name, details = {}) {
-      const entries = Object.entries(details).filter(([k, v]) => {
-        return (
-          k !== 'name' &&
-          v !== null &&
-          v !== undefined &&
-          v !== ''
-        );
-      });
-
-      const hasDetails = entries.length > 0;
-
-      return `
-        <div class="gt-order-pill-wrapper">
-
-          <div
-            class="gt-order-pill ${hasDetails ? 'expandable' : ''}"
-            ${
-              hasDetails
-                ? `onclick="this.parentNode.classList.toggle('open')"`
-                : ''
-            }
-          >
-
-            <span class="gt-order-pill-value">
-              ${escapeHtml(String(name))}
-            </span>
-
-            ${
-              hasDetails
-                ? `
-                  <span class="gt-order-pill-arrow">
-                    ↓
-                  </span>
-                `
-                : ''
-            }
-
-          </div>
-
-          ${
-            hasDetails
-              ? `
-                <div class="gt-order-pill-dropdown">
-
-                  ${entries.map(([k, v]) => `
-                    <div class="gt-order-pill-detail">
-
-                      <span class="gt-order-pill-detail-label">
-                        ${escapeHtml(formatFieldName(k))}:
-                      </span>
-
-                      ${escapeHtml(String(v))}
-
-                    </div>
-                  `).join('')}
-
-                </div>
-              `
-              : ''
-          }
-
-        </div>
-      `;
-    }
-
-    function renderCompactCollection(title, items) {
-      if (!items || !items.length) {
-        return '';
-      }
-
-      let html = `
-        <div class="gt-order-subsection-block">
-
-          <div class="gt-order-subsection-title">
-            ${escapeHtml(title)}
-          </div>
-
-          <div class="gt-order-pills">
-      `;
-
-      items.forEach((item, index) => {
-
-        const name =
-          item.name ||
-          item.bezeichnung ||
-          item.titel ||
-          `#${index + 1}`;
-
-        html += expandablePill(name, item);
-
-      });
-
-      html += `
-          </div>
-
-        </div>
-      `;
-
-      return html;
-    }
-
-    function renderMutedDetails(obj) {
-      const entries = Object.entries(obj).filter(([k, v]) => {
-        return (
-          k !== 'name' &&
-          v !== null &&
-          v !== undefined &&
-          v !== ''
-        );
-      });
-
-      if (!entries.length) return '';
-
-      let html = `
-        <div class="gt-order-detail-card">
-          <div class="gt-order-detail-toggle"
-               onclick="this.parentNode.classList.toggle('open')">
-            Details anzeigen
-          </div>
-
-          <div class="gt-order-detail-content">
-      `;
-
-      entries.forEach(([key, value]) => {
-        html += `
-          <div class="gt-order-detail-row">
-            <span class="gt-order-detail-label">
-              ${escapeHtml(formatFieldName(key))}:
-            </span>
-
-            ${escapeHtml(String(value))}
-          </div>
-        `;
-      });
-
-      html += `
-          </div>
-        </div>
-      `;
-
-      return html;
-    }
-
-    function renderField(key, value) {
-      // Skip rendering if value is falsy
-      if (value === null || value === undefined || value === '') return '';
-
-      // Handle arrays of objects (like veredelungen, handlungen, addons)
-      if (Array.isArray(value)) {
-        if (value.length === 0) return '';
-
-        // Check if array contains objects
-        if (typeof value[0] === 'object' && value[0] !== null) {
-          let html = `<div class="gt-order-field"><span class="gt-order-field-label">${formatFieldName(key)}</span></div>`;
-          value.forEach((item, idx) => {
-            // Extract name for header if available
-            const name = item.name || item.id || `#${idx + 1}`;
-            html += `<div class="gt-order-array-item">`;
-            html += `<div class="gt-order-item-header">${escapeHtml(String(name))}</div>`;
-
-            Object.entries(item).forEach(([k, v]) => {
-              // Skip name since we used it in header, and skip empty values
-              if (k === 'name' || v === null || v === undefined || v === '') return;
-
-              html += `<div class="gt-order-field">`;
-              html += `<span class="gt-order-field-label">${formatFieldName(k)}</span>`;
-              html += `<span class="gt-order-field-value">${formatValue(v)}</span>`;
-              html += `</div>`;
-            });
-            html += `</div>`;
+    html +=
+        '</div>' +
+      '</div>';
+    return html;
+  }
+
+  function renderField(key, value) {
+    if (value === null || value === undefined || value === '') return '';
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return '';
+      if (typeof value[0] === 'object' && value[0] !== null) {
+        var html = '<div class="gt-order-field"><span class="gt-order-field-label">' + formatFieldName(key) + '</span></div>';
+        value.forEach(function(item, idx) {
+          var name = item.name || item.id || ('#' + (idx + 1));
+          html += '<div class="gt-order-array-item">';
+          html += '<div class="gt-order-item-header">' + escapeHtml(String(name)) + '</div>';
+          Object.entries(item).forEach(function(kv) {
+            if (kv[0] === 'name' || kv[1] === null || kv[1] === undefined || kv[1] === '') return;
+            html += '<div class="gt-order-field">';
+            html += '<span class="gt-order-field-label">' + formatFieldName(kv[0]) + '</span>';
+            html += '<span class="gt-order-field-value">' + formatValue(kv[1]) + '</span>';
+            html += '</div>';
           });
-          return html;
-        } else {
-          // Array of primitives
-          return `
-            <div class="gt-order-field">
-              <span class="gt-order-field-label">${formatFieldName(key)}</span>
-              <span class="gt-order-field-value">${value.map(v => formatValue(v)).join(', ')}</span>
-            </div>
-          `;
-        }
-      }
-
-      // Handle objects (like produkt_kategorie, material_kategorie, etc.)
-      if (typeof value === 'object' && value !== null) {
-        // Special case: if object has only 'name' or very few fields, display inline
-        const entries = Object.entries(value).filter(([k, v]) => v !== null && v !== undefined && v !== '');
-
-        if (entries.length === 1 && value.name) {
-          return `
-            <div class="gt-order-field">
-              <span class="gt-order-field-label">${formatFieldName(key)}</span>
-              <span class="gt-order-field-value">${formatValue(value.name)}</span>
-            </div>
-          `;
-        }
-
-        // Otherwise render as card
-        let html = `<div class="gt-order-array-item">`;
-        const name = value.name || formatFieldName(key);
-        html += `<div class="gt-order-item-header">${escapeHtml(String(name))}</div>`;
-
-        entries.forEach(([k, v]) => {
-          if (k === 'name') return; // Skip name since we used it in header
-
-          html += `<div class="gt-order-field">`;
-          html += `<span class="gt-order-field-label">${formatFieldName(k)}</span>`;
-          html += `<span class="gt-order-field-value">${formatValue(v)}</span>`;
-          html += `</div>`;
+          html += '</div>';
         });
-        html += `</div>`;
         return html;
+      } else {
+        return (
+          '<div class="gt-order-field">' +
+            '<span class="gt-order-field-label">' + formatFieldName(key) + '</span>' +
+            '<span class="gt-order-field-value">' + value.map(function(v) { return formatValue(v); }).join(', ') + '</span>' +
+          '</div>'
+        );
       }
-
-      // Handle primitives
-      return `
-        <div class="gt-order-field">
-          <span class="gt-order-field-label">${formatFieldName(key)}</span>
-          <span class="gt-order-field-value">${formatValue(value)}</span>
-        </div>
-      `;
     }
 
-    function formatValue(value) {
-      if (typeof value === 'boolean') {
-        return value ? '✓ Ja' : '✗ Nein';
+    if (typeof value === 'object' && value !== null) {
+      var entries = Object.entries(value).filter(function(kv) {
+        return kv[1] !== null && kv[1] !== undefined && kv[1] !== '';
+      });
+      if (entries.length === 1 && value.name) {
+        return (
+          '<div class="gt-order-field">' +
+            '<span class="gt-order-field-label">' + formatFieldName(key) + '</span>' +
+            '<span class="gt-order-field-value">' + formatValue(value.name) + '</span>' +
+          '</div>'
+        );
       }
-      return escapeHtml(String(value));
+      var html = '<div class="gt-order-array-item">';
+      var name = value.name || formatFieldName(key);
+      html += '<div class="gt-order-item-header">' + escapeHtml(String(name)) + '</div>';
+      entries.forEach(function(kv) {
+        if (kv[0] === 'name') return;
+        html += '<div class="gt-order-field">';
+        html += '<span class="gt-order-field-label">' + formatFieldName(kv[0]) + '</span>';
+        html += '<span class="gt-order-field-value">' + formatValue(kv[1]) + '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+      return html;
     }
 
-    function formatFieldName(name) {
-      return name
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, l => l.toUpperCase());
-    }
+    return (
+      '<div class="gt-order-field">' +
+        '<span class="gt-order-field-label">' + formatFieldName(key) + '</span>' +
+        '<span class="gt-order-field-value">' + formatValue(value) + '</span>' +
+      '</div>'
+    );
+  }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+  function formatValue(value) {
+    if (typeof value === 'boolean') {
+      return value ? '\u2713 Ja' : '\u2717 Nein';
     }
+    return escapeHtml(String(value));
+  }
+
+  function formatFieldName(name) {
+    return name.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+  }
+
+
+  // ============================================================
+  //  3m.  UTILITIES
+  // ============================================================
+
+  function formatDateNow() {
+    var d = new Date(Date.now());
+    var pad = function(n) { return String(n).padStart(2, '0'); };
+    return (
+      d.getFullYear() + '_' +
+      pad(d.getMonth() + 1) + '_' +
+      pad(d.getDate()) + '_' +
+      pad(d.getHours()) + '_' +
+      pad(d.getMinutes()) + '_' +
+      pad(d.getSeconds())
+    );
+  }
+
+  function saveSessionId(newSessionId) {
+    var sessions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    sessions = sessions.filter(function(id) { return id !== newSessionId; });
+    sessions.unshift(newSessionId);
+    sessions = sessions.slice(0, MAX_MESSAGES_IN_STORAGE);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  }
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function scrollToBottom() {
+    var chatMessages = document.querySelector('.gt-chat-messages');
+    if (chatMessages) {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  }
+
+
+  // ============================================================
+  //  INIT
+  // ============================================================
+
+  // Show greeting
+  addMessage('assistant', '\uD83D\uDC4B Hallo! Ich bin Ihr Gravi-Tec Berater. Wie kann ich Ihnen heute helfen?');
+  greeted = true;
+  resetTextareaHeight();
+  document.querySelector('.gt-chat-container').scrollIntoView({ behavior: 'auto', block: 'start' });
 </script>
