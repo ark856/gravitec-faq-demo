@@ -318,11 +318,10 @@ th {
 flowchart TD
     User((User Input)) --> chat_agent
 
-    chat_agent --> t_konfig["vorlaeufige_konfiguration<br>_berechnen"]
+    chat_agent --> bestellungen_agent["bestellungen_agent<br><br>(vorlaeufige_konfiguration<br>_berechnen)"]
     chat_agent --> t_bestellung["bestellung_aufgeben"]
     chat_agent --> faq_agent
 
-    t_konfig --> bestellungen_agent
 
     bestellungen_agent --> herkunft_agent
     bestellungen_agent --> grundlagen_agent
