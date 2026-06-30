@@ -1,5 +1,10 @@
 <!--link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet"-->
 
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+</script>
+
 <style>
 /* ===== GLOBAL ===== */
 body {
@@ -7,6 +12,14 @@ body {
   background: #1b1f24;
   color: #ddd;
   margin: 0;
+}
+
+/* ===== MERMAID ===== */
+.mermaid {
+  background: #0f1316;
+  border-radius: 6px;
+  padding: 16px;
+  overflow: auto;
 }
 
 .admin-container {
@@ -156,23 +169,83 @@ th {
   <!-- GENERAL -->
   <div id="general" class="tab-content active">
     <h2>Settings</h2>
+
+    <div style="margin-bottom:16px;">
+      <button type="button" class="btn" id="fetchModelsBtn">Fetch Models</button>
+      <span id="modelStatus"></span>
+    </div>
+
     <form id="settingsForm">
-      <label style="display:flex; justify-content:space-between; align-items:center;">
-		<span>LLM Model</span>
 
-		<button type="button" class="btn" id="fetchModelsBtn">
-			Fetch Models
-		</button>
-	  </label>
-      <select id="model">
-        <option>gpt-4o</option>
-        <option>gpt-4.1</option>
-      </select>
-	  
-	  <div id="modelStatus"></div>
+      <details open style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">Chat</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_chat" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_chat" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
 
-      <label>System Prompt</label>
-      <textarea id="systemPrompt" rows="6"></textarea>
+      <details style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">Bestellungen</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_bestellungen" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_bestellungen" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
+
+      <details style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">Grundlagen</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_grundlagen" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_grundlagen" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
+
+      <details style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">Auftragsleistungen</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_auftragsleistungen" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_auftragsleistungen" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
+
+      <details style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">Herkunft</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_herkunft" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_herkunft" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
+
+      <details style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">FAQ</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_faq" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_faq" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
+
+      <details style="margin-bottom:12px;">
+        <summary style="cursor:pointer;font-weight:700;color:#9fc0ff;">Response Options Suggester</summary>
+        <div style="padding:12px 0;">
+          <label>LLM Model</label>
+          <select id="model_response_options_suggester" class="model-select"></select>
+          <label>System Prompt</label>
+          <textarea id="prompt_response_options_suggester" class="prompt-textarea" rows="6"></textarea>
+        </div>
+      </details>
 
       <button class="btn">Save</button>
     </form>
@@ -236,7 +309,38 @@ th {
   <!-- INFO -->
   <div id="info" class="tab-content">
     <h2>Info</h2>
-    <div class="session-meta">
+
+    
+
+    <h3 style="margin-top:24px;">System Architecture</h3>
+    <div class="mermaid" id="architectureDiagram">
+%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#2858a8', 'edgeLabelBackground': '#9fc0ff'}}}%%
+flowchart TD
+    User((User Input)) --> chat_agent
+
+    chat_agent --> t_konfig["vorlaeufige_konfiguration<br>_berechnen"]
+    chat_agent --> t_bestellung["bestellung_aufgeben"]
+    chat_agent --> faq_agent
+
+    t_konfig --> bestellungen_agent
+
+    bestellungen_agent --> herkunft_agent
+    bestellungen_agent --> grundlagen_agent
+    bestellungen_agent --> auftragsleistungen_agent
+    bestellungen_agent --> t_berechne_preis["berechne_preis"]
+
+    herkunft_agent --> t_eval_herkunft["überprüfe <br>Fremdwaren/eigeneSchilder <br> Wechsel"]
+
+    grundlagen_agent --> t_fetch_prods["aus DB holen <br>produkts/materials"]
+    grundlagen_agent --> t_akt_pruefen["Aktualisierung<br>ueberpruefen"]
+
+    auftragsleistungen_agent --> t_fetch_services["aus DB holen<br>Veredelungen<br>Handlungen<br>Addons"]
+    auftragsleistungen_agent --> t_eval_service["Services (VerHanAdd)<br>Aktualisierung <br> überprüfen"]
+
+    faq_agent --> t_find_faqs["find_similar_faqs"]
+    </div>
+	
+	<div class="session-meta">
       AI Chatbot powered by Linovy for Gravi-Tec
     </div>
   </div>
@@ -255,6 +359,16 @@ const SETTINGS_API = `${BASE_URL}/agent/settings?code=gravitec`;
 const SESSION_LIST_API = `${BASE_URL}/api/v1/sessions/ids-by-date`;
 const SESSION_LOAD_API = `${BASE_URL}/api/v1/sessions/g`;
 const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
+
+const AGENTS = [
+  { key: "chat", label: "Chat" },
+  { key: "bestellungen", label: "Bestellungen" },
+  { key: "grundlagen", label: "Grundlagen" },
+  { key: "auftragsleistungen", label: "Auftragsleistungen" },
+  { key: "herkunft", label: "Herkunft" },
+  { key: "faq", label: "FAQ" },
+  { key: "response_options_suggester", label: "Response Options Suggester" },
+];
 
 /* =========================
    BOOTSTRAP (WP SAFE)
@@ -288,29 +402,37 @@ const ORDER_SUGGESTIONS_API = `${BASE_URL}/api/v1/order-suggestions`;
         if (tabId === "order-suggestions") {
           initOrderSuggestionsTab();
         }
+        if (tabId === "info") {
+          renderArchitectureDiagram();
+        }
       });
     });
   }
 
+  function renderArchitectureDiagram() {
+    const el = document.getElementById("architectureDiagram");
+    if (!el || el.dataset.rendered === "true") return;
+    el.dataset.rendered = "true";
+
+    try {
+      mermaid.run({ nodes: [el] });
+    } catch (err) {
+      console.error("Mermaid render error:", err);
+      el.textContent = "Diagram render failed. Check console.";
+    }
+  }
+
   function bindForms() {
-    document.getElementById("fetchModelsBtn").onclick = async function () {
-      const select = document.getElementById("model");
-      const prev = select.value;
-
-      await loadModels();
-
-      if ([...select.options].some(o => o.value === prev)) {
-        select.value = prev;
-      }
-    };
+    document.getElementById("fetchModelsBtn").onclick = loadModels;
 
     document.getElementById("settingsForm").onsubmit = async function (e) {
       e.preventDefault();
 
-      const payload = {
-        model_name: document.getElementById("model").value,
-        system_prompt: document.getElementById("systemPrompt").value
-      };
+      const payload = {};
+      AGENTS.forEach(({ key }) => {
+        payload[`${key}_model_name`] = document.getElementById(`model_${key}`).value;
+        payload[`${key}_system_prompt`] = document.getElementById(`prompt_${key}`).value;
+      });
 
       try {
         const res = await apiFetch(SETTINGS_API, {
@@ -532,29 +654,29 @@ function formatTimestamp(ms) {
    MODELS + SETTINGS
 ========================= */
 
-async function loadModels(selectedModel = null) {
-  const select = document.getElementById("model");
+async function loadModels() {
   const status = document.getElementById("modelStatus");
-
   status.textContent = "Loading...";
   status.className = "status-loading";
 
   try {
     const res = await apiFetch(MODEL_API);
     const data = await res.json();
-
     const models = data.models || [];
 
-    select.innerHTML = "";
-
-    models.forEach(m => {
-      const opt = document.createElement("option");
-      opt.value = m;
-      opt.textContent = m;
-      select.appendChild(opt);
+    document.querySelectorAll(".model-select").forEach(select => {
+      const prev = select.value;
+      select.innerHTML = "";
+      models.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        select.appendChild(opt);
+      });
+      if ([...select.options].some(o => o.value === prev)) {
+        select.value = prev;
+      }
     });
-
-    if (selectedModel) select.value = selectedModel;
 
     status.textContent = "Loaded ✓";
     status.className = "status-success";
@@ -570,8 +692,12 @@ async function loadSettings() {
     const res = await apiFetch(SETTINGS_API);
     const data = await res.json();
 
-    await loadModels(data.model_name);
-    document.getElementById("systemPrompt").value = data.system_prompt || "";
+    AGENTS.forEach(({ key }) => {
+      const modelEl = document.getElementById(`model_${key}`);
+      const promptEl = document.getElementById(`prompt_${key}`);
+      if (modelEl) modelEl.value = data[`${key}_model_name`] || "";
+      if (promptEl) promptEl.value = data[`${key}_system_prompt`] || "";
+    });
   } catch (err) {
     console.error(err);
   }
