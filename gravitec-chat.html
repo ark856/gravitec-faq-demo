@@ -1,0 +1,107 @@
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="assets/gravitec-chat.css" rel="stylesheet">
+
+<div class="gt-chat-container">
+  <div class="gt-chat-header" id="session-id-display">
+    Gravi-Tec Support Chat
+    <div style="float:right; font-size:0.75em; color:#888; margin-top:0.5em;"></div>
+    <div style="display:none" id="session-id-value"></div>
+  </div>
+  <div class="gt-chat-content">
+    <div class="gt-chat-messages" id="chat" aria-live="polite"></div>
+    <div class="gt-chat-messages gt-order-view" id="orderView" style="display: none;">
+      <div class="gt-order-loading" id="orderLoading" style="display: none;">
+        <div class="gt-chat-typing">
+          <span>
+            <div class="gt-chat-dot"></div>
+            <div class="gt-chat-dot"></div>
+            <div class="gt-chat-dot"></div>
+          </span>
+        </div>
+      </div>
+
+      <!-- MAIN ORDER CONTENT -->
+      <div class="gt-order-content" id="orderContent"></div>
+
+      
+    </div>
+  </div>
+  <div class="gt-tool-status-bar" id="gtToolStatusBar" style="display:none">
+    <span class="gt-tool-status-icon">&#128295;</span>
+    <span class="gt-tool-status-name" id="gtToolStatusName"></span>
+    <span class="gt-tool-status-dots" id="gtToolStatusDots">·</span>
+  </div>
+  <div class="gt-chat-input">
+    <div class="gt-chat-left-controls">
+      <!-- RESPONSE TOGGLE -->
+      <button type="button" id="gt-response-toggle" class="gt-order-toggle-btn" title="Eingabe Beispiele">
+        &#128161;
+      </button>
+      <!-- RESPONSE TEMPLATE -->
+      <div id="gt-response-template" class="gt-response-template" >
+        <div id="gt-response-template-list" class="gt-response-template-list" >
+          <!-- injected buttons -->
+        </div>
+      </div>
+      <!-- ORDER BUTTON -->
+      <div class="gt-order-toggle-btn" id="toggleOrderBtn" onclick="toggleOrderView()" >
+        <span class="gt-order-toggle-text">&#128230;</span>
+      </div>
+    </div>
+    <div class="gt-chat-textarea-wrapper">
+      <textarea
+        id="chatbot-input"
+        class="gt-chat-input-field"
+        placeholder="Nachricht eingeben..."
+        rows="1"
+      ></textarea>
+    </div>
+    <div class="gt-chat-btn-schild" id="sendBtn" onclick="sendMessageStream()">
+      <a href="#">Senden</a>
+      <div class="chip"><span>&#9998;</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Templates for dynamic DOM creation -->
+<template id="tpl-message-row">
+  <div class="gt-chat-message-row">
+    <div class="gt-chat-message">
+      <span></span>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-typing">
+  <div class="gt-chat-typing">
+    <span>
+      <div class="gt-chat-dot"></div>
+      <div class="gt-chat-dot"></div>
+      <div class="gt-chat-dot"></div>
+    </span>
+  </div>
+</template>
+
+<template id="tpl-thinking">
+  <div class="gt-thinking-row">
+    <div class="gt-thinking-indicator">
+      <div class="gt-thinking-header">
+        <span>&#128173;</span>
+        <span class="gt-thinking-label">Denkt nach...</span>
+      </div>
+      <div class="gt-thinking-content"></div>
+    </div>
+  </div>
+</template>
+
+<template id="tpl-answer-options">
+  <div class="gt-answer-options">
+    <div class="gt-answer-options-label">Mögliche Eingaben</div>
+  </div>
+</template>
+
+<template id="tpl-response-btn">
+  <button class="gt-order-toggle-btn"></button>
+</template>
+
+<script src="assets/gravitec-chat.js"></script>
