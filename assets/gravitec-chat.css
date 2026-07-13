@@ -1,0 +1,746 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap');
+
+/* ============================================================
+   0.  WIDGET OVERRIDES
+============================================================ */
+#gt-widget-btn {
+  position: fixed;
+  bottom: 0.5em;
+  right: 0.5em;
+  z-index: 999999;
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  color: #fff;
+  border-radius: 50%;
+  width: 2.75em;
+  height: 2.75em;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  font-size: 1.5em;
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  user-select: none;
+}
+#gt-widget-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+}
+#gt-widget-btn:active {
+  transform: scale(0.97);
+}
+
+#gt-widget-popup {
+  position: fixed;
+  bottom: 3.5em;
+  right: 0.5em;
+  z-index: 999998;
+  display: none;
+  border-radius: 0.75em;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  max-height: calc(100dvh - 4.5em);
+}
+
+.gt-chat-container.gt-full-page {
+    width: 100%;
+    max-width: 1100px;
+    height: calc(100vh - 120px);
+    margin: 2rem auto;
+    border-radius: 12px;
+}
+
+.gt-chat-close-btn {
+  float: right;
+  cursor: pointer;
+  font-size: 1.25em;
+  line-height: 1;
+  color: rgba(255,255,255,0.7);
+  transition: color 0.15s ease;
+  margin-left: 0.75em;
+}
+.gt-chat-close-btn:hover {
+  color: #fff;
+}
+
+/* ============================================================
+   1.  LAYOUT
+============================================================ */
+body { margin: 0; }
+
+.gt-chat-container {
+  font-size: 16px;
+  box-sizing: border-box;
+  max-width: 37.5625em;
+  width: 100%;
+  height: 32em;
+  max-height: 100%;
+  overflow: hidden;
+  font-family: 'Source Sans Pro', sans-serif;
+  background: #1b1f24;
+  border: 3px solid #000;
+  border-radius: 0.75em;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+  color: #ddd;
+}
+.gt-chat-header {
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  color: white;
+  font-weight: 700;
+  padding: 0.625em 1.25em;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.gt-chat-content {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+.gt-chat-messages {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  padding: 1.25em;
+}
+
+/* ============================================================
+   2.  MESSAGES
+============================================================ */
+.gt-chat-message-row {
+  width: 100%;
+  display: flex;
+  margin-bottom: 0.25em;
+}
+.gt-chat-message-row.user {
+  justify-content: flex-end;
+}
+.gt-chat-message-row.assistant {
+  justify-content: flex-start;
+}
+.gt-chat-message {
+  max-width: 80%;
+  width: auto;
+  background: #232933;
+  color: #f0f0f0;
+  padding: 0.625em 0.875em;
+  border-radius: 0.5em;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+.gt-chat-message span {
+  display: block;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  margin: 0;
+}
+.gt-chat-message p {
+  margin: 0;
+  padding: 0;
+}
+.gt-chat-message pre,
+.gt-chat-message code {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.gt-chat-message.user {
+  background: #2858a8;
+  color: #fff;
+}
+.gt-chat-message.assistant {
+  background: #232933;
+  color: #f0f0f0;
+}
+
+/* ============================================================
+   3.  INPUT
+============================================================ */
+.gt-chat-input {
+  display: flex;
+  gap: 0.5em;
+  padding: 0.375em 0.5em;
+  background: #1b1f24;
+  border-top: 1px solid #333;
+  align-items: center;
+}
+.gt-chat-textarea-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.gt-chat-input-field {
+  width: 100%;
+  resize: none;
+  border: none;
+  border-radius: 0.375em;
+  outline: none;
+  background: #0f1316;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+  padding: 0.25em 0.75em;
+  min-height: 0;
+  max-height: calc(1.4em * 5 + 0.75em);
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.gt-chat-input-field,
+.gt-chat-input-field:hover,
+.gt-chat-input-field:focus {
+  background-color: #0f1316 !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ============================================================
+   4.  SEND BUTTON
+============================================================ */
+.gt-chat-btn-schild {
+  position: relative;
+  display: block;
+  transform: skewX(-2deg);
+  border-radius: 0.625em;
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(40,88,168,0.4);
+  overflow: hidden;
+  min-width: 0;
+  padding-right: 0.5em;
+}
+.gt-chat-btn-schild > a {
+  display: flex;
+  align-items: center;
+  padding: 0.5em 3em 0.5em 0.875em;
+  transform: skewX(2deg);
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.8125em;
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+.gt-chat-btn-schild .chip {
+  position: absolute;
+  right: 0.25em;
+  top: 0.25em;
+  bottom: 0.25em;
+  width: 1.75em;
+  transform: skewX(-2deg);
+  border-radius: 0.5em;
+  background: linear-gradient(180deg, #d0d8e4, #b8c4d4);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  border: 1px solid rgba(0,0,0,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a1f2e;
+  font-size: 1.15em;
+}
+.gt-chat-btn-schild:hover {
+  background: linear-gradient(180deg, #3b75c3, #3b75c3);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 16px rgba(40,88,168,0.4);
+}
+
+/* ============================================================
+   5.  TYPING INDICATOR
+============================================================ */
+.gt-chat-typing {
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  padding: 0.625em 0.875em;
+  border-radius: 0.75em;
+  background: #232933;
+  align-self: flex-start;
+  transform: skewX(-12deg);
+}
+.gt-chat-typing span {
+  transform: skewX(12deg);
+  display: flex;
+  gap: 0.25em;
+}
+.gt-chat-dot {
+  width: 0.5em;
+  height: 0.5em;
+  background: #3b75c3;
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.gt-chat-dot:nth-child(2) { animation-delay: 0.2s; }
+.gt-chat-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* ============================================================
+     6.  TOOL STATUS BAR  (above input)
+============================================================ */
+.gt-tool-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.375em;
+  padding: 0.125em 1em;
+  min-height: 1.625em;
+  background: #1b1f24;
+  border-top: 1px solid #2c323c;
+  font-size: 0.8125em;
+  font-weight: 600;
+  color: #9fffc1;
+  font-family: 'Source Sans Pro', sans-serif;
+}
+.gt-tool-status-icon {
+  font-size: 0.875em;
+}
+.gt-tool-status-dots {
+  min-width: 1.125em;
+  font-family: monospace;
+  font-size: 0.875em;
+}
+
+/* ============================================================
+     7.  USER OPTIONS
+============================================================ */
+.gt-answer-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5em;
+  margin-top: 0.75em;
+  padding: 0.625em 0.75em;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.5em;
+}
+.gt-answer-options-label {
+  width: 100%;
+  font-size: 0.6875em;
+  font-weight: 600;
+  color: #6f86a8;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 0.125em;
+}
+.gt-answer-option-btn {
+  display: inline-flex;
+  align-items: center;
+  background: linear-gradient(180deg, #2f5fa8, #244a84);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 0.375em;
+  padding: 0.4375em 1em;
+  font-size: 0.8125em;
+  min-height: 2.75em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  line-height: 1;
+}
+.gt-answer-option-btn:hover {
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.gt-answer-option-btn:active {
+  transform: scale(0.97);
+}
+
+/* ============================================================
+     8.  LEFT CONTROLS & RESPONSE TEMPLATES
+============================================================ */
+.gt-chat-left-controls {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  gap: 0.25em;
+}
+.gt-response-toggle-btn {
+  min-height: 2.75em;
+  border: none;
+  border-radius: 0.5em;
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  color: #fff;
+  font-size: 0.75em;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 0.875em;
+  transition: all 0.15s ease;
+}
+.gt-response-toggle-btn:hover {
+  transform: translateY(-1px);
+}
+.gt-response-template {
+  position: absolute;
+  bottom: calc(100% + 0.5em);
+  left: 0;
+  width: 13.75em;
+  background: #1b1f24;
+  border-radius: 0.625em;
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+  padding: 0.625em;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(0.625em);
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0.15s ease;
+  z-index: 999;
+}
+.gt-response-template.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.gt-response-template-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375em;
+  max-height: 13.75em;
+  overflow-y: auto;
+}
+.gt-response-template-btn {
+  border: none;
+  border-radius: 999em;
+  padding: 0.375em 0.625em;
+  background: linear-gradient(180deg, #2f5fa8, #244a84);
+  color: #fff;
+  font-size: 0.6875em;
+  min-height: 2.75em;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.gt-response-template-btn:hover {
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  transform: translateY(-1px);
+}
+
+/* ============================================================
+     9.  THINKING INDICATOR
+============================================================ */
+.gt-thinking-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.25em;
+}
+.gt-thinking-indicator {
+  max-width: 80%;
+  background: #232933;
+  color: #f0f0f0;
+  padding: 0.625em 0.875em;
+  border-radius: 0.5em;
+  border-left: 3px solid #3b75c3;
+  line-height: 1.4;
+  font-size: 0.875em;
+}
+.gt-thinking-indicator.gt-complete {
+  opacity: 0.8;
+}
+.gt-thinking-indicator.gt-faded {
+  opacity: 0.6;
+}
+.gt-thinking-header {
+  display: flex;
+  align-items: center;
+  gap: 0.375em;
+  margin-bottom: 0.375em;
+  font-weight: 600;
+  color: #9fc0ff;
+}
+.gt-thinking-icon {
+  font-size: 1.125em;
+}
+.gt-thinking-content {
+  font-size: 0.8125em;
+  font-style: italic;
+  opacity: 0.85;
+  white-space: pre-wrap;
+}
+
+/* ============================================================
+     11.  ORDER TOGGLE BUTTON
+============================================================ */
+.gt-order-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 2em;
+  padding: 0 0.5em;
+  border-radius: 0.5em;
+  background: #20262f;
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #b7c3d6;
+  font-size: 0.8125em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+.gt-order-toggle-btn:hover {
+  background: #293241;
+  border-color: rgba(255,255,255,0.10);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+.gt-order-toggle-btn:active {
+  transform: scale(0.97);
+}
+.gt-order-toggle-icon {
+  font-size: 0.875em;
+  opacity: 0.9;
+}
+.gt-order-toggle-text {
+  white-space: nowrap;
+  font-size: 1.1em;
+}
+
+
+/* ============================================================
+     12.  ORDER VIEW
+============================================================ */
+.gt-order-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5em;
+}
+.gt-order-content {
+  color: #f0f0f0;
+}
+.gt-order-section {
+  background: #232933;
+  border-radius: 0.625em;
+  padding: 1em;
+  margin-bottom: 1.125em;
+  border: 1px solid #2c323c;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+}
+.gt-order-section h3 {
+  color: #3b75c3;
+  font-size: 1em;
+  font-weight: 700;
+  margin-bottom: 0.875em;
+  padding-bottom: 0.5em;
+  border-bottom: 2px solid #3b75c3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.gt-order-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.625em;
+  margin: 0.375em 0 0.875em 0;
+}
+.gt-order-pill-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+}
+.gt-order-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  background: linear-gradient(180deg, #2f5fa8, #244a84);
+  color: #fff;
+  padding: 0.4375em 0.8125em;
+  border-radius: 999em;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05);
+  font-size: 0.75em;
+  line-height: 1;
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+.gt-order-pill.expandable {
+  cursor: pointer;
+}
+.gt-order-pill.expandable:hover {
+  background: linear-gradient(180deg, #3b75c3, #2858a8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+}
+.gt-order-pill-label {
+  color: #cfe1ff;
+  font-weight: 600;
+  opacity: 0.9;
+}
+.gt-order-pill-value {
+  color: #fff;
+  font-weight: 700;
+}
+.gt-order-pill-arrow {
+  font-size: 0.625em;
+  opacity: 0.72;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.gt-order-pill-wrapper.open .gt-order-pill-arrow {
+  transform: rotate(180deg);
+  opacity: 1;
+}
+.gt-order-pill-dropdown {
+  width: 100%;
+  margin-top: 0.375em;
+  background: #1f252d;
+  border-radius: 0.625em;
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.22s ease, opacity 0.18s ease;
+}
+.gt-order-pill-wrapper.open .gt-order-pill-dropdown {
+  max-height: 500px;
+  opacity: 1;
+}
+.gt-order-pill-detail {
+  padding: 0.5em 0.75em;
+  font-size: 0.75em;
+  line-height: 1.45;
+  color: #9aa7bb;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.gt-order-pill-detail:last-child {
+  border-bottom: none;
+}
+.gt-order-pill-detail-label {
+  color: #6f86a8;
+  font-weight: 600;
+}
+.gt-order-subsection-block {
+  margin-top: 1.375em;
+}
+.gt-order-subsection-title {
+  color: #3b75c3;
+  font-size: 0.9375em;
+  font-weight: 700;
+  margin-bottom: 0.75em;
+  padding-bottom: 0.4375em;
+  border-bottom: 2px solid #3b75c3;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.gt-order-field {
+  padding: 0.375em 0;
+  font-size: 0.8125em;
+  line-height: 1.5;
+}
+.gt-order-field-label {
+  font-weight: 600;
+  color: #9fc0ff;
+  display: inline;
+}
+.gt-order-field-label::after {
+  content: ': ';
+}
+.gt-order-field-value {
+  color: #ddd;
+  display: inline;
+}
+.gt-order-empty {
+  text-align: center;
+  color: #888;
+  padding: 3.75em 1.25em;
+  font-size: 1em;
+}
+.gt-order-error {
+  background: #3d1f1f;
+  color: #ff6b6b;
+  padding: 1em;
+  border-radius: 0.5em;
+  border-left: 4px solid #ff6b6b;
+  margin: 1.25em 0;
+}
+.gt-order-error strong {
+  display: block;
+  margin-bottom: 0.5em;
+  font-size: 0.9375em;
+}
+
+.gt-order-status-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  padding: 0.875em 1.125em;
+  border-radius: 0.625em;
+  margin-bottom: 1.125em;
+  font-size: 0.9375em;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.28);
+}
+.gt-order-status-banner .gt-status-icon {
+  font-size: 1.375em;
+  flex-shrink: 0;
+}
+.gt-order-status-banner.in-progress {
+  background: #2c323c;
+  color: #9aa7bb;
+  border-left: 4px solid #5a6474;
+}
+.gt-order-status-banner.complete {
+  background: #2c323c;
+  color: #9aa7bb;
+  border-left: 4px solid #5a6474;
+}
+.gt-order-status-banner.no-orders {
+  background: #2c323c;
+  color: #9aa7bb;
+  border-left: 4px solid #5a6474;
+}
+
+/* ============================================================
+     13.  ACCESSIBILITY & RESPONSIVE
+============================================================ */
+.gt-chat-container *:focus-visible {
+  outline: 0.125em solid #3b75c3;
+  outline-offset: 0.125em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gt-chat-dot { animation: none; }
+  .gt-chat-btn-schild,
+  .gt-chat-btn-schild *,
+  .gt-answer-option-btn,
+  .gt-order-toggle-btn,
+  .gt-response-toggle-btn,
+  .gt-response-template,
+  .gt-order-pill-wrapper,
+  .gt-order-pill-dropdown {
+    transition: none !important;
+  }
+}
+
+@media (max-width: 40em) {
+  .gt-chat-container {
+    font-size: 14px;
+    height: 100dvh;
+    border-width: 0;
+    border-radius: 0;
+  }
+  #gt-widget-popup {
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+    border-radius: 0;
+  }
+  #gt-widget-btn {
+    bottom: 0.75em;
+    right: 0.75em;
+  }
+}
+@media (max-width: 25em) {
+  .gt-chat-container { font-size: 13px; }
+  .gt-chat-message   { max-width: 92%; }
+  .gt-response-template { left: auto; right: 0; }
+}
