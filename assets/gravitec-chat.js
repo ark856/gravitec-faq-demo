@@ -2,23 +2,51 @@
   'use strict';
 
   // ============================================================
-  //  0.  DEPENDENCY: load marked from CDN
+  //  0.  DEPENDENCIES: load marked + DOMPurify from CDN
   // ============================================================
 
-  function ensureMarked(callback) {
-    if (typeof marked !== 'undefined' && typeof marked.parse === 'function') {
-      callback();
-      return;
-    }
-    var s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js';
-    s.onload = callback;
-    s.onerror = function() {
-      console.error('gravi-tec-chat: failed to load marked, using plain text fallback');
-      window.marked = { parse: function(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); } };
-      callback();
-    };
-    document.head.appendChild(s);
+  function ensureDependencies(callback) {
+    var deps = [
+      {
+        name: 'marked',
+        check: function() { return typeof marked !== 'undefined' && typeof marked.parse === 'function'; },
+        url: 'https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.js',
+        fallback: function() {
+          window.marked = { parse: function(t) { return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); } };
+        }
+      },
+      {
+        name: 'DOMPurify',
+        check: function() { return typeof window.DOMPurify !== 'undefined'; },
+        url: 'https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js',
+        fallback: function() {
+          window.DOMPurify = { sanitize: function(html) { return html; } };
+        }
+      }
+    ];
+
+    var pending = deps.length;
+
+    deps.forEach(function(dep) {
+      if (dep.check()) {
+        pending--;
+        if (pending === 0) callback();
+        return;
+      }
+      var script = document.createElement('script');
+      script.src = dep.url;
+      script.onload = function() {
+        pending--;
+        if (pending === 0) callback();
+      };
+      script.onerror = function() {
+        console.error('gravi-tec-chat: failed to load ' + dep.name + ', using fallback');
+        dep.fallback();
+        pending--;
+        if (pending === 0) callback();
+      };
+      document.head.appendChild(script);
+    });
   }
 
   // ============================================================
@@ -698,8 +726,7 @@
 
       var html =
         '<div class="gt-order-pill-wrapper">' +
-          '<div class="gt-order-pill' + (hasDetails ? ' expandable' : '') + '"' +
-            (hasDetails ? ' onclick="this.parentNode.classList.toggle(\'open\')"' : '') + '>' +
+          '<div class="gt-order-pill' + (hasDetails ? ' expandable' : '') + '">' +
             '<span class="gt-order-pill-value">' + escapeHtml(String(name)) + '</span>' +
             (hasDetails ? '<span class="gt-order-pill-arrow">\u2193</span>' : '') +
           '</div>';
@@ -747,7 +774,7 @@
 
       var html =
         '<div class="gt-order-detail-card">' +
-          '<div class="gt-order-detail-toggle" onclick="this.parentNode.classList.toggle(\'open\')">' +
+          '<div class="gt-order-detail-toggle">' +
             'Details anzeigen' +
           '</div>' +
           '<div class="gt-order-detail-content">';
@@ -867,18 +894,7 @@
 
     function sanitizeMarkdown(text) {
       var html = marked.parse(text);
-      return html
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-        .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-        .replace(/\son\w+\s*=\s*\S+/gi, '')
-        .replace(/<iframe\b[^>]*>/gi, '')
-        .replace(/<\/iframe>/gi, '')
-        .replace(/<object\b[^>]*>/gi, '')
-        .replace(/<\/object>/gi, '')
-        .replace(/<embed\b[^>]*>/gi, '')
-        .replace(/<\/embed>/gi, '')
-        .replace(/javascript\s*:/gi, '');
+      return DOMPurify.sanitize(html);
     }
 
     function scrollToBottom() {
@@ -899,7 +915,23 @@
     greeted = true;
     resetTextareaHeight();
 
-    window.toggleOrderView = toggleOrderView;
+    document.getElementById('sendBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      sendMessageStream();
+    });
+    document.getElementById('toggleOrderBtn').addEventListener('click', toggleOrderView);
+
+    document.getElementById('orderContent').addEventListener('click', function(e) {
+      var target = e.target.closest('.gt-order-pill.expandable');
+      if (target) {
+        target.parentNode.classList.toggle('open');
+        return;
+      }
+      target = e.target.closest('.gt-order-detail-toggle');
+      if (target) {
+        target.parentNode.classList.toggle('open');
+      }
+    });
   }
 
   // ============================================================
@@ -909,10 +941,10 @@
   function start() {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', function() {
-        ensureMarked(initChat);
+        ensureDependencies(initChat);
       });
     } else {
-      ensureMarked(initChat);
+      ensureDependencies(initChat);
     }
   }
 
