@@ -95,7 +95,7 @@
       // Toggle on button click
       btn.onclick = function() {
         var hidden = popup.style.display === 'none' || popup.style.display === '';
-        popup.style.display = hidden ? 'block' : 'none';
+        popup.style.display = hidden ? 'flex' : 'none';
         btn.style.display = hidden ? 'none' : 'flex';
         if (hidden) {
           var inp = document.getElementById('chatbot-input');
